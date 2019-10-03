@@ -38,13 +38,13 @@ class VirtualVC: UIViewController, UICollectionViewDelegate, UICollectionViewDat
         navigationController?.navigationBar.barStyle = .default
         navigationController?.navigationBar.isTranslucent = false
         let titleV = UILabel()
-        titleV.text = "Виртуальная лента"
-        titleV.font = UIFont(name: "Comfortaa-Bold", size: 21)
+        titleV.text = "Лента"
+        titleV.font = UIFont(name: "OpenSans-Bold", size: 21)
         titleV.adjustsFontSizeToFitWidth = true
         navigationItem.titleView = titleV
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addItem))
-        navigationItem.rightBarButtonItem?.tintColor = .black
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editItem))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: CreateButton(image: UIImage(named: "info")))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: CreateButton(image: UIImage(named: "edit")))
+//        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editItem))
         swipes()
         initContent()
     }
@@ -109,7 +109,7 @@ class VirtualVC: UIViewController, UICollectionViewDelegate, UICollectionViewDat
         content.reloadData()
         view.addSubview(content)
         content.bounds = view.bounds
-        content.layer.backgroundColor = UIColor.darkGray.cgColor
+        content.layer.backgroundColor = UIColor.white.cgColor
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

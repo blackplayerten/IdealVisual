@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreData
+import ESTabBarController_swift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        UITabBarItem.appearance().setTitleTextAttributes([NSAttributedString.Key.font: UIFont(name: "Comfortaa-Regular", size: 10)!], for: UIControl.State.normal)
+//        UITabBarItem.appearance().setTitleTextAttributes([NSAttributedString.Key.font: UIFont(name: "Comfortaa-Regular", size: 10)!], for: UIControl.State.normal)
         window = UIWindow(frame: UIScreen.main.bounds)
         let tb = TabBar()
         window!.rootViewController = tb

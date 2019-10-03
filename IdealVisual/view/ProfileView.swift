@@ -7,3 +7,15 @@
 //
 
 import Foundation
+import UIKit
+
+class ProfileView: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setup()
+    }
+    
+    private func setup() {
+        view.backgroundColor = .blue
+    }
+}
