@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,8 +13,6 @@
 		181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 181B1AC2231DA6930081B01C /* LaunchScreen.storyboard */; };
 		181B1ACF231DA6940081B01C /* IdealVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1ACE231DA6940081B01C /* IdealVisualTests.swift */; };
 		181B1ADA231DA6940081B01C /* IdealVisualUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */; };
-		183C79B923392FBF005AA54E /* PopUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 183C79B823392FBF005AA54E /* PopUp.swift */; };
-		1893229C23464AD4004026FC /* TabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229B23464AD4004026FC /* TabBarItem.swift */; };
 		1893229E23466104004026FC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229D23466104004026FC /* ProfileView.swift */; };
 		189322AA234680B9004026FC /* OpenSans-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 189322A0234680B9004026FC /* OpenSans-SemiBoldItalic.ttf */; };
 		189322AB234680B9004026FC /* OpenSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 189322A1234680B9004026FC /* OpenSans-SemiBold.ttf */; };
@@ -27,10 +25,9 @@
 		189322B2234680B9004026FC /* OpenSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 189322A8234680B9004026FC /* OpenSans-Bold.ttf */; };
 		189322B3234680B9004026FC /* OpenSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 189322A9234680B9004026FC /* OpenSans-Italic.ttf */; };
 		189322B5234687CE004026FC /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* Buttons.swift */; };
-		63219138970C8C5C48A6E26C /* TabBarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219F74E0A7C30EB6B15881 /* TabBarVC.swift */; };
+		18E981F0234909FB007DCE69 /* BottomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E981EF234909FB007DCE69 /* BottomView.swift */; };
 		63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632194B70D0AC636CB2B847F /* PhotoCell.swift */; };
-		63219A4A265F4D025E33856C /* VirtualVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219C5F3C3B40275C1AC524 /* VirtualVC.swift */; };
-		864D272806B1738ED0458DDB /* libPods-IdealVisual.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D06576B052BD4C0FB386A732 /* libPods-IdealVisual.a */; };
+		63219A4A265F4D025E33856C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219C5F3C3B40275C1AC524 /* MainView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,8 +60,6 @@
 		181B1AD5231DA6940081B01C /* IdealVisualUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IdealVisualUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdealVisualUITests.swift; sourceTree = "<group>"; };
 		181B1ADB231DA6940081B01C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		183C79B823392FBF005AA54E /* PopUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopUp.swift; sourceTree = "<group>"; };
-		1893229B23464AD4004026FC /* TabBarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarItem.swift; sourceTree = "<group>"; };
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322A0234680B9004026FC /* OpenSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OpenSans-SemiBoldItalic.ttf"; path = "../../fonts/Open_Sans/OpenSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		189322A1234680B9004026FC /* OpenSans-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OpenSans-SemiBold.ttf"; path = "../../fonts/Open_Sans/OpenSans-SemiBold.ttf"; sourceTree = "<group>"; };
@@ -77,12 +72,9 @@
 		189322A8234680B9004026FC /* OpenSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OpenSans-Bold.ttf"; path = "../../fonts/Open_Sans/OpenSans-Bold.ttf"; sourceTree = "<group>"; };
 		189322A9234680B9004026FC /* OpenSans-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OpenSans-Italic.ttf"; path = "../../fonts/Open_Sans/OpenSans-Italic.ttf"; sourceTree = "<group>"; };
 		189322B4234687CE004026FC /* Buttons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Buttons.swift; sourceTree = "<group>"; };
-		2447B2C97ED95F9AE3BE2BC2 /* Pods-IdealVisual.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisual.debug.xcconfig"; path = "Target Support Files/Pods-IdealVisual/Pods-IdealVisual.debug.xcconfig"; sourceTree = "<group>"; };
+		18E981EF234909FB007DCE69 /* BottomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomView.swift; sourceTree = "<group>"; };
 		632194B70D0AC636CB2B847F /* PhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCell.swift; sourceTree = "<group>"; };
-		63219C5F3C3B40275C1AC524 /* VirtualVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VirtualVC.swift; sourceTree = "<group>"; };
-		63219F74E0A7C30EB6B15881 /* TabBarVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TabBarVC.swift; sourceTree = "<group>"; };
-		D06576B052BD4C0FB386A732 /* libPods-IdealVisual.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-IdealVisual.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		E3668015BB64B24767745B0C /* Pods-IdealVisual.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisual.release.xcconfig"; path = "Target Support Files/Pods-IdealVisual/Pods-IdealVisual.release.xcconfig"; sourceTree = "<group>"; };
+		63219C5F3C3B40275C1AC524 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,7 +82,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				864D272806B1738ED0458DDB /* libPods-IdealVisual.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -111,15 +102,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		017C89CE10DF9602A4A65F45 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				2447B2C97ED95F9AE3BE2BC2 /* Pods-IdealVisual.debug.xcconfig */,
-				E3668015BB64B24767745B0C /* Pods-IdealVisual.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		181B1AAA231DA6930081B01C = {
 			isa = PBXGroup;
 			children = (
@@ -127,8 +109,6 @@
 				181B1ACD231DA6940081B01C /* IdealVisualTests */,
 				181B1AD8231DA6940081B01C /* IdealVisualUITests */,
 				181B1AB4231DA6930081B01C /* Products */,
-				017C89CE10DF9602A4A65F45 /* Pods */,
-				99BA991E3509960737B90CC0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -195,22 +175,12 @@
 			isa = PBXGroup;
 			children = (
 				632194B70D0AC636CB2B847F /* PhotoCell.swift */,
-				63219F74E0A7C30EB6B15881 /* TabBarVC.swift */,
-				63219C5F3C3B40275C1AC524 /* VirtualVC.swift */,
-				183C79B823392FBF005AA54E /* PopUp.swift */,
-				1893229B23464AD4004026FC /* TabBarItem.swift */,
+				63219C5F3C3B40275C1AC524 /* MainView.swift */,
 				1893229D23466104004026FC /* ProfileView.swift */,
 				189322B4234687CE004026FC /* Buttons.swift */,
+				18E981EF234909FB007DCE69 /* BottomView.swift */,
 			);
 			path = view;
-			sourceTree = "<group>";
-		};
-		99BA991E3509960737B90CC0 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				D06576B052BD4C0FB386A732 /* libPods-IdealVisual.a */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -220,11 +190,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 181B1ADE231DA6940081B01C /* Build configuration list for PBXNativeTarget "IdealVisual" */;
 			buildPhases = (
-				E4C33DD314081F005D419946 /* [CP] Check Pods Manifest.lock */,
 				181B1AAF231DA6930081B01C /* Sources */,
 				181B1AB0231DA6930081B01C /* Frameworks */,
 				181B1AB1231DA6930081B01C /* Resources */,
-				99B53AB34B23A2A949F5D901 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -350,62 +318,18 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		99B53AB34B23A2A949F5D901 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-IdealVisual/Pods-IdealVisual-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-IdealVisual/Pods-IdealVisual-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-IdealVisual/Pods-IdealVisual-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E4C33DD314081F005D419946 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-IdealVisual-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		181B1AAF231DA6930081B01C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				189322B5234687CE004026FC /* Buttons.swift in Sources */,
+				18E981F0234909FB007DCE69 /* BottomView.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
 				181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */,
 				63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */,
-				63219138970C8C5C48A6E26C /* TabBarVC.swift in Sources */,
-				1893229C23464AD4004026FC /* TabBarItem.swift in Sources */,
-				183C79B923392FBF005AA54E /* PopUp.swift in Sources */,
-				63219A4A265F4D025E33856C /* VirtualVC.swift in Sources */,
+				63219A4A265F4D025E33856C /* MainView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -570,7 +494,6 @@
 		};
 		181B1ADF231DA6940081B01C /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2447B2C97ED95F9AE3BE2BC2 /* Pods-IdealVisual.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -589,7 +512,6 @@
 		};
 		181B1AE0231DA6940081B01C /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E3668015BB64B24767745B0C /* Pods-IdealVisual.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

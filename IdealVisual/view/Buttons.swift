@@ -9,20 +9,39 @@
 import Foundation
 import UIKit
 
-func CreateButton(image: UIImage?) -> UIView {
-    let back = UIView()
-    let imagev = UIImageView()
-    imagev.image = image
-    back.translatesAutoresizingMaskIntoConstraints = false
-    back.widthAnchor.constraint(equalToConstant: 35).isActive = true
-    back.heightAnchor.constraint(equalToConstant: 35).isActive = true
-    back.layer.cornerRadius = 10
-    back.backgroundColor = UIColor(red: 255/255, green: 209/255, blue: 140/255, alpha: 1.0)
-    back.addSubview(imagev)
-    imagev.translatesAutoresizingMaskIntoConstraints = false
-    imagev.centerXAnchor.constraint(equalTo: back.safeAreaLayoutGuide.centerXAnchor).isActive = true
-    imagev.centerYAnchor.constraint(equalTo: back.safeAreaLayoutGuide.centerYAnchor).isActive = true
-    imagev.widthAnchor.constraint(equalToConstant: 20).isActive = true
-    imagev.heightAnchor.constraint(equalToConstant: 20).isActive = true
-    return back
+struct Colors {
+    static let orange = UIColor(red: 0.85, green: 0.41, blue: 0.28, alpha: 1)
+}
+
+class ImageButton: UIView {
+    init(image: UIImage, side: CGFloat = 35, target: Any, action: Selector, buttonColor: UIColor? = nil) {
+        super.init(frame: .zero)
+        let back = UIButton(type: .system)
+        back.addTarget(target, action: action, for: .touchUpInside)
+        let imagev = UIImageView()
+        imagev.image = image
+        self.translatesAutoresizingMaskIntoConstraints = false
+        self.widthAnchor.constraint(equalToConstant: side).isActive = true
+        self.heightAnchor.constraint(equalToConstant: side).isActive = true
+        self.layer.cornerRadius = 10
+        self.backgroundColor = buttonColor
+        
+        self.addSubview(back)
+        back.translatesAutoresizingMaskIntoConstraints = false
+        back.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor).isActive = true
+        back.centerYAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerYAnchor).isActive = true
+        back.widthAnchor.constraint(equalTo: self.safeAreaLayoutGuide.widthAnchor).isActive = true
+        back.heightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.heightAnchor).isActive = true
+        
+        self.addSubview(imagev)
+        imagev.translatesAutoresizingMaskIntoConstraints = false
+        imagev.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor).isActive = true
+        imagev.centerYAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerYAnchor).isActive = true
+        imagev.widthAnchor.constraint(equalToConstant: 0.7 * side).isActive = true
+        imagev.heightAnchor.constraint(equalToConstant: 0.7 * side).isActive = true
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }

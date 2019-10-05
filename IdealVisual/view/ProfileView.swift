@@ -9,13 +9,9 @@
 import Foundation
 import UIKit
 
-class ProfileView: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setup()
-    }
+class ProfileView: UIView {
     
     private func setup() {
-        view.backgroundColor = .blue
+        backgroundColor = .blue
     }
 }
