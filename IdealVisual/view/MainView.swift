@@ -75,6 +75,21 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         guard let add_pic = UIImage(named: "add") else { return }
         add_button.addSubview(ImageButton(image: add_pic, side: 35, target: self, action: #selector(choose_photo), buttonColor: Colors.orange))
         
+        if photos.isEmpty {
+            content.isHidden = true
+            let helpText = UILabel()
+            view.addSubview(helpText)
+            helpText.translatesAutoresizingMaskIntoConstraints = false
+            helpText.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            helpText.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -110).isActive = true
+            helpText.widthAnchor.constraint(equalToConstant: 300).isActive = true
+            helpText.font = UIFont(name: "OpenSans-Regular", size: 18)
+            helpText.numberOfLines = 0
+            helpText.textAlignment = .center
+            helpText.textColor = Colors.dark_gray
+            helpText.text = "Здесь будут размещены Ваши фото \n\n Чтобы начать свой путь к созданию идеальной ленты или блога добавьте свою первую фотографию нажав на +"
+        }
+        
         swipes()
         initContent()
     }
@@ -107,6 +122,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
             print("photos", photos)
          }
         dismiss(animated: true, completion: nil)
+        content.isHidden = false
         content.reloadData()
     }
 
