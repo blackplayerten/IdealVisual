@@ -11,6 +11,8 @@ import UIKit
 
 struct Colors {
     static let orange = UIColor(red: 0.85, green: 0.41, blue: 0.28, alpha: 1)
+    static let light_gray = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1)
+    static let dark_gray = UIColor(red: 0.32, green: 0.32, blue: 0.31, alpha: 1)
 }
 
 class ImageButton: UIView {

@@ -13,6 +13,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     private let choose = UIImagePickerController()
     private let photo = UIButton()
     private var photos = [UIImage]()
+    let addView = UIView()
     
     private lazy var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -31,6 +32,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     }
     
     private func setup() {
+        view.backgroundColor = .white
         navigationController?.navigationBar.barStyle = .default
         navigationController?.navigationBar.isTranslucent = false
         let titleV = UILabel()
@@ -38,20 +40,46 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         titleV.font = UIFont(name: "OpenSans-Bold", size: 21)
         titleV.adjustsFontSizeToFitWidth = true
         navigationItem.titleView = titleV
+        
         guard let default_profile_pic = UIImage(named: "default_profile") else { return }
         guard let edit_pic = UIImage(named: "edit_black") else { return }
         guard let barButtonSide = navigationController?.navigationBar.frame.size.height else { return }
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: ImageButton(image: default_profile_pic, side: barButtonSide, target: self, action: #selector(profile)))
-        navigationItem.rightBarButtonItem?.target = self
-        navigationItem.rightBarButtonItem?.action = #selector(profile)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: ImageButton(image: default_profile_pic,
+                                                                                    side: barButtonSide,
+                                                                                    target: self,
+                                                                                    action: #selector(profile)
+        ))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: ImageButton(image: edit_pic,
+                                                                                   side: barButtonSide,
+                                                                                   target: self,
+                                                                                   action: #selector(add)
+        ))
         
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: ImageButton(image: edit_pic, side: barButtonSide, target: self, action: #selector(add)))
+        view.addSubview(addView)
+        addView.translatesAutoresizingMaskIntoConstraints = false
+        addView.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
+        addView.heightAnchor.constraint(equalToConstant: 110).isActive = true
+        addView.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor).isActive = true
+        addView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        addView.backgroundColor = .white
+        addView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        addView.layer.cornerRadius = 30
+        addView.layer.borderColor = Colors.dark_gray.cgColor
+        addView.layer.borderWidth = 1
+        let add_button = UIButton()
+        addView.addSubview(add_button)
+        add_button.translatesAutoresizingMaskIntoConstraints = false
+        add_button.centerXAnchor.constraint(equalTo: addView.safeAreaLayoutGuide.centerXAnchor).isActive = true
+        add_button.centerYAnchor.constraint(equalTo: addView.safeAreaLayoutGuide.centerYAnchor).isActive = true
+        guard let add_pic = UIImage(named: "add") else { return }
+        add_button.addSubview(ImageButton(image: add_pic, side: 35, target: self, action: #selector(choose_photo), buttonColor: Colors.orange))
+        
         swipes()
         initContent()
     }
     
-    @objc func profile() {
+    @objc private func profile() {
         print("profile handler")
     }
 
@@ -59,9 +87,10 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         print("add handler")
     }
     
-    func choose_photo() {
+    @objc private func choose_photo() {
         let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Галерея", style: .default, handler: { _ in self.openGallery() }))
+        alert.addAction(UIAlertAction(title: "Отменить", style: UIAlertAction.Style.cancel, handler: nil))
         present(alert, animated: true)
     }
 
@@ -98,13 +127,16 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     }
 
     private func initContent() {
+        content.translatesAutoresizingMaskIntoConstraints = false
         content.delegate = self
         content.dataSource = self
         content.dragInteractionEnabled = true
         content.register(PhotoCell.self, forCellWithReuseIdentifier: "cell")
         content.reloadData()
         view.addSubview(content)
-        content.bounds = view.bounds
+        content.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
+        content.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        content.bottomAnchor.constraint(equalTo: addView.topAnchor).isActive = true
         content.layer.backgroundColor = UIColor.white.cgColor
     }
 
