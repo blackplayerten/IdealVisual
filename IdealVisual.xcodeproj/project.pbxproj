@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1802AC0F234E13CB0007560A /* Asset.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1802AC0E234E13CB0007560A /* Asset.xcassets */; };
+		180D6C1E234BCD4700AB52F5 /* TabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180D6C1D234BCD4700AB52F5 /* TabBar.swift */; };
 		181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1AB6231DA6930081B01C /* AppDelegate.swift */; };
 		181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 181B1ABD231DA6930081B01C /* IdealVisual.xcdatamodeld */; };
-		181B1AC1231DA6930081B01C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 181B1AC0231DA6930081B01C /* Assets.xcassets */; };
 		181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 181B1AC2231DA6930081B01C /* LaunchScreen.storyboard */; };
 		181B1ACF231DA6940081B01C /* IdealVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1ACE231DA6940081B01C /* IdealVisualTests.swift */; };
 		181B1ADA231DA6940081B01C /* IdealVisualUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */; };
@@ -47,10 +48,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1802AC0E234E13CB0007560A /* Asset.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Asset.xcassets; sourceTree = "<group>"; };
+		180D6C1D234BCD4700AB52F5 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
 		181B1AB3231DA6930081B01C /* IdealVisual.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IdealVisual.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		181B1AB6231DA6930081B01C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		181B1ABE231DA6930081B01C /* IdealVisual.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = IdealVisual.xcdatamodel; sourceTree = "<group>"; };
-		181B1AC0231DA6930081B01C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		181B1AC3231DA6930081B01C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		181B1AC5231DA6930081B01C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		181B1ACA231DA6940081B01C /* IdealVisualTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IdealVisualTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,6 +105,7 @@
 		181B1AAA231DA6930081B01C = {
 			isa = PBXGroup;
 			children = (
+				1802AC0E234E13CB0007560A /* Asset.xcassets */,
 				181B1AB5231DA6930081B01C /* IdealVisual */,
 				181B1ACD231DA6940081B01C /* IdealVisualTests */,
 				181B1AD8231DA6940081B01C /* IdealVisualUITests */,
@@ -125,7 +128,6 @@
 			children = (
 				1893229F2346809B004026FC /* fonts */,
 				181B1AB6231DA6930081B01C /* AppDelegate.swift */,
-				181B1AC0231DA6930081B01C /* Assets.xcassets */,
 				181B1AC2231DA6930081B01C /* LaunchScreen.storyboard */,
 				181B1AC5231DA6930081B01C /* Info.plist */,
 				181B1ABD231DA6930081B01C /* IdealVisual.xcdatamodeld */,
@@ -176,6 +178,7 @@
 				63219C5F3C3B40275C1AC524 /* MainView.swift */,
 				1893229D23466104004026FC /* ProfileView.swift */,
 				189322B4234687CE004026FC /* Button.swift */,
+				180D6C1D234BCD4700AB52F5 /* TabBar.swift */,
 			);
 			path = view;
 			sourceTree = "<group>";
@@ -290,12 +293,12 @@
 				189322AE234680B9004026FC /* OpenSans-ExtraBold.ttf in Resources */,
 				189322AA234680B9004026FC /* OpenSans-SemiBoldItalic.ttf in Resources */,
 				189322B1234680B9004026FC /* OpenSans-LightItalic.ttf in Resources */,
+				1802AC0F234E13CB0007560A /* Asset.xcassets in Resources */,
 				189322AC234680B9004026FC /* OpenSans-ExtraBoldItalic.ttf in Resources */,
 				181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */,
 				189322AF234680B9004026FC /* OpenSans-BoldItalic.ttf in Resources */,
 				189322B3234680B9004026FC /* OpenSans-Italic.ttf in Resources */,
 				189322B0234680B9004026FC /* OpenSans-Regular.ttf in Resources */,
-				181B1AC1231DA6930081B01C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,6 +329,7 @@
 				181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */,
 				63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */,
 				63219A4A265F4D025E33856C /* MainView.swift in Sources */,
+				180D6C1E234BCD4700AB52F5 /* TabBar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

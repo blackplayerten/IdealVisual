@@ -9,11 +9,11 @@
 import UIKit
 import Foundation
 
-class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITabBarControllerDelegate, ProfileDelegate {
     private let choose = UIImagePickerController()
     private let photo = UIButton()
     private var photos = [UIImage]()
-    let addView = UIView()
+    private var profileV: ProfileView?
     
     private lazy var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -28,6 +28,9 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.tabBarController?.delegate = self
+        profileV = ProfileView()
+        profileV?.delegateProfile = self
         setup()
     }
     
@@ -55,26 +58,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
                                                                                    target: self,
                                                                                    action: #selector(add)
         ))
-        
-        view.addSubview(addView)
-        addView.translatesAutoresizingMaskIntoConstraints = false
-        addView.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
-        addView.heightAnchor.constraint(equalToConstant: 110).isActive = true
-        addView.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor).isActive = true
-        addView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        addView.backgroundColor = .white
-        addView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        addView.layer.cornerRadius = 30
-        addView.layer.borderColor = Colors.dark_gray.cgColor
-        addView.layer.borderWidth = 1
-        let add_button = UIButton()
-        addView.addSubview(add_button)
-        add_button.translatesAutoresizingMaskIntoConstraints = false
-        add_button.centerXAnchor.constraint(equalTo: addView.safeAreaLayoutGuide.centerXAnchor).isActive = true
-        add_button.centerYAnchor.constraint(equalTo: addView.safeAreaLayoutGuide.centerYAnchor).isActive = true
-        guard let add_pic = UIImage(named: "add") else { return }
-        add_button.addSubview(ImageButton(image: add_pic, side: 35, target: self, action: #selector(choose_photo), buttonColor: Colors.orange))
-        
+
         if photos.isEmpty {
             content.isHidden = true
             let helpText = UILabel()
@@ -87,22 +71,39 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
             helpText.numberOfLines = 0
             helpText.textAlignment = .center
             helpText.textColor = Colors.dark_gray
-            helpText.text = "Здесь будут размещены Ваши фото \n\n Чтобы начать свой путь к созданию идеальной ленты или блога добавьте свою первую фотографию нажав на +"
+            helpText.text = """
+            Здесь будут размещены Ваши фото \n\n
+            Чтобы начать свой путь к созданию идеальной ленты или блога \
+            добавьте свою первую фотографию нажав на +
+            """
         }
         
         swipes()
         initContent()
     }
     
-    @objc private func profile() {
-        print("profile handler")
+    @objc internal func profile() {
+        guard let pr = profileV else { return }
+        view.addSubview(pr)
+        pr.translatesAutoresizingMaskIntoConstraints = false
+        let currentWindow: UIWindow? = UIApplication.shared.keyWindow
+        currentWindow?.addSubview(pr)
+        pr.heightAnchor.constraint(equalToConstant: 400).isActive = true
+        pr.widthAnchor.constraint(equalTo:  view.safeAreaLayoutGuide.widthAnchor).isActive = true
+        pr.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        pr.layer.cornerRadius = 20
+        pr.topAnchor.constraint(equalTo: (self.navigationController?.navigationBar.topAnchor)!).isActive = true
+        pr.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+        pr.backgroundColor = Colors.dark_gray
+        pr.setup()
     }
+
 
     @objc private func add() {
         print("add handler")
     }
     
-    @objc private func choose_photo() {
+    func choose_photo() {
         let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Галерея", style: .default, handler: { _ in self.openGallery() }))
         alert.addAction(UIAlertAction(title: "Отменить", style: UIAlertAction.Style.cancel, handler: nil))
@@ -150,9 +151,9 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         content.register(PhotoCell.self, forCellWithReuseIdentifier: "cell")
         content.reloadData()
         view.addSubview(content)
-        content.widthAnchor.constraint(equalToConstant: view.frame.width).isActive = true
+        content.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
         content.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        content.bottomAnchor.constraint(equalTo: addView.topAnchor).isActive = true
+        content.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         content.layer.backgroundColor = UIColor.white.cgColor
     }
 
@@ -166,5 +167,11 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         cell.picture.image = photos[indexPath.item]
         cell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1, height: view.bounds.width / 3 - 1)
         return cell
+    }
+    
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        if self.tabBarController?.selectedIndex == 0 {
+            self.choose_photo()
+        }
     }
 }

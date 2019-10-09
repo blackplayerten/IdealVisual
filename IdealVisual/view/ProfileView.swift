@@ -9,9 +9,21 @@
 import Foundation
 import UIKit
 
+protocol ProfileDelegate: class {
+    func profile()
+}
+
 class ProfileView: UIView {
-    
-    private func setup() {
-        backgroundColor = .blue
+    weak var delegateProfile: ProfileDelegate?
+    func setup() {
+        let swipe = UISwipeGestureRecognizer()
+        swipe.direction = .up
+        swipe.addTarget(self, action: #selector(closeProfile))
+        self.addGestureRecognizer(swipe)
     }
+    
+    @objc func closeProfile() {
+        self.removeFromSuperview()
+    }
+    
 }
