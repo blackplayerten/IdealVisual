@@ -44,14 +44,13 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         titleV.adjustsFontSizeToFitWidth = true
         navigationItem.titleView = titleV
         
-        guard let default_profile_pic = UIImage(named: "default_profile") else { return }
+        guard let default_profile_pic = UIImage(named: "test") else { return }
         guard let edit_pic = UIImage(named: "edit_black") else { return }
         guard let barButtonSide = navigationController?.navigationBar.frame.size.height else { return }
-        
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: ImageButton(image: default_profile_pic,
-                                                                                    side: barButtonSide,
-                                                                                    target: self,
-                                                                                    action: #selector(profile)
+                                                                                side: barButtonSide,
+                                                                                target: self,
+                                                                                action: #selector(profile)
         ))
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: ImageButton(image: edit_pic,
                                                                                    side: barButtonSide,
@@ -88,7 +87,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         pr.translatesAutoresizingMaskIntoConstraints = false
         let currentWindow: UIWindow? = UIApplication.shared.keyWindow
         currentWindow?.addSubview(pr)
-        pr.heightAnchor.constraint(equalToConstant: 400).isActive = true
+        pr.heightAnchor.constraint(equalToConstant: 360).isActive = true
         pr.widthAnchor.constraint(equalTo:  view.safeAreaLayoutGuide.widthAnchor).isActive = true
         pr.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         pr.layer.cornerRadius = 20
