@@ -10,12 +10,13 @@ import UIKit
 import Foundation
 
 class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITabBarControllerDelegate, ProfileDelegate {
-    private let choose = UIImagePickerController()
+    var choose = UIImagePickerController()
+    
     private let photo = UIButton()
     private var photos = [UIImage]()
     private var profileV: ProfileView?
     
-    private lazy var content: UICollectionView = {
+     lazy var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
         let sizecell = CGSize(width: cellSide, height: cellSide)
         let layout = UICollectionViewFlowLayout()
@@ -29,8 +30,12 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tabBarController?.delegate = self
-        profileV = ProfileView()
-        profileV?.delegateProfile = self
+        
+        choose.delegate = self
+        choose.sourceType = .photoLibrary
+        choose.allowsEditing = true
+        
+        profileV = ProfileView(profileDelegate: self)
         setup()
     }
     
@@ -87,8 +92,17 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         pr.translatesAutoresizingMaskIntoConstraints = false
         let currentWindow: UIWindow? = UIApplication.shared.keyWindow
         currentWindow?.addSubview(pr)
-        pr.heightAnchor.constraint(equalToConstant: 360).isActive = true
-        pr.widthAnchor.constraint(equalTo:  view.safeAreaLayoutGuide.widthAnchor).isActive = true
+        
+        if pr.t == false {
+            guard let block_tabbar = UIImage(named: "block_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
+            tabBarItem = UITabBarItem(title: nil, image: block_tabbar, selectedImage: block_tabbar)
+        }
+        else {
+            guard let add_tabbar = UIImage(named: "add_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
+           tabBarItem = UITabBarItem(title: nil, image: add_tabbar, selectedImage: add_tabbar)
+        }
+        
+        pr.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
         pr.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         pr.layer.cornerRadius = 20
         pr.topAnchor.constraint(equalTo: (self.navigationController?.navigationBar.topAnchor)!).isActive = true
@@ -98,32 +112,49 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     }
 
 
+    internal func chooseAvatar(picker: UIImagePickerController) {
+        present(picker, animated: true, completion: nil)
+    }
+    
+    
     @objc private func add() {
         print("add handler")
     }
     
-    func choose_photo() {
+    @objc func choose_photo_for_feed() {
         let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Галерея", style: .default, handler: { _ in self.openGallery() }))
         alert.addAction(UIAlertAction(title: "Отменить", style: UIAlertAction.Style.cancel, handler: nil))
         present(alert, animated: true)
     }
+    
+    internal func showAlert(alert: UIAlertController) {
+        present(alert, animated: true)
+    }
 
     private func openGallery() {
-        choose.delegate = self
-        choose.sourceType = .photoLibrary
-        choose.allowsEditing = true
         present(choose, animated: true, completion: nil)
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            photos.append(selected)
-            print("photos", photos)
-         }
+        switch picker {
+        case choose:
+            if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+                photos.append(selected)
+                content.isHidden = false
+                content.reloadData()
+            }
+//        case testAva:
+//            break
+            //TODO: change image, upload...
+        default:
+            fatalError("unknown picker, add handler")
+        }
+        dismissAlert()
+    }
+    
+    internal func dismissAlert() {
         dismiss(animated: true, completion: nil)
-        content.isHidden = false
-        content.reloadData()
     }
 
     @objc private func edit() {
@@ -170,7 +201,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         if self.tabBarController?.selectedIndex == 0 {
-            self.choose_photo()
+            self.choose_photo_for_feed()
         }
     }
 }
