@@ -8,8 +8,9 @@
 
 import UIKit
 import Foundation
+import MobileCoreServices
 
-class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITabBarControllerDelegate, ProfileDelegate {
+class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDragDelegate, UICollectionViewDropDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITabBarControllerDelegate, ProfileDelegate {
     var choose = UIImagePickerController()
     
     private let photo = UIButton()
@@ -30,6 +31,9 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tabBarController?.delegate = self
+        self.content.dragDelegate = self
+        self.content.dropDelegate = self
+        self.content.dragInteractionEnabled = true
         
         choose.delegate = self
         choose.sourceType = .photoLibrary
@@ -137,18 +141,11 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        switch picker {
-        case choose:
-            if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                photos.append(selected)
-                content.isHidden = false
-                content.reloadData()
-            }
-//        case testAva:
-//            break
-            //TODO: change image, upload...
-        default:
-            fatalError("unknown picker, add handler")
+        if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+            //FIXME: fix crop image
+            photos.append(selected)
+            content.isHidden = false
+            content.reloadData()
         }
         dismissAlert()
     }
@@ -204,4 +201,93 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
             self.choose_photo_for_feed()
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        let provider = NSItemProvider(object: photos[indexPath.row])
+        let dragItem = UIDragItem(itemProvider: provider)
+        return [dragItem]
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
+        return session.hasItemsConforming(toTypeIdentifiers: [kUTTypeImage as String])
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
+        let destinationIndexPath = coordinator.destinationIndexPath ?? IndexPath(item: 0, section: 0)
+        
+        switch coordinator.proposal.operation {
+            case .copy:
+                let items = coordinator.items
+                for item in items {
+                    item.dragItem.itemProvider.loadObject(ofClass: UIImage.self, completionHandler: { (newImage, error)  -> Void in
+                        if var image = newImage as? UIImage {
+                            if image.size.width > 200 {
+                                image = self.scaleImage(image: image, width: 200)
+                            }
+                        self.photos.insert(image, at: destinationIndexPath.item)
+                        DispatchQueue.main.async { collectionView.insertItems(at: [destinationIndexPath]) }
+                        }
+                    }
+            )
+                }
+
+            case .move:
+                      
+                       let items = coordinator.items
+                       
+                       for item in items {
+                           guard let sourceIndexPath = item.sourceIndexPath
+                                       else { return }
+                           
+                           collectionView.performBatchUpdates({
+                               
+                               let moveImage = photos[sourceIndexPath.item]
+                               photos.remove(at: sourceIndexPath.item)
+                               photos.insert(moveImage, at: destinationIndexPath.item)
+                               
+                               content.deleteItems(at: [sourceIndexPath])
+                               content.insertItems(at: [destinationIndexPath])
+                           })
+                           coordinator.drop(item.dragItem,
+                           toItemAt: destinationIndexPath)
+                       }
+            
+            default: return
+        }
+    }
+    
+    
+    func scaleImage (image:UIImage, width: CGFloat) -> UIImage {
+        let oldWidth = image.size.width
+        let scaleFactor = width / oldWidth
+
+
+        let newHeight = image.size.height * scaleFactor
+        let newWidth = oldWidth * scaleFactor
+
+
+        UIGraphicsBeginImageContext(CGSize(width: newWidth, height: newHeight))
+        image.draw(in: CGRect(x:0, y:0, width: newWidth, height: newHeight))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return newImage!
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate
+      session: UIDropSession, withDestinationIndexPath destinationIndexPath:
+       IndexPath?) -> UICollectionViewDropProposal {
+        
+        if session.localDragSession != nil {
+            return UICollectionViewDropProposal(operation: .move,
+                    intent: .insertAtDestinationIndexPath)
+        } else {
+            return UICollectionViewDropProposal(operation: .copy,
+                    intent: .insertAtDestinationIndexPath)
+        }
+    }
+    
+    
+    
+    
+    
 }
