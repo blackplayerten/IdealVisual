@@ -19,9 +19,9 @@ class TabBar: UITabBarController, UITabBarControllerDelegate {
         self.tabBar.layer.borderColor = Colors.dark_gray.cgColor
         self.tabBar.layer.borderWidth = 0.2
         let main = MainView()
-        guard let im = UIImage(named: "add_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
-        main.tabBarItem = UITabBarItem(title: nil, image: im, tag: 0)
-
+        let image = UIImage(named: "add_tabbar")?.withRenderingMode(.alwaysOriginal)
+        main.tabBarItem = UITabBarItem(title: nil, image: image, tag: 0)
+        
         viewControllers = [
             UINavigationController(rootViewController: main)
         ]

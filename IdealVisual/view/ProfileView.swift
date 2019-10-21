@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 
+
 protocol ProfileDelegate: class {
     func profile()
     func chooseAvatar(picker: UIImagePickerController)
@@ -174,6 +175,10 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+<<<<<<< HEAD
+=======
+            //FIXME: fix crop image
+>>>>>>> dev
             ava.image = selected
             //TODO: save in photo library if camera
         }
