@@ -21,17 +21,10 @@ class TabBar: UITabBarController, UITabBarControllerDelegate {
         let main = MainView()
         let image = UIImage(named: "add_tabbar")?.withRenderingMode(.alwaysOriginal)
         main.tabBarItem = UITabBarItem(title: nil, image: image, tag: 0)
+        main.tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
         
         viewControllers = [
             UINavigationController(rootViewController: main)
         ]
     }
-}
-
-extension UITabBar {
-    override open func sizeThatFits(_ size: CGSize) -> CGSize {
-    var sizeThatFits = super.sizeThatFits(size)
-    sizeThatFits.height = 70
-    return sizeThatFits
-   }
 }

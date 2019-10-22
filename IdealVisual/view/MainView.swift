@@ -107,10 +107,12 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         if pr.t == false {
             guard let block_tabbar = UIImage(named: "block_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
             tabBarItem = UITabBarItem(title: nil, image: block_tabbar, selectedImage: block_tabbar)
+            tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
         }
         else {
             guard let add_tabbar = UIImage(named: "add_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
            tabBarItem = UITabBarItem(title: nil, image: add_tabbar, selectedImage: add_tabbar)
+            tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
         }
         
         pr.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
