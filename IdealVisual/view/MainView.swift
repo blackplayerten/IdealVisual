@@ -10,11 +10,7 @@ import UIKit
 import Foundation
 import MobileCoreServices
 
-<<<<<<< HEAD
-class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITabBarControllerDelegate, ProfileDelegate {
-=======
 class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDragDelegate, UICollectionViewDropDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITabBarControllerDelegate, ProfileDelegate {
->>>>>>> dev
     var choose = UIImagePickerController()
     
     private let photo = UIButton()
@@ -35,12 +31,10 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tabBarController?.delegate = self
-<<<<<<< HEAD
-=======
+
         self.content.dragDelegate = self
         self.content.dropDelegate = self
         self.content.dragInteractionEnabled = true
->>>>>>> dev
         
         choose.delegate = self
         choose.sourceType = .photoLibrary
@@ -150,26 +144,11 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-<<<<<<< HEAD
-        switch picker {
-        case choose:
-            if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                photos.append(selected)
-                content.isHidden = false
-                content.reloadData()
-            }
-//        case testAva:
-//            break
-            //TODO: change image, upload...
-        default:
-            fatalError("unknown picker, add handler")
-=======
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             //FIXME: fix crop image
             photos.append(selected)
             content.isHidden = false
             content.reloadData()
->>>>>>> dev
         }
         dismissAlert()
     }
@@ -223,8 +202,6 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         if self.tabBarController?.selectedIndex == 0 {
             self.choose_photo_for_feed()
-<<<<<<< HEAD
-=======
         }
     }
     
@@ -309,7 +286,6 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         } else {
             return UICollectionViewDropProposal(operation: .copy,
                     intent: .insertAtDestinationIndexPath)
->>>>>>> dev
         }
     }
     
