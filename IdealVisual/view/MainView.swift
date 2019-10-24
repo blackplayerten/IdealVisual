@@ -11,10 +11,11 @@ import Foundation
 import MobileCoreServices
 
 class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDragDelegate, UICollectionViewDropDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITabBarControllerDelegate, ProfileDelegate {
+    
     var choose = UIImagePickerController()
     
     private let photo = UIButton()
-    private var photos = [UIImage]()
+    private var photos = [Photo]()
     private var profileV: ProfileView?
     
      lazy var content: UICollectionView = {
@@ -47,25 +48,30 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     private func setup() {
         view.backgroundColor = .white
         navigationController?.navigationBar.barStyle = .default
+        navigationController?.navigationBar.backgroundColor = .white
         navigationController?.navigationBar.isTranslucent = false
+
         let titleV = UILabel()
         titleV.text = "Лента"
-        titleV.font = UIFont(name: "OpenSans-Bold", size: 21)
+        titleV.font = UIFont(name: "OpenSans-SemiBold", size: 20)
         titleV.adjustsFontSizeToFitWidth = true
         navigationItem.titleView = titleV
+
+        let profileV = UIButton()
+        profileV.translatesAutoresizingMaskIntoConstraints = false
+        profileV.clipsToBounds = true
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: profileV)
+        profileV.setBackgroundImage(UIImage(named: "test"), for: .normal)
+        profileV.widthAnchor.constraint(equalToConstant: 33).isActive = true
+        profileV.heightAnchor.constraint(equalToConstant: 33).isActive = true
+        profileV.layer.cornerRadius = 10
+        profileV.addTarget(self, action: #selector(profile), for: .touchUpInside)
         
-        guard let default_profile_pic = UIImage(named: "test") else { return }
         guard let edit_pic = UIImage(named: "edit_black") else { return }
-        guard let barButtonSide = navigationController?.navigationBar.frame.size.height else { return }
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: ImageButton(image: default_profile_pic,
-                                                                                side: barButtonSide,
-                                                                                target: self,
-                                                                                action: #selector(profile)
-        ))
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: ImageButton(image: edit_pic,
-                                                                                   side: barButtonSide,
+                                                                                   side: 35,
                                                                                    target: self,
-                                                                                   action: #selector(add)
+                                                                                   action: #selector(edit)
         ))
 
         if photos.isEmpty {
@@ -74,7 +80,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
             view.addSubview(helpText)
             helpText.translatesAutoresizingMaskIntoConstraints = false
             helpText.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-            helpText.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -110).isActive = true
+            helpText.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50).isActive = true
             helpText.widthAnchor.constraint(equalToConstant: 300).isActive = true
             helpText.font = UIFont(name: "OpenSans-Regular", size: 18)
             helpText.numberOfLines = 0
@@ -92,22 +98,13 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     }
     
     @objc internal func profile() {
+        disableTabBarButton()
+        
         guard let pr = profileV else { return }
         view.addSubview(pr)
         pr.translatesAutoresizingMaskIntoConstraints = false
         let currentWindow: UIWindow? = UIApplication.shared.keyWindow
         currentWindow?.addSubview(pr)
-        
-        if pr.t == false {
-            guard let block_tabbar = UIImage(named: "block_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
-            tabBarItem = UITabBarItem(title: nil, image: block_tabbar, selectedImage: block_tabbar)
-            tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
-        }
-        else {
-            guard let add_tabbar = UIImage(named: "add_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
-           tabBarItem = UITabBarItem(title: nil, image: add_tabbar, selectedImage: add_tabbar)
-            tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
-        }
         
         pr.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
         pr.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
@@ -117,15 +114,24 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         pr.backgroundColor = Colors.dark_gray
         pr.setup()
     }
+    
+    private func disableTabBarButton() {
+        guard let block_tabbar = UIImage(named: "block_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
+        tabBarItem = UITabBarItem(title: nil, image: block_tabbar, selectedImage: block_tabbar)
+        tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
+        tabBarController?.tabBar.isUserInteractionEnabled = false
+    }
+    
+    internal func enableTabBarButton() {
+        guard let add_tabbar = UIImage(named: "add_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
+                  tabBarItem = UITabBarItem(title: nil, image: add_tabbar, selectedImage: add_tabbar)
+                   tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
+        tabBarController?.tabBar.isUserInteractionEnabled = true
+    }
 
 
     internal func chooseAvatar(picker: UIImagePickerController) {
         present(picker, animated: true, completion: nil)
-    }
-    
-    
-    @objc private func add() {
-        print("add handler")
     }
     
     @objc func choose_photo_for_feed() {
@@ -146,7 +152,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             //FIXME: fix crop image
-            photos.append(selected)
+            photos.append(Photo(photo: selected))
             content.isHidden = false
             content.reloadData()
         }
@@ -194,9 +200,15 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! PhotoCell
         cell.backgroundColor = .gray
-        cell.picture.image = photos[indexPath.item]
+        cell.picture.image = photos[indexPath.item].photo
         cell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1, height: view.bounds.width / 3 - 1)
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let detailPhoto = PhotoView()
+        detailPhoto.publication = photos[indexPath.item]
+        self.navigationController?.pushViewController(detailPhoto, animated: true)
     }
     
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
@@ -206,7 +218,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     }
     
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
-        let provider = NSItemProvider(object: photos[indexPath.row])
+        let provider = NSItemProvider(object: photos[indexPath.row].photo)
         let dragItem = UIDragItem(itemProvider: provider)
         return [dragItem]
     }
@@ -227,7 +239,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
                             if image.size.width > 200 {
                                 image = self.scaleImage(image: image, width: 200)
                             }
-                        self.photos.insert(image, at: destinationIndexPath.item)
+//                        self.photos.insert(image, at: destinationIndexPath.item)
                         DispatchQueue.main.async { collectionView.insertItems(at: [destinationIndexPath]) }
                         }
                     }
@@ -288,9 +300,5 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
                     intent: .insertAtDestinationIndexPath)
         }
     }
-    
-    
-    
-    
     
 }

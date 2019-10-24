@@ -14,6 +14,8 @@
 		181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 181B1AC2231DA6930081B01C /* LaunchScreen.storyboard */; };
 		181B1ACF231DA6940081B01C /* IdealVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1ACE231DA6940081B01C /* IdealVisualTests.swift */; };
 		181B1ADA231DA6940081B01C /* IdealVisualUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */; };
+		188B5FB02361E47E00EA3701 /* PhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PhotoView.swift */; };
+		188B5FB52361E6CC00EA3701 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FB42361E6CC00EA3701 /* Photo.swift */; };
 		1893229E23466104004026FC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229D23466104004026FC /* ProfileView.swift */; };
 		189322AA234680B9004026FC /* OpenSans-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 189322A0234680B9004026FC /* OpenSans-SemiBoldItalic.ttf */; };
 		189322AB234680B9004026FC /* OpenSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 189322A1234680B9004026FC /* OpenSans-SemiBold.ttf */; };
@@ -61,6 +63,8 @@
 		181B1AD5231DA6940081B01C /* IdealVisualUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IdealVisualUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdealVisualUITests.swift; sourceTree = "<group>"; };
 		181B1ADB231DA6940081B01C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		188B5FAF2361E47E00EA3701 /* PhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoView.swift; sourceTree = "<group>"; };
+		188B5FB42361E6CC00EA3701 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322A0234680B9004026FC /* OpenSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OpenSans-SemiBoldItalic.ttf"; path = "../../fonts/Open_Sans/OpenSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		189322A1234680B9004026FC /* OpenSans-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OpenSans-SemiBold.ttf"; path = "../../fonts/Open_Sans/OpenSans-SemiBold.ttf"; sourceTree = "<group>"; };
@@ -126,6 +130,7 @@
 		181B1AB5231DA6930081B01C /* IdealVisual */ = {
 			isa = PBXGroup;
 			children = (
+				188B5FB32361E68200EA3701 /* models */,
 				1893229F2346809B004026FC /* fonts */,
 				181B1AB6231DA6930081B01C /* AppDelegate.swift */,
 				181B1AC2231DA6930081B01C /* LaunchScreen.storyboard */,
@@ -154,6 +159,14 @@
 			path = IdealVisualUITests;
 			sourceTree = "<group>";
 		};
+		188B5FB32361E68200EA3701 /* models */ = {
+			isa = PBXGroup;
+			children = (
+				188B5FB42361E6CC00EA3701 /* Photo.swift */,
+			);
+			path = models;
+			sourceTree = "<group>";
+		};
 		1893229F2346809B004026FC /* fonts */ = {
 			isa = PBXGroup;
 			children = (
@@ -179,6 +192,7 @@
 				1893229D23466104004026FC /* ProfileView.swift */,
 				189322B4234687CE004026FC /* Button.swift */,
 				180D6C1D234BCD4700AB52F5 /* TabBar.swift */,
+				188B5FAF2361E47E00EA3701 /* PhotoView.swift */,
 			);
 			path = view;
 			sourceTree = "<group>";
@@ -326,10 +340,12 @@
 				189322B5234687CE004026FC /* Button.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
+				188B5FB52361E6CC00EA3701 /* Photo.swift in Sources */,
 				181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */,
 				63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */,
 				63219A4A265F4D025E33856C /* MainView.swift in Sources */,
 				180D6C1E234BCD4700AB52F5 /* TabBar.swift in Sources */,
+				188B5FB02361E47E00EA3701 /* PhotoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

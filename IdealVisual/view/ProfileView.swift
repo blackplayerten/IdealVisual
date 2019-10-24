@@ -11,10 +11,10 @@ import UIKit
 
 
 protocol ProfileDelegate: class {
-    func profile()
     func chooseAvatar(picker: UIImagePickerController)
     func showAlert(alert: UIAlertController)
     func dismissAlert()
+    func enableTabBarButton()
 }
 
 class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -30,10 +30,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
     private let repeat_password = UITextField()
     
     private let hide_keyboard = UITapGestureRecognizer(target: self, action: #selector(hide))
-        
-    //FIXME: fix tabbar flag
-    var t = false
-        
+    
     init(profileDelegate: ProfileDelegate) {
         self.delegateProfile = profileDelegate
         super.init(frame: CGRect())
@@ -48,9 +45,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         height.isActive = true
         let swipe = UISwipeGestureRecognizer()
         swipe.direction = .up
-        t = true
         swipe.addTarget(self, action: #selector(closeProfile))
-        t = false
         self.addGestureRecognizer(swipe)
         
         guard let im_s = UIImage(named: "settings") else { return }
@@ -189,7 +184,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
     }
     
     @objc private func no_settings() {
-        removeFromSuperview()
+        setup()
     }
     
     @objc private func logout() {
@@ -218,8 +213,8 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
     }
     
     @objc func closeProfile() {
-        t = false
         removeFromSuperview()
+        delegateProfile?.enableTabBarButton()
     }
     
     @objc private func hide() {

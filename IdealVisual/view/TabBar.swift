@@ -16,8 +16,9 @@ class TabBar: UITabBarController, UITabBarControllerDelegate {
     }
     
     private func setup() {
-        self.tabBar.layer.borderColor = Colors.dark_gray.cgColor
-        self.tabBar.layer.borderWidth = 0.2
+        self.tabBar.barTintColor = .white
+        tabBar.clipsToBounds = true
+        
         let main = MainView()
         let image = UIImage(named: "add_tabbar")?.withRenderingMode(.alwaysOriginal)
         main.tabBarItem = UITabBarItem(title: nil, image: image, tag: 0)
