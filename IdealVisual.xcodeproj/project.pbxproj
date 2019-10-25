@@ -27,7 +27,7 @@
 		189322B1234680B9004026FC /* OpenSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 189322A7234680B9004026FC /* OpenSans-LightItalic.ttf */; };
 		189322B2234680B9004026FC /* OpenSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 189322A8234680B9004026FC /* OpenSans-Bold.ttf */; };
 		189322B3234680B9004026FC /* OpenSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 189322A9234680B9004026FC /* OpenSans-Italic.ttf */; };
-		189322B5234687CE004026FC /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* Button.swift */; };
+		189322B5234687CE004026FC /* CustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* CustomElements.swift */; };
 		63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632194B70D0AC636CB2B847F /* PhotoCell.swift */; };
 		63219A4A265F4D025E33856C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219C5F3C3B40275C1AC524 /* MainView.swift */; };
 /* End PBXBuildFile section */
@@ -76,7 +76,7 @@
 		189322A7234680B9004026FC /* OpenSans-LightItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OpenSans-LightItalic.ttf"; path = "../../fonts/Open_Sans/OpenSans-LightItalic.ttf"; sourceTree = "<group>"; };
 		189322A8234680B9004026FC /* OpenSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OpenSans-Bold.ttf"; path = "../../fonts/Open_Sans/OpenSans-Bold.ttf"; sourceTree = "<group>"; };
 		189322A9234680B9004026FC /* OpenSans-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "OpenSans-Italic.ttf"; path = "../../fonts/Open_Sans/OpenSans-Italic.ttf"; sourceTree = "<group>"; };
-		189322B4234687CE004026FC /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
+		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
 		632194B70D0AC636CB2B847F /* PhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCell.swift; sourceTree = "<group>"; };
 		63219C5F3C3B40275C1AC524 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -190,7 +190,7 @@
 				632194B70D0AC636CB2B847F /* PhotoCell.swift */,
 				63219C5F3C3B40275C1AC524 /* MainView.swift */,
 				1893229D23466104004026FC /* ProfileView.swift */,
-				189322B4234687CE004026FC /* Button.swift */,
+				189322B4234687CE004026FC /* CustomElements.swift */,
 				180D6C1D234BCD4700AB52F5 /* TabBar.swift */,
 				188B5FAF2361E47E00EA3701 /* PhotoView.swift */,
 			);
@@ -337,7 +337,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				189322B5234687CE004026FC /* Button.swift in Sources */,
+				189322B5234687CE004026FC /* CustomElements.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
 				188B5FB52361E6CC00EA3701 /* Photo.swift in Sources */,

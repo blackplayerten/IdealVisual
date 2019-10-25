@@ -29,6 +29,12 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         return UICollectionView(frame: self.view.frame, collectionViewLayout: layout)
     }()
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.tabBarController?.tabBar.isHidden = false
+        navigationController?.navigationBar.barStyle = .default
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.tabBarController?.delegate = self
@@ -47,7 +53,6 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     
     private func setup() {
         view.backgroundColor = .white
-        navigationController?.navigationBar.barStyle = .default
         navigationController?.navigationBar.backgroundColor = .white
         navigationController?.navigationBar.isTranslucent = false
 
@@ -99,13 +104,11 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     
     @objc internal func profile() {
         disableTabBarButton()
-        
         guard let pr = profileV else { return }
         view.addSubview(pr)
         pr.translatesAutoresizingMaskIntoConstraints = false
         let currentWindow: UIWindow? = UIApplication.shared.keyWindow
         currentWindow?.addSubview(pr)
-        
         pr.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
         pr.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         pr.layer.cornerRadius = 20
@@ -120,6 +123,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         tabBarItem = UITabBarItem(title: nil, image: block_tabbar, selectedImage: block_tabbar)
         tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
         tabBarController?.tabBar.isUserInteractionEnabled = false
+        content.isUserInteractionEnabled = false
     }
     
     internal func enableTabBarButton() {
@@ -127,6 +131,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
                   tabBarItem = UITabBarItem(title: nil, image: add_tabbar, selectedImage: add_tabbar)
                    tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
         tabBarController?.tabBar.isUserInteractionEnabled = true
+        content.isUserInteractionEnabled = true
     }
 
 

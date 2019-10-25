@@ -48,3 +48,47 @@ class ImageButton: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+class AddButton: UIButton {
+    init(text: String) {
+        super.init(frame: .zero)
+        let button = UIButton(type: .system)
+        self.addSubview(button)
+        button.isUserInteractionEnabled = true
+        button.backgroundColor = .white
+        button.titleLabel?.text = text
+        button.setTitle(button.titleLabel?.text, for: .normal)
+        button.setTitleColor(Colors.dark_gray, for: .normal)
+        button.titleLabel?.textColor = Colors.dark_gray
+        button.titleLabel?.attributedText = NSMutableAttributedString(string: "Добавить дату",
+                                                                             attributes: [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue])
+        button.titleLabel?.font = UIFont(name: "OpenSans-SemiBold", size: 18)
+        button.underlineText()
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class ForEdit: UITextField {
+    init(text: String, width: CGFloat, height: CGFloat) {
+        super.init(frame: .zero)
+        
+        let field = UITextField()
+        self.addSubview(field)
+        field.translatesAutoresizingMaskIntoConstraints = false
+        field.widthAnchor.constraint(equalToConstant: width).isActive = true
+        field.heightAnchor.constraint(equalToConstant: height).isActive = true
+        field.font = UIFont(name: "OpenSans-Regular", size: 18)
+        field.text = text
+        field.textAlignment = .center
+        field.textColor = Colors.dark_gray
+        field.isUserInteractionEnabled = true
+//        field.layer.borderWidth = 0.3
+//        field.layer.borderColor = Colors.dark_gray.cgColor
+        field.allowsEditingTextAttributes = true
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
