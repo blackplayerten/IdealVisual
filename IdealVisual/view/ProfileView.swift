@@ -49,7 +49,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         self.addGestureRecognizer(swipe)
         
         guard let im_s = UIImage(named: "settings") else { return }
-        let settings = ImageButton(image: im_s, side: 35, target: self, action: #selector(set_settings), buttonColor: Colors.orange)
+        let settings = SubstrateButton(image: im_s, side: 35, target: self, action: #selector(set_settings), substrate_color: Colors.orange)
         addSubview(settings)
         settings.translatesAutoresizingMaskIntoConstraints = false
         settings.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 17).isActive = true
@@ -67,7 +67,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         logout_button.titleLabel?.textColor = .white
         logout_button.titleLabel?.attributedText = NSMutableAttributedString(string: "Выйти",
                                                                              attributes: [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue])
-        logout_button.titleLabel?.font = UIFont(name: "OpenSans-SemiBold", size: 18)
+        logout_button.titleLabel?.font = UIFont(name: "Montserrat-Bold", size: 18)
         logout_button.underlineText()
         logout_button.addTarget(self, action: #selector(logout), for: .touchUpInside)
         
@@ -87,7 +87,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         username.translatesAutoresizingMaskIntoConstraints = false
         username.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         username.topAnchor.constraint(equalTo: self.ava.topAnchor, constant: 170).isActive = true
-        username.font = UIFont(name: "OpenSans-Bold", size: 24)
+        username.font = UIFont(name: "Montserrat-Bold", size: 24)
         username.textAlignment = .center
         username.textColor = .white
         username.text = "stub"
@@ -97,7 +97,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         email.translatesAutoresizingMaskIntoConstraints = false
         email.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         email.topAnchor.constraint(equalTo: username.topAnchor, constant: 50).isActive = true
-        email.font = UIFont(name: "OpenSans-Regular", size: 14)
+        email.font = UIFont(name: "PingFang-SC-Regular", size: 14)
         email.textAlignment = .center
         email.textColor = .white
         email.text = "email@email.ru"
@@ -108,7 +108,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         password.translatesAutoresizingMaskIntoConstraints = false
         password.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         password.topAnchor.constraint(equalTo: email.topAnchor, constant: 40).isActive = true
-        password.font = UIFont(name: "OpenSans-Regular", size: 14)
+        password.font = UIFont(name: "PingFang-SC-Regular", size: 14)
         password.textAlignment = .center
         password.textColor = .white
         password.placeholder = "Пароль"
@@ -121,7 +121,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         repeat_password.translatesAutoresizingMaskIntoConstraints = false
         repeat_password.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         repeat_password.topAnchor.constraint(equalTo: password.topAnchor, constant: 40).isActive = true
-        repeat_password.font = UIFont(name: "OpenSans-Regular", size: 14)
+        repeat_password.font = UIFont(name: "PingFang-SC-Regular", size: 14)
         repeat_password.textAlignment = .center
         repeat_password.textColor = .white
         repeat_password.placeholder = "Подтвердите пароль"
@@ -140,7 +140,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         new_height.isActive = true
         
         guard let im_yes = UIImage(named: "yes") else { return }
-        let yes = ImageButton(image: im_yes, side: 35, target: self, action: #selector(save_settings), buttonColor: Colors.orange)
+        let yes = SubstrateButton(image: im_yes, side: 35, target: self, action: #selector(save_settings), substrate_color: Colors.orange)
         addSubview(yes)
         yes.translatesAutoresizingMaskIntoConstraints = false
         yes.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 17).isActive = true
@@ -148,7 +148,7 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         
         logout_button.isHidden = true
         guard let im_no = UIImage(named: "close") else { return }
-        let no = ImageButton(image: im_no, side: 35, target: self, action: #selector(no_settings), buttonColor: Colors.dark_dark_gray)
+        let no = SubstrateButton(image: im_no, side: 35, target: self, action: #selector(no_settings), substrate_color: Colors.dark_dark_gray)
         addSubview(no)
         no.translatesAutoresizingMaskIntoConstraints = false
         no.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 17).isActive = true

@@ -16,32 +16,34 @@ struct Colors {
     static let dark_dark_gray = UIColor(red: 0.23, green: 0.23, blue: 0.23, alpha: 1)
 }
 
-class ImageButton: UIView {
-    init(image: UIImage, side: CGFloat = 35, target: Any, action: Selector, buttonColor: UIColor? = nil) {
+class SubstrateButton: UIView {
+    init(image: UIImage, side: CGFloat = 35, target: Any? = nil, action: Selector? = nil, substrate_color: UIColor? = nil) {
         super.init(frame: .zero)
-        let back = UIButton(type: .system)
-        back.addTarget(target, action: action, for: .touchUpInside)
-        let imagev = UIImageView()
-        imagev.image = image
+        let button = UIButton(type: .system)
+        if let t = target, let a = action {
+            button.addTarget(t, action: a, for: .touchUpInside)
+        }
+        let substrate = UIImageView()
+        substrate.image = image
         self.translatesAutoresizingMaskIntoConstraints = false
         self.widthAnchor.constraint(equalToConstant: side).isActive = true
         self.heightAnchor.constraint(equalToConstant: side).isActive = true
         self.layer.cornerRadius = 10
-        self.backgroundColor = buttonColor
+        self.backgroundColor = substrate_color
         
-        self.addSubview(back)
-        back.translatesAutoresizingMaskIntoConstraints = false
-        back.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor).isActive = true
-        back.centerYAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerYAnchor).isActive = true
-        back.widthAnchor.constraint(equalTo: self.safeAreaLayoutGuide.widthAnchor).isActive = true
-        back.heightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.heightAnchor).isActive = true
+        self.addSubview(button)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor).isActive = true
+        button.centerYAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerYAnchor).isActive = true
+        button.widthAnchor.constraint(equalTo: self.safeAreaLayoutGuide.widthAnchor).isActive = true
+        button.heightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.heightAnchor).isActive = true
         
-        self.addSubview(imagev)
-        imagev.translatesAutoresizingMaskIntoConstraints = false
-        imagev.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor).isActive = true
-        imagev.centerYAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerYAnchor).isActive = true
-        imagev.widthAnchor.constraint(equalToConstant: 0.7 * side).isActive = true
-        imagev.heightAnchor.constraint(equalToConstant: 0.7 * side).isActive = true
+        self.addSubview(substrate)
+        substrate.translatesAutoresizingMaskIntoConstraints = false
+        substrate.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor).isActive = true
+        substrate.centerYAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerYAnchor).isActive = true
+        substrate.widthAnchor.constraint(equalToConstant: 0.7 * side).isActive = true
+        substrate.heightAnchor.constraint(equalToConstant: 0.7 * side).isActive = true
     }
     
     required init?(coder: NSCoder) {
@@ -49,46 +51,54 @@ class ImageButton: UIView {
     }
 }
 
-class AddButton: UIButton {
+class AddComponentsButton: UIButton {
     init(text: String) {
         super.init(frame: .zero)
-        let button = UIButton(type: .system)
-        self.addSubview(button)
-        button.isUserInteractionEnabled = true
-        button.backgroundColor = .white
-        button.titleLabel?.text = text
-        button.setTitle(button.titleLabel?.text, for: .normal)
-        button.setTitleColor(Colors.dark_gray, for: .normal)
-        button.titleLabel?.textColor = Colors.dark_gray
-        button.titleLabel?.attributedText = NSMutableAttributedString(string: "Добавить дату",
-                                                                             attributes: [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue])
-        button.titleLabel?.font = UIFont(name: "OpenSans-SemiBold", size: 18)
-        button.underlineText()
+        isUserInteractionEnabled = true
+        backgroundColor = .white
+        titleLabel?.text = text
+        setTitle(self.titleLabel?.text, for: .normal)
+        setTitleColor(Colors.dark_gray, for: .normal)
+        titleLabel?.textColor = Colors.dark_gray
+        titleLabel?.attributedText = NSMutableAttributedString(string: "",
+                                                               attributes: [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue])
+        titleLabel?.font = UIFont(name: "Montserrat-Bold", size: 14)
+        underlineText()
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
 
-class ForEdit: UITextField {
-    init(text: String, width: CGFloat, height: CGFloat) {
-        super.init(frame: .zero)
-        
-        let field = UITextField()
-        self.addSubview(field)
-        field.translatesAutoresizingMaskIntoConstraints = false
-        field.widthAnchor.constraint(equalToConstant: width).isActive = true
-        field.heightAnchor.constraint(equalToConstant: height).isActive = true
-        field.font = UIFont(name: "OpenSans-Regular", size: 18)
-        field.text = text
-        field.textAlignment = .center
-        field.textColor = Colors.dark_gray
-        field.isUserInteractionEnabled = true
-//        field.layer.borderWidth = 0.3
-//        field.layer.borderColor = Colors.dark_gray.cgColor
-        field.allowsEditingTextAttributes = true
+class ContentField: UITextView {
+    init(text: String? = nil) {
+        super.init(frame: .zero, textContainer: nil)
+        isScrollEnabled = false
+        textContainer.lineBreakMode = NSLineBreakMode.byWordWrapping
+        font = UIFont(name: "PingFang-SC-Regular", size: 14)
+        self.text = text
+        textAlignment = .left
+        textColor = Colors.dark_gray
+        isUserInteractionEnabled = false
+        allowsEditingTextAttributes = true
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+class Line: UIView {
+    init() {
+        super.init(frame: .zero)
+        let line = CGRect(x: 0, y: 0, width: 300, height: 2.0)
+        let v = UIView(frame: line)
+        v.backgroundColor = Colors.light_gray
+        self.addSubview(v)
+        v.heightAnchor.constraint(equalToConstant: 1).isActive = true
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+

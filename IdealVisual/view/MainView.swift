@@ -37,6 +37,11 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // FIXME: stub
+        guard let img = UIImage(named: "test") else { return }
+        photos.append(Photo(photo: img))
+        
         self.tabBarController?.delegate = self
 
         self.content.dragDelegate = self
@@ -58,7 +63,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
 
         let titleV = UILabel()
         titleV.text = "Лента"
-        titleV.font = UIFont(name: "OpenSans-SemiBold", size: 20)
+        titleV.font = UIFont(name: "Montserrat-Bold", size: 20)
         titleV.adjustsFontSizeToFitWidth = true
         navigationItem.titleView = titleV
 
@@ -73,7 +78,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
         profileV.addTarget(self, action: #selector(profile), for: .touchUpInside)
         
         guard let edit_pic = UIImage(named: "edit_black") else { return }
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: ImageButton(image: edit_pic,
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: edit_pic,
                                                                                    side: 35,
                                                                                    target: self,
                                                                                    action: #selector(edit)
@@ -87,7 +92,7 @@ class MainView: UIViewController, UICollectionViewDelegate, UICollectionViewData
             helpText.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
             helpText.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50).isActive = true
             helpText.widthAnchor.constraint(equalToConstant: 300).isActive = true
-            helpText.font = UIFont(name: "OpenSans-Regular", size: 18)
+            helpText.font = UIFont(name: "PingFang-SC-Regular", size: 18)
             helpText.numberOfLines = 0
             helpText.textAlignment = .center
             helpText.textColor = Colors.dark_gray
