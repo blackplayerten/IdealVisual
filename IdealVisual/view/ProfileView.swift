@@ -17,18 +17,23 @@ protocol ProfileDelegate: class {
     func enableTabBarButton()
 }
 
-class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ProfileView: UIView {
     private weak var delegateProfile: ProfileDelegate?
+    private var testAva = UIImagePickerController()
     
     private var height = NSLayoutConstraint()
+    
+    
     private let logout_button = UIButton()
+    
     private let ava = UIImageView()
-    private var testAva = UIImagePickerController()
+    
+
+    
     private let username = UITextField()
     private let email = UITextField()
     private let password = UITextField()
     private let repeat_password = UITextField()
-    
     private let hide_keyboard = UITapGestureRecognizer(target: self, action: #selector(hide))
     
     init(profileDelegate: ProfileDelegate) {
@@ -40,120 +45,67 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setup() {
-        height = self.heightAnchor.constraint(equalToConstant: 360)
-        height.isActive = true
+    private func setupElements() {
+        testAva.delegate = self
+        testAva.allowsEditing = true
         let swipe = UISwipeGestureRecognizer()
         swipe.direction = .up
         swipe.addTarget(self, action: #selector(closeProfile))
         self.addGestureRecognizer(swipe)
         
-        guard let im_s = UIImage(named: "settings") else { return }
-        let settings = SubstrateButton(image: im_s, side: 35, target: self, action: #selector(set_settings), substrate_color: Colors.orange)
-        addSubview(settings)
-        settings.translatesAutoresizingMaskIntoConstraints = false
-        settings.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 17).isActive = true
-        settings.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 17).isActive = true
+        setNavButtons()
+        setAva()
         
-        addSubview(logout_button)
-        logout_button.translatesAutoresizingMaskIntoConstraints = false
-        logout_button.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 17).isActive = true
-        logout_button.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -17).isActive = true
-        logout_button.isUserInteractionEnabled = true
-        logout_button.backgroundColor = Colors.dark_gray
-        logout_button.titleLabel?.text = "Выйти"
-        logout_button.setTitle(logout_button.titleLabel?.text, for: .normal)
-        logout_button.setTitleColor(.white, for: .normal)
-        logout_button.titleLabel?.textColor = .white
-        logout_button.titleLabel?.attributedText = NSMutableAttributedString(string: "Выйти",
-                                                                             attributes: [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue])
-        logout_button.titleLabel?.font = UIFont(name: "Montserrat-Bold", size: 18)
-        logout_button.underlineText()
-        logout_button.addTarget(self, action: #selector(logout), for: .touchUpInside)
+        let k = ProfileTable(view: self)
+        addSubview(k)
+        k.translatesAutoresizingMaskIntoConstraints = false
+        k.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
+        k.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -20).isActive = true
+        k.topAnchor.constraint(equalTo: ava.bottomAnchor, constant: 27).isActive = true
+        k.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -30).isActive = true
+        k.isScrollEnabled = false
+        k.backgroundColor = Colors.dark_gray
         
-        testAva.delegate = self
-        testAva.allowsEditing = true
         
-        addSubview(ava)
-        ava.translatesAutoresizingMaskIntoConstraints = false
-        ava.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        ava.topAnchor.constraint(equalTo: settings.topAnchor, constant: 60).isActive = true
-        ava.widthAnchor.constraint(equalToConstant: 150).isActive = true
-        ava.heightAnchor.constraint(equalToConstant: 150).isActive = true
-        ava.image = UIImage(named: "test")?.withRenderingMode(.alwaysOriginal)
-        ava.isUserInteractionEnabled = false
         
-        addSubview(username)
-        username.translatesAutoresizingMaskIntoConstraints = false
-        username.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        username.topAnchor.constraint(equalTo: self.ava.topAnchor, constant: 170).isActive = true
-        username.font = UIFont(name: "Montserrat-Bold", size: 24)
-        username.textAlignment = .center
-        username.textColor = .white
-        username.text = "stub"
-        username.isUserInteractionEnabled = false
-        
-        addSubview(email)
-        email.translatesAutoresizingMaskIntoConstraints = false
-        email.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        email.topAnchor.constraint(equalTo: username.topAnchor, constant: 50).isActive = true
-        email.font = UIFont(name: "PingFang-SC-Regular", size: 14)
-        email.textAlignment = .center
-        email.textColor = .white
-        email.text = "email@email.ru"
-        email.isUserInteractionEnabled = false
-        
-        password.isHidden = true
-        addSubview(password)
-        password.translatesAutoresizingMaskIntoConstraints = false
-        password.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        password.topAnchor.constraint(equalTo: email.topAnchor, constant: 40).isActive = true
-        password.font = UIFont(name: "PingFang-SC-Regular", size: 14)
-        password.textAlignment = .center
-        password.textColor = .white
-        password.placeholder = "Пароль"
-        password.attributedPlaceholder = NSAttributedString(string: password.placeholder!,
-                                                                attributes: [NSAttributedString.Key.foregroundColor: UIColor.white]
-        )
-        
-        repeat_password.isHidden = true
-        addSubview(repeat_password)
-        repeat_password.translatesAutoresizingMaskIntoConstraints = false
-        repeat_password.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        repeat_password.topAnchor.constraint(equalTo: password.topAnchor, constant: 40).isActive = true
-        repeat_password.font = UIFont(name: "PingFang-SC-Regular", size: 14)
-        repeat_password.textAlignment = .center
-        repeat_password.textColor = .white
-        repeat_password.placeholder = "Подтвердите пароль"
-        repeat_password.attributedPlaceholder = NSAttributedString(string: repeat_password.placeholder!,
-                                                                       attributes: [NSAttributedString.Key.foregroundColor: UIColor.white]
-        )
+//        password.isHidden = true
+//        addSubview(password)
+//        password.translatesAutoresizingMaskIntoConstraints = false
+//        password.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+//        password.topAnchor.constraint(equalTo: email.topAnchor, constant: 40).isActive = true
+//        password.font = UIFont(name: "PingFang-SC-Regular", size: 14)
+//        password.textAlignment = .center
+//        password.textColor = .white
+//        password.placeholder = "Пароль"
+//        password.attributedPlaceholder = NSAttributedString(string: password.placeholder!,
+//                                                                attributes: [NSAttributedString.Key.foregroundColor: UIColor.white]
+//        )
+//
+//        repeat_password.isHidden = true
+//        addSubview(repeat_password)
+//        repeat_password.translatesAutoresizingMaskIntoConstraints = false
+//        repeat_password.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+//        repeat_password.topAnchor.constraint(equalTo: password.topAnchor, constant: 40).isActive = true
+//        repeat_password.font = UIFont(name: "PingFang-SC-Regular", size: 14)
+//        repeat_password.textAlignment = .center
+//        repeat_password.textColor = .white
+//        repeat_password.placeholder = "Подтвердите пароль"
+//        repeat_password.attributedPlaceholder = NSAttributedString(string: repeat_password.placeholder!,
+//                                                                       attributes: [NSAttributedString.Key.foregroundColor: UIColor.white]
+//        )
     }
     
     @objc private func set_settings() {
         self.isUserInteractionEnabled = true
         self.addGestureRecognizer(hide_keyboard)
         
+        setNavEditButtons()
         
         height.isActive = false
         let new_height = self.heightAnchor.constraint(equalToConstant: 440)
         new_height.isActive = true
         
-        guard let im_yes = UIImage(named: "yes") else { return }
-        let yes = SubstrateButton(image: im_yes, side: 35, target: self, action: #selector(save_settings), substrate_color: Colors.orange)
-        addSubview(yes)
-        yes.translatesAutoresizingMaskIntoConstraints = false
-        yes.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 17).isActive = true
-        yes.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 17).isActive = true
-        
-        logout_button.isHidden = true
-        guard let im_no = UIImage(named: "close") else { return }
-        let no = SubstrateButton(image: im_no, side: 35, target: self, action: #selector(no_settings), substrate_color: Colors.dark_dark_gray)
-        addSubview(no)
-        no.translatesAutoresizingMaskIntoConstraints = false
-        no.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 17).isActive = true
-        no.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -17).isActive = true
-        
+
         let tap = UITapGestureRecognizer()
         ava.isUserInteractionEnabled = true
         self.ava.addGestureRecognizer(tap)
@@ -168,15 +120,13 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         repeat_password.allowsEditingTextAttributes = true
     }
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-
-            //FIXME: fix crop image
-
-            ava.image = selected
-            //TODO: save in photo library if camera
-        }
-        delegateProfile?.dismissAlert()
+    @objc func closeProfile() {
+        removeFromSuperview()
+        delegateProfile?.enableTabBarButton()
+    }
+    
+    @objc private func hide() {
+        self.endEditing(true)
     }
     
     @objc private func save_settings() {
@@ -189,6 +139,117 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
     
     @objc private func logout() {
         
+    }
+    
+}
+
+extension ProfileView {
+    func setup() {
+        setupView()
+    }
+    
+    private func setupView() {
+        self.translatesAutoresizingMaskIntoConstraints = false
+        let currentWindow: UIWindow? = UIApplication.shared.keyWindow
+        currentWindow?.addSubview(self)
+        self.widthAnchor.constraint(equalTo: (superview?.safeAreaLayoutGuide.widthAnchor)!).isActive = true
+        self.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        self.layer.cornerRadius = 20
+        self.topAnchor.constraint(equalTo: (superview?.topAnchor)!).isActive = true
+        self.leftAnchor.constraint(equalTo: (superview?.safeAreaLayoutGuide.leftAnchor)!).isActive = true
+        self.backgroundColor = Colors.dark_gray
+        self.heightAnchor.constraint(greaterThanOrEqualToConstant: 460).isActive = true
+        setupElements()
+    }
+}
+
+extension ProfileView {
+    private func setNavButtons() {
+        guard let im_s = UIImage(named: "settings") else { return }
+        let settings = SubstrateButton(image: im_s, side: 33, target: self, action: #selector(set_settings), substrate_color: Colors.orange)
+        addSubview(settings)
+        settings.translatesAutoresizingMaskIntoConstraints = false
+        settings.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
+        settings.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
+
+        guard let im_logout = UIImage(named: "logout") else { return }
+        let logout_b = SubstrateButton(image: im_logout, side: 33, target: self, action: #selector(logout), substrate_color: Colors.dark_dark_gray)
+        addSubview(logout_b)
+        logout_b.translatesAutoresizingMaskIntoConstraints = false
+        logout_b.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
+        logout_b.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -20).isActive = true
+    }
+
+    @objc private func setNavEditButtons() {
+        guard let im_yes = UIImage(named: "yes") else { return }
+        let yes = SubstrateButton(image: im_yes, side: 35, target: self, action: #selector(save_settings), substrate_color: Colors.orange)
+        addSubview(yes)
+        yes.translatesAutoresizingMaskIntoConstraints = false
+        yes.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
+        yes.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
+
+        guard let im_no = UIImage(named: "close") else { return }
+        let no = SubstrateButton(image: im_no, side: 35, target: self, action: #selector(no_settings), substrate_color: Colors.dark_dark_gray)
+        addSubview(no)
+        no.translatesAutoresizingMaskIntoConstraints = false
+        no.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
+        no.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -20).isActive = true
+    }
+}
+
+extension ProfileView {
+    private func setAva() {
+        addSubview(ava)
+        ava.translatesAutoresizingMaskIntoConstraints = false
+        ava.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        ava.topAnchor.constraint(equalTo: self.topAnchor, constant: 120).isActive = true
+        ava.widthAnchor.constraint(equalToConstant: 150).isActive = true
+        ava.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        ava.image = UIImage(named: "default_profile")?.withRenderingMode(.alwaysOriginal)
+        ava.isUserInteractionEnabled = false
+    }
+}
+
+//extension ProfileView {
+//    private func setUsername() {
+//        addSubview(username)
+//        username.translatesAutoresizingMaskIntoConstraints = false
+//        username.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+//        username.topAnchor.constraint(equalTo: self.ava.bottomAnchor, constant: 70).isActive = true
+//        username.font = UIFont(name: "Montserrat-Bold", size: 24)
+//        username.textAlignment = .center
+//        username.textColor = .white
+//        username.text = "stub"
+//        username.isUserInteractionEnabled = false
+//    }
+//}
+
+//extension ProfileView {
+//    private func setEmail() {
+//        addSubview(email)
+//        email.translatesAutoresizingMaskIntoConstraints = false
+//        email.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+//        email.topAnchor.constraint(equalTo: username.topAnchor, constant: 50).isActive = true
+//        email.font = UIFont(name: "PingFang-SC-Regular", size: 14)
+//        email.textAlignment = .center
+//        email.textColor = .white
+//        email.text = "email@email.ru"
+//        email.isUserInteractionEnabled = false
+//    }
+//}
+
+
+
+extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+
+            //FIXME: fix crop image
+
+            ava.image = selected
+            //TODO: save in photo library if camera
+        }
+        delegateProfile?.dismissAlert()
     }
     
     @objc private func chooseAva() {
@@ -211,26 +272,4 @@ class ProfileView: UIView, UIImagePickerControllerDelegate, UINavigationControll
         alert.addAction(UIAlertAction(title: "Отменить", style: UIAlertAction.Style.cancel, handler: nil))
         delegateProfile?.showAlert(alert: alert)
     }
-    
-    @objc func closeProfile() {
-        removeFromSuperview()
-        delegateProfile?.enableTabBarButton()
-    }
-    
-    @objc private func hide() {
-        self.endEditing(true)
-    }
-}
-
-extension UIButton {
-  func underlineText() {
-    guard let title = title(for: .normal) else { return }
-    let titleString = NSMutableAttributedString(string: title)
-    titleString.addAttribute(
-      .underlineStyle,
-      value: NSUnderlineStyle.single.rawValue,
-      range: NSRange(location: 0, length: title.count)
-    )
-    setAttributedTitle(titleString, for: .normal)
-  }
 }

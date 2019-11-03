@@ -70,6 +70,19 @@ class AddComponentsButton: UIButton {
     }
 }
 
+extension UIButton {
+  func underlineText() {
+    guard let title = title(for: .normal) else { return }
+    let titleString = NSMutableAttributedString(string: title)
+    titleString.addAttribute(
+      .underlineStyle,
+      value: NSUnderlineStyle.single.rawValue,
+      range: NSRange(location: 0, length: title.count)
+    )
+    setAttributedTitle(titleString, for: .normal)
+  }
+}
+
 class ContentField: UITextView {
     init(text: String? = nil) {
         super.init(frame: .zero, textContainer: nil)
@@ -87,18 +100,93 @@ class ContentField: UITextView {
     }
 }
 
-class Line: UIView {
-    init() {
-        super.init(frame: .zero)
-        let line = CGRect(x: 0, y: 0, width: 300, height: 2.0)
-        let v = UIView(frame: line)
-        v.backgroundColor = Colors.light_gray
-        self.addSubview(v)
-        v.heightAnchor.constraint(equalToConstant: 1).isActive = true
+class ProfileTable: UITableView, UITableViewDelegate, UITableViewDataSource {
+    let identifyertableuser: String = "UserTableCell"
+    let view: UIView
+    var data = [User]()
+    
+    init(view: UIView) {
+        self.view = view
+        data = user
+        super.init(frame: .zero, style: .plain)
+        self.delegate = self
+        self.dataSource = self
+        self.register(UserTableCell.self, forCellReuseIdentifier: identifyertableuser)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        data.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: identifyertableuser, for: indexPath)
+        if let mycell = cell as? UserTableCell {
+            mycell.set()
+            mycell.fill(with: data[indexPath.row])
+        }
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let cell = tableView.dequeueReusableCell(withIdentifier: identifyertableuser, for: indexPath) as! UserTableCell
+        cell.editField()
+    }
 }
 
+class UserTableCell: UITableViewCell {
+    var usernameField = UITextField()
+    var emailField = UILabel()
+    var passwordField = UILabel()
+    
+    func fill(with model: User) {
+        fillCells(with: model)
+    }
+    
+    private func fillCells(with model: User) {
+        usernameField.text = model.username
+        emailField.text = model.email
+        passwordField.text = model.password
+    }
+    
+    func set() {
+        setup()
+    }
+    
+    private func setup() {
+        self.backgroundColor = Colors.dark_gray
+        self.isUserInteractionEnabled = true
+        
+        addSubview(usernameField)
+        usernameField.isUserInteractionEnabled = false
+        usernameField.translatesAutoresizingMaskIntoConstraints = false
+        usernameField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        usernameField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        
+        addSubview(emailField)
+        emailField.isUserInteractionEnabled = false
+        emailField.translatesAutoresizingMaskIntoConstraints = false
+        emailField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        emailField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        
+        addSubview(passwordField)
+        passwordField.isUserInteractionEnabled = false
+        passwordField.translatesAutoresizingMaskIntoConstraints = false
+        passwordField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        passwordField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+    }
+    
+    func editField() {
+        edit()
+    }
+    
+    private func edit() {
+        self.backgroundColor = Colors.orange
+        usernameField.isUserInteractionEnabled = true
+        emailField.isUserInteractionEnabled = true
+        passwordField.isUserInteractionEnabled = true
+    }
+}
