@@ -10,11 +10,23 @@ import Foundation
 import UIKit
 
 struct Colors {
-    static let orange = UIColor(red: 0.85, green: 0.41, blue: 0.28, alpha: 1)
-    static let light_gray = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1)
-    static let dark_gray = UIColor(red: 0.32, green: 0.32, blue: 0.31, alpha: 1)
+    static let blue = UIColor(red: 0.008, green: 0.333, blue: 0.631, alpha: 1)
+    static let light_blue = UIColor(red: 0.094, green: 0.565, blue: 1, alpha: 1)
+    static let yellow = UIColor(red: 0.98, green: 0.678, blue: 0.078, alpha: 1)
+    static let light_gray = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
+    static let dark_gray = UIColor(red: 0.741, green: 0.741, blue: 0.741, alpha: 1)
     static let dark_dark_gray = UIColor(red: 0.23, green: 0.23, blue: 0.23, alpha: 1)
 }
+
+struct Auth {
+    let username: String? = "Логин"
+    let password: String? = "Пароль"
+    let email: String? = "Эл. почта"
+}
+
+let auth = [
+    Auth()
+]
 
 class SubstrateButton: UIView {
     init(image: UIImage, side: CGFloat = 35, target: Any? = nil, action: Selector? = nil, substrate_color: UIColor? = nil) {
@@ -100,93 +112,139 @@ class ContentField: UITextView {
     }
 }
 
-class ProfileTable: UITableView, UITableViewDelegate, UITableViewDataSource {
-    let identifyertableuser: String = "UserTableCell"
-    let view: UIView
-    var data = [User]()
-    
-    init(view: UIView) {
-        self.view = view
-        data = user
-        super.init(frame: .zero, style: .plain)
-        self.delegate = self
-        self.dataSource = self
-        self.register(UserTableCell.self, forCellReuseIdentifier: identifyertableuser)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        data.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: identifyertableuser, for: indexPath)
-        if let mycell = cell as? UserTableCell {
-            mycell.set()
-            mycell.fill(with: data[indexPath.row])
-        }
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cell = tableView.dequeueReusableCell(withIdentifier: identifyertableuser, for: indexPath) as! UserTableCell
-        cell.editField()
-    }
-}
+// attempt to make table layout
 
-class UserTableCell: UITableViewCell {
-    var usernameField = UITextField()
-    var emailField = UILabel()
-    var passwordField = UILabel()
-    
-    func fill(with model: User) {
-        fillCells(with: model)
-    }
-    
-    private func fillCells(with model: User) {
-        usernameField.text = model.username
-        emailField.text = model.email
-        passwordField.text = model.password
-    }
-    
-    func set() {
-        setup()
-    }
-    
-    private func setup() {
-        self.backgroundColor = Colors.dark_gray
-        self.isUserInteractionEnabled = true
-        
-        addSubview(usernameField)
-        usernameField.isUserInteractionEnabled = false
-        usernameField.translatesAutoresizingMaskIntoConstraints = false
-        usernameField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        usernameField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        
-        addSubview(emailField)
-        emailField.isUserInteractionEnabled = false
-        emailField.translatesAutoresizingMaskIntoConstraints = false
-        emailField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        emailField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        
-        addSubview(passwordField)
-        passwordField.isUserInteractionEnabled = false
-        passwordField.translatesAutoresizingMaskIntoConstraints = false
-        passwordField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        passwordField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-    }
-    
-    func editField() {
-        edit()
-    }
-    
-    private func edit() {
-        self.backgroundColor = Colors.orange
-        usernameField.isUserInteractionEnabled = true
-        emailField.isUserInteractionEnabled = true
-        passwordField.isUserInteractionEnabled = true
-    }
-}
+//class UserTable: UITableView, UITableViewDelegate, UITableViewDataSource {
+//    let user_cell: String = "UserTableCell"
+//    let detail_cell: String = "DetailTableCell"
+//    let auth_cell: String = "AuthTableCell"
+//    let view: UIView
+//    var dataUser = [User]()
+//    var dataAuth = [Auth]()
+//
+//    init(view: UIView) {
+//        self.view = view
+//        dataUser = user
+//        dataAuth = auth
+//        super.init(frame: .zero, style: .plain)
+//        self.delegate = self
+//        self.dataSource = self
+//        self.separatorStyle = .none
+//        self.register(UserTableCell.self, forCellReuseIdentifier: user_cell)
+//        self.register(AuthTableCell.self, forCellReuseIdentifier: auth_cell)
+//    }
+//
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+//
+//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        dataUser.count
+//    }
+//
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let cell = tableView.dequeueReusableCell(withIdentifier: user_cell, for: indexPath)
+//        if let user_cel = cell as? UserTableCell {
+//            user_cel.set()
+//            user_cel.fill(with: dataUser[indexPath.row])
+//        }
+//        if let auth_cel = cell as? AuthTableCell {
+//            auth_cel.set()
+//            auth_cel.fill(with: dataAuth[indexPath.row])
+//        }
+//        return cell
+//    }
+//
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        let cell = tableView.dequeueReusableCell(withIdentifier: user_cell, for: indexPath) as! UserTableCell
+//        cell.editField()
+//    }
+//}
+//
+//class UserTableCell: UITableViewCell {
+//    var usernameField = UITextField()
+//    var emailField = UILabel()
+//    var passwordField = UILabel()
+//
+//    func fill(with model: User) {
+//        fillCells(with: model)
+//    }
+//
+//    private func fillCells(with model: User) {
+//        usernameField.text = model.username
+//        emailField.text = model.email
+//        passwordField.text = model.password
+//    }
+//
+//    func set() {
+//        setup()
+//    }
+//
+//    private func setup() {
+//        self.backgroundColor = .white
+//        self.isUserInteractionEnabled = true
+//        self.selectionStyle = .none
+//
+//        addSubview(usernameField)
+//        usernameField.isUserInteractionEnabled = false
+//        usernameField.translatesAutoresizingMaskIntoConstraints = false
+//        usernameField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+//        usernameField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+//
+//        addSubview(emailField)
+//        emailField.isUserInteractionEnabled = false
+//        emailField.translatesAutoresizingMaskIntoConstraints = false
+//        emailField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+//        emailField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+//
+//        addSubview(passwordField)
+//        passwordField.isUserInteractionEnabled = false
+//        passwordField.translatesAutoresizingMaskIntoConstraints = false
+//        passwordField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+//        passwordField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+//    }
+//
+//    func editField() {
+//        edit()
+//    }
+//
+//    private func edit() {
+//        self.backgroundColor = Colors.blue
+//        usernameField.isUserInteractionEnabled = true
+//        emailField.isUserInteractionEnabled = true
+//        passwordField.isUserInteractionEnabled = true
+//    }
+//}
+//
+//class AuthTableCell: UITableViewCell {
+//    var usr = UITextField()
+//
+//
+//    func fill(with model: Auth) {
+//        fillCells(with: model)
+//    }
+//
+//    private func fillCells(with model: Auth) {
+//        usr.text = model.username
+//
+//    }
+//
+//    func set() { setup() }
+//
+//    private func setup() {
+//        self.backgroundColor = .white
+//        self.isUserInteractionEnabled = true
+//
+//        addSubview(usr)
+//        usr.translatesAutoresizingMaskIntoConstraints = false
+//        usr.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+//        usr.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+//        checkMaxLength(textField: usr, maxLength: 30)
+//    }
+//
+//    func checkMaxLength(textField: UITextField!, maxLength: Int) {
+//        if (textField.text!.count > maxLength) {
+//            textField.deleteBackward()
+//        }
+//    }
+//}

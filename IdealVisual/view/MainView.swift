@@ -16,8 +16,9 @@ class MainView: UIViewController {
     private let photo = UIButton()
     private var photos = [Photo]()
     private var profileV: ProfileView?
+    private var editMode: Bool = false
     
-     lazy fileprivate var content: UICollectionView = {
+    lazy fileprivate var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
         let sizecell = CGSize(width: cellSide, height: cellSide)
         let layout = UICollectionViewFlowLayout()
@@ -40,28 +41,31 @@ class MainView: UIViewController {
         view.backgroundColor = .white
         
         // FIXME: stub
-        guard let img = UIImage(named: "test") else { return }
-        photos.append(Photo(photo: img))
-        guard let img2 = UIImage(named: "test") else { return }
-        photos.append(Photo(photo: img2))
-        
+        for i in 1...11 {
+            let strName = String(i)
+            let mypath = "test/" + strName
+            guard let img = UIImage(named: mypath) else { return }
+            photos.append(Photo(photo: img))
+        }
         
         self.tabBarController?.delegate = self
         choose.delegate = self
         choose.sourceType = .photoLibrary
         choose.allowsEditing = true
         profileV = ProfileView(profileDelegate: self)
+        setNavTitle()
         setNavItems()
-        
     }
     
-    private func setNavItems() {
+    private func setNavTitle() {
         let titleV = UILabel()
         titleV.text = "Лента"
         titleV.font = UIFont(name: "Montserrat-Bold", size: 20)
         titleV.adjustsFontSizeToFitWidth = true
         navigationItem.titleView = titleV
-
+    }
+    
+    private func setNavItems() {
         let profileV = UIButton()
         profileV.translatesAutoresizingMaskIntoConstraints = false
         profileV.clipsToBounds = true
@@ -73,14 +77,13 @@ class MainView: UIViewController {
         profileV.addTarget(self, action: #selector(profile), for: .touchUpInside)
         
         if photos.isEmpty == false {
-            guard let edit_pic = UIImage(named: "edit_black") else { return }
+            guard let edit_pic = UIImage(named: "edit_gray") else { return }
             navigationItem.leftBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: edit_pic,
                                                                                        side: 35,
                                                                                        target: self,
                                                                                        action: #selector(edit)
             ))
         } else { navigationItem.leftBarButtonItem = nil }
-        
         checkPhotos()
         initContent()
     }
@@ -93,7 +96,7 @@ class MainView: UIViewController {
                                                                                    action: #selector(no)
         ))
     
-        guard let yes_pic = UIImage(named: "yes_gray") else { return }
+        guard let yes_pic = UIImage(named: "yes_yellow") else { return }
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: yes_pic,
                                                                                    side: 33,
                                                                                    target: self,
@@ -101,45 +104,6 @@ class MainView: UIViewController {
         ))
     }
     
-    
-    
-//    private func canClick() {
-//        let Indexcells = content.indexPathsForVisibleItems
-//        for Indexcell in Indexcells {
-//            let cell = content.cellForItem(at: Indexcell)
-//            cell?.isUserInteractionEnabled = true
-//        }
-//    }
-//
-//    private func cantClick() {
-//        let Indexcells = content.indexPathsForVisibleItems
-//        for Indexcell in Indexcells {
-//            let cell = content.cellForItem(at: Indexcell)
-//            cell?.isUserInteractionEnabled = false
-//        }
-//    }
-    
-    
-    @objc private func edit() {
-        setNavEditItems()
-        content.allowsMultipleSelection = true
-    }
-    
-    @objc private func no() {
-        setNavItems()
-    }
-    
-    @objc private func save() {
-        if let selectedCells = content.indexPathsForSelectedItems {
-            let items = selectedCells.map{ $0.item }.sorted().reversed()
-            for item in items {
-                photos.remove(at: item)
-            }
-            content.deleteItems(at: selectedCells)
-        }
-        setNavItems()
-    }
-
     private func initContent() {
         content.translatesAutoresizingMaskIntoConstraints = false
         content.delegate = self
@@ -159,27 +123,59 @@ class MainView: UIViewController {
 
 extension MainView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let detailPhoto = PhotoView()
-        detailPhoto.publication = photos[indexPath.item]
-        self.navigationController?.pushViewController(detailPhoto, animated: true)
+        if editMode == true {
+            let cell = collectionView.cellForItem(at: indexPath)
+            if let selectCell = cell as? PhotoCell { selectCell.selectedImage.isHidden = false }
+        } else {
+            let detailPhoto = PhotoView()
+            detailPhoto.publication = photos[indexPath.item]
+            self.navigationController?.pushViewController(detailPhoto, animated: true)
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        if editMode == true {
+            let cell = collectionView.cellForItem(at: indexPath)
+            if let selectCell = cell as? PhotoCell { selectCell.selectedImage.isHidden = true }
+        }
+    }
+}
+
+extension MainView {
+    @objc private func edit() {
+        editMode = true
+        setNavEditItems()
+        initContent()
+        content.allowsMultipleSelection = true
+        content.dragInteractionEnabled = false
+    }
+    
+    @objc private func no() {
+        setNavItems()
+        editMode = false
+    }
+    
+    @objc private func save() {
+        if editMode == true {
+            if let selectedCells = content.indexPathsForSelectedItems {
+                let items = selectedCells.map{ $0.item }.sorted().reversed()
+                for item in items { photos.remove(at: item) }
+                content.deleteItems(at: selectedCells)
+            }
+            setNavItems()
+        }
     }
 }
 
 extension MainView: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-            return photos.count
-        }
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int { return photos.count }
 
-     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! PhotoCell
         cell.backgroundColor = .gray
         cell.picture.image = photos[indexPath.item].photo
         cell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1, height: view.bounds.width / 3 - 1)
         return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        collectionView.deleteItems(at: [indexPath])
     }
     
     private func checkPhotos() {
@@ -248,13 +244,9 @@ extension MainView: UICollectionViewDropDelegate {
 }
 
 extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    internal func showAlert(alert: UIAlertController) {
-        present(alert, animated: true)
-    }
+    internal func showAlert(alert: UIAlertController) { present(alert, animated: true) }
     
-    private func openGallery() {
-        present(choose, animated: true, completion: nil)
-    }
+    private func openGallery() { present(choose, animated: true, completion: nil) }
     
    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
@@ -267,13 +259,9 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
         dismissAlert()
     }
     
-    func dismissAlert() {
-        dismiss(animated: true, completion: nil)
-    }
+    func dismissAlert() { dismiss(animated: true, completion: nil) }
     
-    func chooseAvatar(picker: UIImagePickerController) {
-        present(picker, animated: true, completion: nil)
-    }
+    func chooseAvatar(picker: UIImagePickerController) { present(picker, animated: true, completion: nil) }
     
     @objc private func choose_photo() {
         let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
@@ -285,9 +273,7 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
 
 extension MainView: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-        if self.tabBarController?.selectedIndex == 0 {
-            self.choose_photo()
-        }
+        if self.tabBarController?.selectedIndex == 0 { self.choose_photo() }
     }
     
     private func disableTabBarButton() {
@@ -298,23 +284,27 @@ extension MainView: UITabBarControllerDelegate {
         content.isUserInteractionEnabled = false
     }
     
-    internal func enableTabBarButton() {
-        orangeTabBarButton()
-    }
+    internal func enableTabBarButton() { orangeTabBarButton() }
     
     private func orangeTabBarButton() {
         guard let add_tabbar = UIImage(named: "add_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
-                  tabBarItem = UITabBarItem(title: nil, image: add_tabbar, selectedImage: add_tabbar)
-                   tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
+        tabBarItem = UITabBarItem(title: nil, image: add_tabbar, selectedImage: add_tabbar)
+        tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
         tabBarController?.tabBar.isUserInteractionEnabled = true
         content.isUserInteractionEnabled = true
     }
 }
 
 extension MainView: ProfileDelegate {
-    @objc internal func profile() {
-        show_profile()
+    internal func logOut() { auth() }
+    
+    private func auth() {
+        let authVC = SignIn()
+//        authVC.modalPresentationStyle = .fullScreen
+        present(authVC, animated: true, completion: nil)
     }
+    
+    @objc internal func profile() { show_profile() }
     
     @objc private func show_profile() {
         disableTabBarButton()

@@ -15,6 +15,7 @@ protocol ProfileDelegate: class {
     func showAlert(alert: UIAlertController)
     func dismissAlert()
     func enableTabBarButton()
+    func logOut()
 }
 
 class ProfileView: UIView {
@@ -56,15 +57,15 @@ class ProfileView: UIView {
         setNavButtons()
         setAva()
         
-        let k = ProfileTable(view: self)
-        addSubview(k)
-        k.translatesAutoresizingMaskIntoConstraints = false
-        k.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
-        k.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -20).isActive = true
-        k.topAnchor.constraint(equalTo: ava.bottomAnchor, constant: 27).isActive = true
-        k.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -30).isActive = true
-        k.isScrollEnabled = false
-        k.backgroundColor = Colors.dark_gray
+//        let k = UserTable(view: self)
+//        addSubview(k)
+//        k.translatesAutoresizingMaskIntoConstraints = false
+//        k.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
+//        k.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -20).isActive = true
+//        k.topAnchor.constraint(equalTo: ava.bottomAnchor, constant: 27).isActive = true
+//        k.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -30).isActive = true
+//        k.isScrollEnabled = false
+//        k.backgroundColor = .white
         
         
         
@@ -138,9 +139,8 @@ class ProfileView: UIView {
     }
     
     @objc private func logout() {
-        
+        delegateProfile?.logOut()
     }
-    
 }
 
 extension ProfileView {
@@ -157,7 +157,10 @@ extension ProfileView {
         self.layer.cornerRadius = 20
         self.topAnchor.constraint(equalTo: (superview?.topAnchor)!).isActive = true
         self.leftAnchor.constraint(equalTo: (superview?.safeAreaLayoutGuide.leftAnchor)!).isActive = true
-        self.backgroundColor = Colors.dark_gray
+        self.backgroundColor = .white
+        self.layer.shadowColor = Colors.dark_dark_gray.cgColor
+        self.layer.shadowRadius = 5.0
+        self.layer.shadowOpacity = 50.0
         self.heightAnchor.constraint(greaterThanOrEqualToConstant: 460).isActive = true
         setupElements()
     }
@@ -166,14 +169,14 @@ extension ProfileView {
 extension ProfileView {
     private func setNavButtons() {
         guard let im_s = UIImage(named: "settings") else { return }
-        let settings = SubstrateButton(image: im_s, side: 33, target: self, action: #selector(set_settings), substrate_color: Colors.orange)
+        let settings = SubstrateButton(image: im_s, side: 33, target: self, action: #selector(set_settings), substrate_color: Colors.yellow)
         addSubview(settings)
         settings.translatesAutoresizingMaskIntoConstraints = false
         settings.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
         settings.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
 
         guard let im_logout = UIImage(named: "logout") else { return }
-        let logout_b = SubstrateButton(image: im_logout, side: 33, target: self, action: #selector(logout), substrate_color: Colors.dark_dark_gray)
+        let logout_b = SubstrateButton(image: im_logout, side: 33, target: self, action: #selector(logout), substrate_color: Colors.dark_gray)
         addSubview(logout_b)
         logout_b.translatesAutoresizingMaskIntoConstraints = false
         logout_b.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
@@ -182,18 +185,18 @@ extension ProfileView {
 
     @objc private func setNavEditButtons() {
         guard let im_yes = UIImage(named: "yes") else { return }
-        let yes = SubstrateButton(image: im_yes, side: 35, target: self, action: #selector(save_settings), substrate_color: Colors.orange)
+        let yes = SubstrateButton(image: im_yes, side: 33, target: self, action: #selector(save_settings), substrate_color: Colors.yellow)
         addSubview(yes)
         yes.translatesAutoresizingMaskIntoConstraints = false
         yes.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
-        yes.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
+        yes.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -20).isActive = true
 
         guard let im_no = UIImage(named: "close") else { return }
-        let no = SubstrateButton(image: im_no, side: 35, target: self, action: #selector(no_settings), substrate_color: Colors.dark_dark_gray)
+        let no = SubstrateButton(image: im_no, side: 33, target: self, action: #selector(no_settings), substrate_color: Colors.dark_gray)
         addSubview(no)
         no.translatesAutoresizingMaskIntoConstraints = false
         no.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
-        no.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -20).isActive = true
+        no.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
     }
 }
 
@@ -205,6 +208,9 @@ extension ProfileView {
         ava.topAnchor.constraint(equalTo: self.topAnchor, constant: 120).isActive = true
         ava.widthAnchor.constraint(equalToConstant: 150).isActive = true
         ava.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        ava.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
+        ava.layer.cornerRadius = 10
+        ava.layer.masksToBounds = true
         ava.image = UIImage(named: "default_profile")?.withRenderingMode(.alwaysOriginal)
         ava.isUserInteractionEnabled = false
     }

@@ -19,14 +19,19 @@ class PhotoCell : UICollectionViewCell {
         picture.image = UIImage()
         
         picture.addSubview(selectedImage)
-        selectedImage.isHidden = true
         selectedImage.translatesAutoresizingMaskIntoConstraints = false
-        selectedImage.image = UIImage(named: "yes")
         selectedImage.widthAnchor.constraint(equalToConstant: 50).isActive = true
         selectedImage.heightAnchor.constraint(equalToConstant: 50).isActive = true
         selectedImage.centerXAnchor.constraint(equalTo: picture.centerXAnchor).isActive = true
         selectedImage.centerYAnchor.constraint(equalTo: picture.centerYAnchor).isActive = true
         selectedImage.backgroundColor = .clear
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        selectedImage.image = UIImage(named: "yes")
+        selectedImage.isHidden = true
+
     }
 
     required init?(coder aDecoder: NSCoder) {
