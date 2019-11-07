@@ -164,6 +164,7 @@ extension MainView {
             }
             setNavItems()
         }
+        editMode = false
     }
 }
 

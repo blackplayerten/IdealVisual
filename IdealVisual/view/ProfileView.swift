@@ -208,6 +208,7 @@ extension ProfileView {
         ava.topAnchor.constraint(equalTo: self.topAnchor, constant: 120).isActive = true
         ava.widthAnchor.constraint(equalToConstant: 150).isActive = true
         ava.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        ava.contentMode = .scaleAspectFill
         ava.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
         ava.layer.cornerRadius = 10
         ava.layer.masksToBounds = true
@@ -249,9 +250,6 @@ extension ProfileView {
 extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-
-            //FIXME: fix crop image
-
             ava.image = selected
             //TODO: save in photo library if camera
         }

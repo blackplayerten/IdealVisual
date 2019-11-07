@@ -16,20 +16,21 @@ class PhotoCell : UICollectionViewCell {
         picture.translatesAutoresizingMaskIntoConstraints = false
         picture.widthAnchor.constraint(equalToConstant: contentView.bounds.width).isActive = true
         picture.heightAnchor.constraint(equalToConstant: contentView.bounds.width).isActive = true
-        picture.image = UIImage()
+        picture.clipsToBounds = true
+        picture.contentMode = .scaleAspectFill
         
         picture.addSubview(selectedImage)
         selectedImage.translatesAutoresizingMaskIntoConstraints = false
-        selectedImage.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        selectedImage.widthAnchor.constraint(equalToConstant: 80).isActive = true
         selectedImage.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        selectedImage.centerXAnchor.constraint(equalTo: picture.centerXAnchor).isActive = true
-        selectedImage.centerYAnchor.constraint(equalTo: picture.centerYAnchor).isActive = true
+        selectedImage.topAnchor.constraint(equalTo: picture.topAnchor).isActive = true
+        selectedImage.rightAnchor.constraint(equalTo: picture.rightAnchor).isActive = true
         selectedImage.backgroundColor = .clear
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        selectedImage.image = UIImage(named: "yes")
+        selectedImage.image = UIImage(named: "selected")
         selectedImage.isHidden = true
 
     }

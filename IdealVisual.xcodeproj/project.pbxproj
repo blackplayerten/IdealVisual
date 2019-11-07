@@ -14,8 +14,8 @@
 		181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 181B1AC2231DA6930081B01C /* LaunchScreen.storyboard */; };
 		181B1ACF231DA6940081B01C /* IdealVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1ACE231DA6940081B01C /* IdealVisualTests.swift */; };
 		181B1ADA231DA6940081B01C /* IdealVisualUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */; };
-		182DA47D2366479000C0AEC2 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 182DA47C2366479000C0AEC2 /* PingFang-SC-Regular.ttf */; };
 		1838C7B823718358000A32A9 /* SignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1838C7B723718358000A32A9 /* SignIn.swift */; };
+		1838C7BA23748CF0000A32A9 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */; };
 		18457F2E23636E3300568D81 /* BlocksPub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18457F2D23636E3300568D81 /* BlocksPub.swift */; };
 		1863C743236496F0001EB5F8 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */; };
 		188B5FB02361E47E00EA3701 /* PhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PhotoView.swift */; };
@@ -58,8 +58,8 @@
 		181B1AD5231DA6940081B01C /* IdealVisualUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IdealVisualUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdealVisualUITests.swift; sourceTree = "<group>"; };
 		181B1ADB231DA6940081B01C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		182DA47C2366479000C0AEC2 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "PingFang-SC-Regular.ttf"; path = "../../../../Desktop/fonts/PingFang/PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		1838C7B723718358000A32A9 /* SignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
+		1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "PingFang-SC-Regular.ttf"; path = "../../Desktop/fonts/PingFang/PingFang-SC-Regular.ttf"; sourceTree = SOURCE_ROOT; };
 		18457F2D23636E3300568D81 /* BlocksPub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksPub.swift; sourceTree = "<group>"; };
 		1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
 		188B5FAF2361E47E00EA3701 /* PhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoView.swift; sourceTree = "<group>"; };
@@ -162,7 +162,7 @@
 			isa = PBXGroup;
 			children = (
 				1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */,
-				182DA47C2366479000C0AEC2 /* PingFang-SC-Regular.ttf */,
+				1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */,
 			);
 			path = fonts;
 			sourceTree = "<group>";
@@ -289,7 +289,7 @@
 				1802AC0F234E13CB0007560A /* Asset.xcassets in Resources */,
 				181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */,
 				1863C743236496F0001EB5F8 /* Montserrat-Bold.ttf in Resources */,
-				182DA47D2366479000C0AEC2 /* PingFang-SC-Regular.ttf in Resources */,
+				1838C7BA23748CF0000A32A9 /* PingFang-SC-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

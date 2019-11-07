@@ -64,11 +64,13 @@ class BlocksPub: UIView {
     private func renderReadingTextView(value: String? = nil) {
 //        renderLines()
         text_view = ContentField(text: value)
+        checkMaxLength(textView: text_view, maxLength: 2200)
         addSubview(text_view!)
         text_view?.translatesAutoresizingMaskIntoConstraints = false
         text_view?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
         text_view?.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        text_view?.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        text_view?.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        self.heightAnchor.constraint(equalTo: text_view!.heightAnchor).isActive = true
 //        renderLines()
     }
 
@@ -80,6 +82,12 @@ class BlocksPub: UIView {
 //        line?.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
 //        line?.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
 //    }
+    
+    private func checkMaxLength(textView: UITextView!, maxLength: Int) {
+        if (textView.text!.count > maxLength) {
+            textView.deleteBackward()
+        }
+    }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
