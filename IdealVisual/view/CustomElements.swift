@@ -112,6 +112,77 @@ class ContentField: UITextView {
     }
 }
 
+class Line: UIView {
+    init() {
+        super.init(frame: .zero)
+        let line = CGRect(x: 0, y: 0, width: 355, height: 1.0)
+        let v = UIView(frame: line)
+        v.backgroundColor = Colors.light_gray
+        self.addSubview(v)
+        v.heightAnchor.constraint(equalToConstant: 1).isActive = true
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class LineClose: UIView {
+    init() {
+        super.init(frame: .zero)
+        let line = CGRect(x: 0, y: 0, width: 50, height: 4.0)
+        let v = UIView(frame: line)
+        v.backgroundColor = Colors.dark_gray
+        self.addSubview(v)
+        v.heightAnchor.constraint(equalToConstant: 4).isActive = true
+        v.layer.cornerRadius = 3
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class InputFields: UIView {
+    init(label_text: String, text: String? = nil) {
+//        let border = CGRect(x: 0, y: 0, width: 0, height: 50)
+        super.init(frame: .zero)
+        self.translatesAutoresizingMaskIntoConstraints = false
+
+        self.backgroundColor = .white
+        self.layer.borderWidth = 1
+        self.layer.borderColor = Colors.light_blue.cgColor
+        self.layer.cornerRadius = 15
+        let font1 = UIFont(name: "PingFang-SC-SemiBold", size: 14)
+        let font2 = UIFont(name: "PingFang-SC-Regular", size: 14)
+        
+        let label = UILabel()
+        label.text = label_text
+        self.addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
+        label.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        label.heightAnchor.constraint(equalToConstant: 15).isActive = true
+        label.textColor = .black
+        label.font = font1
+
+        let tf = UITextField()
+        tf.text = text
+        self.addSubview(tf)
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        tf.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        tf.leftAnchor.constraint(equalTo: label.rightAnchor, constant: 30).isActive = true
+        tf.textAlignment = .left
+        tf.textColor = Colors.dark_gray
+        tf.font = font2
+        tf.allowsEditingTextAttributes = true
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 
 // attempt to make table layout
 

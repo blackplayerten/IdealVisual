@@ -21,8 +21,8 @@ class PhotoCell : UICollectionViewCell {
         
         picture.addSubview(selectedImage)
         selectedImage.translatesAutoresizingMaskIntoConstraints = false
-        selectedImage.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        selectedImage.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        selectedImage.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        selectedImage.heightAnchor.constraint(equalToConstant: 30).isActive = true
         selectedImage.topAnchor.constraint(equalTo: picture.topAnchor).isActive = true
         selectedImage.rightAnchor.constraint(equalTo: picture.rightAnchor).isActive = true
         selectedImage.backgroundColor = .clear

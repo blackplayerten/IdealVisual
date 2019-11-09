@@ -41,7 +41,7 @@ class MainView: UIViewController {
         view.backgroundColor = .white
         
         // FIXME: stub
-        for i in 1...11 {
+        for i in 1...19 {
             let strName = String(i)
             let mypath = "test/" + strName
             guard let img = UIImage(named: mypath) else { return }

@@ -21,34 +21,31 @@ protocol ProfileDelegate: class {
 class ProfileView: UIView {
     private weak var delegateProfile: ProfileDelegate?
     private var testAva = UIImagePickerController()
+    private let scroll = UIScrollView()
+    private let labelToField = UILabel()
     
-    private var height = NSLayoutConstraint()
-    
-    
-    private let logout_button = UIButton()
+    private var height: NSLayoutConstraint?
+    private var lineBottom = LineClose()
     
     private let ava = UIImageView()
+    private let logout_button = UIButton()
     
-
-    
-    private let username = UITextField()
-    private let email = UITextField()
-    private let password = UITextField()
-    private let repeat_password = UITextField()
-    private let hide_keyboard = UITapGestureRecognizer(target: self, action: #selector(hide))
+    private let username = InputFields(label_text: "Логин", text: "ketnipz")
+    private let email = InputFields(label_text: "Почта", text: "ketnipz@mail.ru")
+    private let password = InputFields(label_text: "Пароль", text: nil)
+    private let repeat_password = InputFields(label_text: "Пароль", text: nil)
     
     init(profileDelegate: ProfileDelegate) {
         self.delegateProfile = profileDelegate
         super.init(frame: CGRect())
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
-    private func setupElements() {
+    private func setNoEdit() {
         testAva.delegate = self
         testAva.allowsEditing = true
+        
         let swipe = UISwipeGestureRecognizer()
         swipe.direction = .up
         swipe.addTarget(self, action: #selector(closeProfile))
@@ -56,72 +53,29 @@ class ProfileView: UIView {
         
         setNavButtons()
         setAva()
-        
-//        let k = UserTable(view: self)
-//        addSubview(k)
-//        k.translatesAutoresizingMaskIntoConstraints = false
-//        k.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
-//        k.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -20).isActive = true
-//        k.topAnchor.constraint(equalTo: ava.bottomAnchor, constant: 27).isActive = true
-//        k.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -30).isActive = true
-//        k.isScrollEnabled = false
-//        k.backgroundColor = .white
-        
-        
-        
-//        password.isHidden = true
-//        addSubview(password)
-//        password.translatesAutoresizingMaskIntoConstraints = false
-//        password.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-//        password.topAnchor.constraint(equalTo: email.topAnchor, constant: 40).isActive = true
-//        password.font = UIFont(name: "PingFang-SC-Regular", size: 14)
-//        password.textAlignment = .center
-//        password.textColor = .white
-//        password.placeholder = "Пароль"
-//        password.attributedPlaceholder = NSAttributedString(string: password.placeholder!,
-//                                                                attributes: [NSAttributedString.Key.foregroundColor: UIColor.white]
-//        )
-//
-//        repeat_password.isHidden = true
-//        addSubview(repeat_password)
-//        repeat_password.translatesAutoresizingMaskIntoConstraints = false
-//        repeat_password.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-//        repeat_password.topAnchor.constraint(equalTo: password.topAnchor, constant: 40).isActive = true
-//        repeat_password.font = UIFont(name: "PingFang-SC-Regular", size: 14)
-//        repeat_password.textAlignment = .center
-//        repeat_password.textColor = .white
-//        repeat_password.placeholder = "Подтвердите пароль"
-//        repeat_password.attributedPlaceholder = NSAttributedString(string: repeat_password.placeholder!,
-//                                                                       attributes: [NSAttributedString.Key.foregroundColor: UIColor.white]
-//        )
+        setFields()
+        password.isHidden = true
+        repeat_password.isHidden = true
+        renderBottomLine()
     }
     
-    @objc private func set_settings() {
-        self.isUserInteractionEnabled = true
-        self.addGestureRecognizer(hide_keyboard)
-        
+    @objc private func setEdit() {
+        height?.isActive = false
         setNavEditButtons()
-        
-        height.isActive = false
-        let new_height = self.heightAnchor.constraint(equalToConstant: 440)
-        new_height.isActive = true
-        
 
+        height = self.heightAnchor.constraint(equalToConstant: self.bounds.height + 120)
+        height?.isActive = true
+        
         let tap = UITapGestureRecognizer()
         ava.isUserInteractionEnabled = true
-        self.ava.addGestureRecognizer(tap)
-        tap.numberOfTapsRequired = 1
+        ava.addGestureRecognizer(tap)
         tap.addTarget(self, action: #selector(chooseAva))
-        
-        username.isUserInteractionEnabled = true
-        email.isUserInteractionEnabled = true
-        password.isHidden = false
-        password.allowsEditingTextAttributes = true
-        repeat_password.isHidden = false
-        repeat_password.allowsEditingTextAttributes = true
+        setPassword()
+//        setFields()
     }
     
     @objc func closeProfile() {
+        height?.isActive = false
         removeFromSuperview()
         delegateProfile?.enableTabBarButton()
     }
@@ -131,11 +85,12 @@ class ProfileView: UIView {
     }
     
     @objc private func save_settings() {
-        
+        setupView()
     }
     
     @objc private func no_settings() {
-        setup()
+        height?.isActive = false
+        setupView()
     }
     
     @objc private func logout() {
@@ -143,6 +98,7 @@ class ProfileView: UIView {
     }
 }
 
+//add view
 extension ProfileView {
     func setup() {
         setupView()
@@ -161,15 +117,39 @@ extension ProfileView {
         self.layer.shadowColor = Colors.dark_dark_gray.cgColor
         self.layer.shadowRadius = 5.0
         self.layer.shadowOpacity = 50.0
-        self.heightAnchor.constraint(greaterThanOrEqualToConstant: 460).isActive = true
-        setupElements()
+        height = self.heightAnchor.constraint(equalToConstant: 450)
+        height?.isActive = true
+        setNoEdit()
     }
 }
 
+// scroll and keyboard
+extension ProfileView {
+    
+}
+
+// text fields
+extension ProfileView {
+    private func setFields() {
+        [username, email].forEach {
+            addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        }
+        username.topAnchor.constraint(equalTo: ava.bottomAnchor, constant: 30).isActive = true
+//        username.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 30).isActive = true
+
+        email.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 70).isActive = true
+//        email.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+//        email.widthAnchor.constraint(equalToConstant: 800).isActive = true
+    }
+}
+
+//nav
 extension ProfileView {
     private func setNavButtons() {
         guard let im_s = UIImage(named: "settings") else { return }
-        let settings = SubstrateButton(image: im_s, side: 33, target: self, action: #selector(set_settings), substrate_color: Colors.yellow)
+        let settings = SubstrateButton(image: im_s, side: 33, target: self, action: #selector(setEdit), substrate_color: Colors.yellow)
         addSubview(settings)
         settings.translatesAutoresizingMaskIntoConstraints = false
         settings.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
@@ -200,14 +180,15 @@ extension ProfileView {
     }
 }
 
+//ava
 extension ProfileView {
     private func setAva() {
         addSubview(ava)
         ava.translatesAutoresizingMaskIntoConstraints = false
         ava.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        ava.topAnchor.constraint(equalTo: self.topAnchor, constant: 120).isActive = true
-        ava.widthAnchor.constraint(equalToConstant: 150).isActive = true
-        ava.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        ava.topAnchor.constraint(equalTo: self.topAnchor, constant: 90).isActive = true
+        ava.widthAnchor.constraint(equalToConstant: 170).isActive = true
+        ava.heightAnchor.constraint(equalToConstant: 170).isActive = true
         ava.contentMode = .scaleAspectFill
         ava.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
         ava.layer.cornerRadius = 10
@@ -217,35 +198,20 @@ extension ProfileView {
     }
 }
 
-//extension ProfileView {
-//    private func setUsername() {
-//        addSubview(username)
-//        username.translatesAutoresizingMaskIntoConstraints = false
-//        username.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-//        username.topAnchor.constraint(equalTo: self.ava.bottomAnchor, constant: 70).isActive = true
-//        username.font = UIFont(name: "Montserrat-Bold", size: 24)
-//        username.textAlignment = .center
-//        username.textColor = .white
-//        username.text = "stub"
-//        username.isUserInteractionEnabled = false
-//    }
-//}
+// passwords
+extension ProfileView {
+    private func setPassword() {
+        [password, repeat_password].forEach {
+            addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 30).isActive = true
+        password.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 30).isActive = true
 
-//extension ProfileView {
-//    private func setEmail() {
-//        addSubview(email)
-//        email.translatesAutoresizingMaskIntoConstraints = false
-//        email.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-//        email.topAnchor.constraint(equalTo: username.topAnchor, constant: 50).isActive = true
-//        email.font = UIFont(name: "PingFang-SC-Regular", size: 14)
-//        email.textAlignment = .center
-//        email.textColor = .white
-//        email.text = "email@email.ru"
-//        email.isUserInteractionEnabled = false
-//    }
-//}
-
-
+        repeat_password.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 70).isActive = true
+        repeat_password.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+    }
+}
 
 extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
@@ -275,5 +241,15 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
         }
         alert.addAction(UIAlertAction(title: "Отменить", style: UIAlertAction.Style.cancel, handler: nil))
         delegateProfile?.showAlert(alert: alert)
+    }
+}
+
+// bottom line
+extension ProfileView {
+    private func renderBottomLine() {
+        addSubview(lineBottom)
+        lineBottom.translatesAutoresizingMaskIntoConstraints = false
+        lineBottom.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15).isActive = true
+        lineBottom.centerXAnchor.constraint(equalTo: self.centerXAnchor, constant: -23).isActive = true
     }
 }
