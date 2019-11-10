@@ -22,6 +22,7 @@
 		188B5FB52361E6CC00EA3701 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FB42361E6CC00EA3701 /* Photo.swift */; };
 		1893229E23466104004026FC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229D23466104004026FC /* ProfileView.swift */; };
 		189322B5234687CE004026FC /* CustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* CustomElements.swift */; };
+		18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 18AA6582237714F0004B9588 /* .swiftlint.yml */; };
 		18D4EEE5236DAE6A007C16D6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D4EEE4236DAE6A007C16D6 /* User.swift */; };
 		63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632194B70D0AC636CB2B847F /* PhotoCell.swift */; };
 		63219A4A265F4D025E33856C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219C5F3C3B40275C1AC524 /* MainView.swift */; };
@@ -66,6 +67,7 @@
 		188B5FB42361E6CC00EA3701 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
+		18AA6582237714F0004B9588 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		18D4EEE4236DAE6A007C16D6 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		632194B70D0AC636CB2B847F /* PhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCell.swift; sourceTree = "<group>"; };
 		63219C5F3C3B40275C1AC524 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 		181B1AAA231DA6930081B01C = {
 			isa = PBXGroup;
 			children = (
+				18AA6582237714F0004B9588 /* .swiftlint.yml */,
 				1802AC0E234E13CB0007560A /* Asset.xcassets */,
 				181B1AB5231DA6930081B01C /* IdealVisual */,
 				181B1ACD231DA6940081B01C /* IdealVisualTests */,
@@ -189,6 +192,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 181B1ADE231DA6940081B01C /* Build configuration list for PBXNativeTarget "IdealVisual" */;
 			buildPhases = (
+				18AA658123770027004B9588 /* ShellScript */,
 				181B1AAF231DA6930081B01C /* Sources */,
 				181B1AB0231DA6930081B01C /* Frameworks */,
 				181B1AB1231DA6930081B01C /* Resources */,
@@ -286,6 +290,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */,
 				1802AC0F234E13CB0007560A /* Asset.xcassets in Resources */,
 				181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */,
 				1863C743236496F0001EB5F8 /* Montserrat-Bold.ttf in Resources */,
@@ -308,6 +313,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		18AA658123770027004B9588 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		181B1AAF231DA6930081B01C /* Sources */ = {

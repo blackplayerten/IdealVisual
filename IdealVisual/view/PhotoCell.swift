@@ -6,10 +6,10 @@
 import Foundation
 import UIKit
 
-class PhotoCell : UICollectionViewCell {
+class PhotoCell: UICollectionViewCell {
     var picture = UIImageView()
     var selectedImage = UIImageView()
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(picture)
@@ -18,7 +18,7 @@ class PhotoCell : UICollectionViewCell {
         picture.heightAnchor.constraint(equalToConstant: contentView.bounds.width).isActive = true
         picture.clipsToBounds = true
         picture.contentMode = .scaleAspectFill
-        
+
         picture.addSubview(selectedImage)
         selectedImage.translatesAutoresizingMaskIntoConstraints = false
         selectedImage.widthAnchor.constraint(equalToConstant: 50).isActive = true
@@ -27,12 +27,11 @@ class PhotoCell : UICollectionViewCell {
         selectedImage.rightAnchor.constraint(equalTo: picture.rightAnchor).isActive = true
         selectedImage.backgroundColor = .clear
     }
-    
+
     override func prepareForReuse() {
         super.prepareForReuse()
         selectedImage.image = UIImage(named: "selected")
         selectedImage.isHidden = true
-
     }
 
     required init?(coder aDecoder: NSCoder) {

@@ -1,0 +1,3 @@
+disabled_rules:
+    - todo
+    - function_body_length

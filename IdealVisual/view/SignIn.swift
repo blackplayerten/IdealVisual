@@ -15,7 +15,7 @@ class SignIn: UIViewController {
         view.backgroundColor = .white
         setNav()
     }
-    
+
     private func setNav() {
         let titleV = UILabel()
         view.addSubview(titleV)
@@ -26,7 +26,7 @@ class SignIn: UIViewController {
         titleV.font = UIFont(name: "Montserrat-Bold", size: 35)
         titleV.adjustsFontSizeToFitWidth = true
         navigationController?.navigationItem.titleView = titleV
-        
+
         let logo = UIImageView()
         view.addSubview(logo)
         logo.translatesAutoresizingMaskIntoConstraints = false
@@ -37,8 +37,8 @@ class SignIn: UIViewController {
         logo.rightAnchor.constraint(equalTo: titleV.leftAnchor, constant: -20).isActive = true
         setAuth()
     }
-    
+
     private func setAuth() {
-        
+
     }
 }

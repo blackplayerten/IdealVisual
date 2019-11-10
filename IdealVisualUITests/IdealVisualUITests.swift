@@ -8,6 +8,7 @@
 
 import XCTest
 
+// swiftlint:disable all
 class IdealVisualUITests: XCTestCase {
 
     override func setUp() {

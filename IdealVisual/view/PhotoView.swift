@@ -15,13 +15,13 @@ class PhotoView: UIViewController {
     var scroll = UIScrollView()
     let margin: CGFloat = 30.0
     var date: BlocksPub? = nil, post: BlocksPub? = nil, place: BlocksPub? = nil
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.tabBarController?.tabBar.isHidden = true
         navigationController?.navigationBar.barStyle = .black
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -30,19 +30,19 @@ class PhotoView: UIViewController {
         setBlocks()
         fill()
     }
-    
+
     private func setInteraction() {
         let swipeBack = UISwipeGestureRecognizer(target: self, action: #selector(back))
         swipeBack.direction = .right
         view.addGestureRecognizer(swipeBack)
-        
+
         view.addSubview(scroll)
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
         scroll.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
         scroll.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
         scroll.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-        //FIXME: height content on 7
+        // FIXME: height content on 7
         scroll.contentSize = CGSize(width: self.view.bounds.size.width, height: self.view.bounds.size.height + 1970)
     }
 
@@ -51,69 +51,102 @@ class PhotoView: UIViewController {
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
         navigationController?.navigationBar.backgroundColor = .none
-        
-        navigationItem.setHidesBackButton(true, animated:false)
-        guard let back_but = UIImage(named: "previous_gray")?.withRenderingMode(.alwaysOriginal) else { return }
-        let my_back_but = SubstrateButton(image: back_but, side: 35, target: self, action: #selector(back), substrate_color: nil)
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: my_back_but)
+
+        navigationItem.setHidesBackButton(true, animated: false)
+        guard let buttonBack = UIImage(named: "previous_gray")?.withRenderingMode(.alwaysOriginal) else { return }
+        let myBackButton = SubstrateButton(image: buttonBack, side: 35, target: self, action: #selector(back),
+                                           substrateColor: nil)
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: myBackButton)
 
         setupPhoto()
     }
-    
+
     private func setupPhoto() {
         let marginTop = (navigationController?.navigationBar.frame.height)! + UIApplication.shared.statusBarFrame.height
-        
+
         scroll.addSubview(photo)
         photo.translatesAutoresizingMaskIntoConstraints = false
         photo.widthAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
         photo.heightAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
         photo.topAnchor.constraint(equalTo: scroll.topAnchor, constant: -marginTop).isActive = true
         photo.contentMode = .scaleAspectFit
-        
-        guard let i = UIImage(named: "edit")?.withRenderingMode(.alwaysOriginal) else { return }
-        let edit = SubstrateButton(image: i, side: 35, target: self, action: #selector(editBlock), substrate_color: Colors.dark_gray)
+
+        guard let markEdit = UIImage(named: "edit")?.withRenderingMode(.alwaysOriginal) else { return }
+        let edit = SubstrateButton(image: markEdit, side: 35, target: self, action: #selector(editBlock),
+                                   substrateColor: Colors.darkGray)
         self.view.addSubview(edit)
         edit.translatesAutoresizingMaskIntoConstraints = false
         edit.topAnchor.constraint(equalTo: photo.bottomAnchor, constant: -45).isActive = true
         edit.rightAnchor.constraint(equalTo: photo.rightAnchor, constant: -10).isActive = true
     }
-    
+
     private func setBlocks() {
-        date = BlocksPub(icon_image: UIImage(named: "date")!, button_text: "дату", view: scroll)
+        date = BlocksPub(iconImage: UIImage(named: "date")!, buttonIext: "дату", view: scroll)
         guard let date = date else { return }
         date.topAnchor.constraint(equalTo: photo.bottomAnchor, constant: 5).isActive = true
 
         place = BlocksPub(
             value: """
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+                et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+                dolore eu fugiatnulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+                officia deserunt mollit anim id est laborum.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna
+                aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
+                anim id est laborum.
             """,
-        
-            icon_image: UIImage(named: "map")!, button_text: "место", view: scroll)
+
+            iconImage: UIImage(named: "map")!, buttonIext: "место", view: scroll)
             guard let place = place else { return }
             place.topAnchor.constraint(equalTo: date.bottomAnchor, constant: 70).isActive = true
-        
             post = BlocksPub(
                 value: """
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit
+                esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt
+                in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur
+                adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
+                anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+                velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+                proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet,
+                consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+                ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+                laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi
+                ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+                cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                qui officia deserunt mollit anim id est laborum.
                 """,
-                                 
-            icon_image: UIImage(named: "post")!, button_text: "пост", view: scroll)
+
+                iconImage: UIImage(named: "post")!, buttonIext: "пост", view: scroll)
             guard let post = post else { return }
             post.topAnchor.constraint(equalTo: place.bottomAnchor, constant: 70).isActive = true
-            
+
             for value in [BlocksPub](arrayLiteral: date, place, post) {
                 value.translatesAutoresizingMaskIntoConstraints = false
                 value.leftAnchor.constraint(equalTo: view.leftAnchor, constant: margin).isActive = true
                 value.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -margin).isActive = true
             }
     }
-        
+
     private func fill() {
         photo.image = publication?.photo
     }
-    
+
     @objc private func back() { navigationController?.popViewController(animated: true) }
-    
+
     @objc private func editBlock() {
         self.date?.editText()
         self.post?.editText()
