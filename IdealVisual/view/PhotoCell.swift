@@ -1,6 +1,7 @@
 //
-// Created by a.kurganova on 10/09/2019.
-// Copyright (c) 2019 a.kurganova. All rights reserved.
+//  PhotoCell.swift
+//  Created by a.kurganova on 10/09/2019.
+//  Copyright (c) 2019 a.kurganova. All rights reserved.
 //
 
 import Foundation

@@ -1,5 +1,5 @@
 //
-//  Buttons.swift
+//  CustomElements.swift
 //  IdealVisual
 //
 //  Created by a.kurganova on 03/10/2019.
@@ -46,28 +46,25 @@ class SubstrateButton: UIView {
 
         self.addSubview(button)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor).isActive = true
-        button.centerYAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerYAnchor).isActive = true
-        button.widthAnchor.constraint(equalTo: self.safeAreaLayoutGuide.widthAnchor).isActive = true
-        button.heightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.heightAnchor).isActive = true
+        button.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        button.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        button.widthAnchor.constraint(equalTo: self.widthAnchor).isActive = true
+        button.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
 
         self.addSubview(substrate)
         substrate.translatesAutoresizingMaskIntoConstraints = false
-        substrate.centerXAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerXAnchor).isActive = true
-        substrate.centerYAnchor.constraint(equalTo: self.safeAreaLayoutGuide.centerYAnchor).isActive = true
+        substrate.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        substrate.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         substrate.widthAnchor.constraint(equalToConstant: 0.7 * side).isActive = true
         substrate.heightAnchor.constraint(equalToConstant: 0.7 * side).isActive = true
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 class AddComponentsButton: UIButton {
     init(text: String) {
         super.init(frame: .zero)
-        isUserInteractionEnabled = true
         backgroundColor = .white
         titleLabel?.text = text
         setTitle(self.titleLabel?.text, for: .normal)
@@ -78,9 +75,8 @@ class AddComponentsButton: UIButton {
         titleLabel?.font = UIFont(name: "Montserrat-Bold", size: 14)
         underlineText()
     }
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 extension UIButton {
@@ -108,9 +104,7 @@ class ContentField: UITextView {
         isUserInteractionEnabled = false
         allowsEditingTextAttributes = true
     }
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 class Line: UIView {
@@ -123,9 +117,7 @@ class Line: UIView {
         view.heightAnchor.constraint(equalToConstant: 1).isActive = true
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 class LineClose: UIView {
@@ -139,9 +131,7 @@ class LineClose: UIView {
         view.layer.cornerRadius = 3
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 class InputFields: UIView {
@@ -173,15 +163,14 @@ class InputFields: UIView {
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         textField.leftAnchor.constraint(equalTo: label.rightAnchor, constant: 30).isActive = true
+        textField.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
         textField.textAlignment = .left
         textField.textColor = Colors.darkGray
         textField.font = font2
         textField.allowsEditingTextAttributes = true
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 // attempt to make table layout

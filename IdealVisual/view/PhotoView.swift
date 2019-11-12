@@ -102,7 +102,7 @@ class PhotoView: UIViewController {
 
             iconImage: UIImage(named: "map")!, buttonIext: "место", view: scroll)
             guard let place = place else { return }
-            place.topAnchor.constraint(equalTo: date.bottomAnchor, constant: 70).isActive = true
+            place.topAnchor.constraint(equalTo: date.bottomAnchor, constant: 100).isActive = true
             post = BlocksPub(
                 value: """
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
@@ -132,7 +132,7 @@ class PhotoView: UIViewController {
 
                 iconImage: UIImage(named: "post")!, buttonIext: "пост", view: scroll)
             guard let post = post else { return }
-            post.topAnchor.constraint(equalTo: place.bottomAnchor, constant: 70).isActive = true
+            post.topAnchor.constraint(equalTo: place.bottomAnchor, constant: 100).isActive = true
 
             for value in [BlocksPub](arrayLiteral: date, place, post) {
                 value.translatesAutoresizingMaskIntoConstraints = false
@@ -145,7 +145,9 @@ class PhotoView: UIViewController {
         photo.image = publication?.photo
     }
 
-    @objc private func back() { navigationController?.popViewController(animated: true) }
+    @objc private func back() {
+        navigationController?.popViewController(animated: true)
+    }
 
     @objc private func editBlock() {
         self.date?.editText()

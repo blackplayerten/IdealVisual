@@ -1,5 +1,5 @@
 //
-//  VirtualVC.swift
+//  MainView.swift
 //  IdealVisual
 //
 //  Created by a.kurganova on 03/09/2019.
@@ -11,6 +11,7 @@ import Foundation
 import MobileCoreServices
 
 class MainView: UIViewController {
+    private var refreshControl = UIRefreshControl()
     private let helpText = UILabel()
     fileprivate var choose = UIImagePickerController()
     private let photo = UIButton()
@@ -111,6 +112,7 @@ class MainView: UIViewController {
         content.dragInteractionEnabled = true
         content.dragDelegate = self
         content.dropDelegate = self
+        content.prefetchDataSource = self
         content.register(PhotoCell.self, forCellWithReuseIdentifier: "cell")
         content.reloadData()
         view.addSubview(content)
@@ -118,6 +120,9 @@ class MainView: UIViewController {
         content.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         content.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         content.layer.backgroundColor = UIColor.white.cgColor
+
+        content.addSubview(refreshControl)
+        refreshControl.tintColor = Colors.lightBlue
     }
 }
 
@@ -250,6 +255,20 @@ extension MainView: UICollectionViewDropDelegate {
     func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession,
                         withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
            return UICollectionViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
+    }
+}
+
+extension MainView: UICollectionViewDataSourcePrefetching {
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(tick),
+                                         userInfo: nil, repeats: true)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+    }
+
+    @objc private func tick() {
+        refreshControl.endRefreshing()
     }
 }
 
