@@ -10,6 +10,9 @@ import Foundation
 import UIKit
 
 class SignIn: UIViewController {
+    private let username = InputFields(labelText: "Логин", text: nil)
+    private let password = InputFields(labelText: "Пароль", text: nil)
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -35,10 +38,54 @@ class SignIn: UIViewController {
         logo.heightAnchor.constraint(equalToConstant: 35).isActive = true
         logo.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 25).isActive = true
         logo.rightAnchor.constraint(equalTo: titleV.leftAnchor, constant: -20).isActive = true
-        setAuth()
+        setAuthFields()
     }
 
-    private func setAuth() {
+    private func setAuthFields() {
+        [username, password].forEach {
+            view.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            $0.heightAnchor.constraint(equalToConstant: 40).isActive = true
+            $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
+            $0.setEditFields(state: true)
+        }
+        username.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
+                                      constant: 300).isActive = true
+        password.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 30).isActive = true
+        setAuthButtons()
+    }
+
+    private func setAuthButtons() {
+        let signInButton = AddComponentsButton(text: "Войти")
+        let signUpButton = AddComponentsButton(text: "Еще нет аккаунта")
+        [signInButton, signUpButton].forEach {
+            view.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            $0.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        }
+
+        signInButton.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 50).isActive = true
+        signInButton.widthAnchor.constraint(equalToConstant: 120).isActive = true
+        signInButton.setTitleColor(.white, for: .normal)
+        signInButton.backgroundColor = Colors.blue
+        signInButton.addTarget(self, action: #selector(goTosignIn), for: .touchUpInside)
+
+        signUpButton.topAnchor.constraint(equalTo: signInButton.bottomAnchor, constant: 50).isActive = true
+        signUpButton.widthAnchor.constraint(equalToConstant: 150).isActive = true
+        signUpButton.setTitleColor(Colors.darkDarkGray, for: .normal)
+        signUpButton.backgroundColor = .green
+        signInButton.addTarget(self, action: #selector(goTosignUp), for: .touchUpInside)
+    }
+
+    @objc private func goTosignIn() {
+//        let mainVC = MainView()
+//        mainVC.modalPresentationStyle = .fullScreen
+//        present(mainVC, animated: true, completion: nil)
+    }
+
+    @objc private func goTosignUp() {
 
     }
 }

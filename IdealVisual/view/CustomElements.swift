@@ -68,12 +68,18 @@ class AddComponentsButton: UIButton {
         backgroundColor = .white
         titleLabel?.text = text
         setTitle(self.titleLabel?.text, for: .normal)
-        setTitleColor(Colors.darkGray, for: .normal)
-        titleLabel?.textColor = Colors.darkGray
         titleLabel?.attributedText = NSMutableAttributedString(string: "",
                                 attributes: [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.single.rawValue])
         titleLabel?.font = UIFont(name: "Montserrat-Bold", size: 14)
         underlineText()
+    }
+
+    func setColor(state: Bool) {
+        if state == true {
+            titleLabel?.textColor = Colors.yellow
+        } else {
+            titleLabel?.textColor = Colors.darkGray
+        }
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -100,11 +106,21 @@ class ContentField: UITextView {
         font = UIFont(name: "PingFang-SC-Regular", size: 14)
         self.text = text
         textAlignment = .left
-        textColor = Colors.darkGray
         isUserInteractionEnabled = false
         allowsEditingTextAttributes = true
     }
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func setTVColor(state: Bool) {
+        if state == true {
+            textColor = Colors.darkDarkGray
+        } else {
+            textColor = Colors.darkGray
+        }
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 class Line: UIView {
@@ -134,40 +150,74 @@ class LineClose: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
-class InputFields: UIView {
-    init(labelText: String, text: String? = nil) {
-//        let border = CGRect(x: 0, y: 0, width: 0, height: 50)
-        super.init(frame: .zero)
-        self.translatesAutoresizingMaskIntoConstraints = false
+class InputFields: UIView, UITextFieldDelegate {
+    let textField = UITextField()
+    let labelMode = UILabel()
+    let label = UILabel()
 
+    init(labelText: String, text: String? = nil) {
+        super.init(frame: .zero)
+        [textField, labelMode, label].forEach {
+            self.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+
+        self.translatesAutoresizingMaskIntoConstraints = false
         self.backgroundColor = .white
-        self.layer.borderWidth = 1
-        self.layer.borderColor = Colors.lightBlue.cgColor
-        self.layer.cornerRadius = 15
+        self.layer.borderWidth = 0.5
+        self.layer.cornerRadius = 10
+
         let font1 = UIFont(name: "PingFang-SC-SemiBold", size: 14)
         let font2 = UIFont(name: "PingFang-SC-Regular", size: 14)
 
-        let label = UILabel()
-        label.text = labelText
-        self.addSubview(label)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        label.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
-        label.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        label.heightAnchor.constraint(equalToConstant: 15).isActive = true
-        label.textColor = .black
-        label.font = font1
-
-        let textField = UITextField()
+        textField.delegate = self
         textField.text = text
-        self.addSubview(textField)
-        textField.translatesAutoresizingMaskIntoConstraints = false
         textField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        textField.leftAnchor.constraint(equalTo: label.rightAnchor, constant: 30).isActive = true
-        textField.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        textField.textAlignment = .left
-        textField.textColor = Colors.darkGray
+        textField.heightAnchor.constraint(equalToConstant: 30).isActive = true
         textField.font = font2
-        textField.allowsEditingTextAttributes = true
+        textField.textAlignment = .left
+        textField.setContentHuggingPriority(UILayoutPriority(rawValue: 1), for: .horizontal)
+
+        labelMode.leftAnchor.constraint(equalTo: textField.rightAnchor, constant: 10).isActive = true
+        guard let tvCount = textField.text?.count else { return }
+        labelMode.text = "\(50 - tvCount)"
+        labelMode.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -20).isActive = true
+        labelMode.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        labelMode.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        labelMode.textColor = Colors.darkGray
+        labelMode.font = font2
+        labelMode.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 2000), for: .horizontal)
+
+        label.text = labelText
+        label.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
+        label.rightAnchor.constraint(equalTo: textField.leftAnchor, constant: -20).isActive = true
+        label.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        label.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        label.font = font1
+        label.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 2000), for: .horizontal)
+    }
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool {
+        let newLength = (textField.text!.count + string.count) - range.length
+        if newLength <= 50 {
+            self.labelMode.text = "\(50 - newLength)"
+            return true
+        } else {
+            return false
+        }
+    }
+
+    func setEditFields(state: Bool) {
+        if state == true {
+            self.layer.borderColor = Colors.lightBlue.cgColor
+            label.textColor = Colors.lightBlue
+        } else {
+            self.layer.borderColor = Colors.darkGray.cgColor
+            label.textColor = .black
+        }
+        labelMode.isHidden = !state
+        textField.isUserInteractionEnabled = state
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }

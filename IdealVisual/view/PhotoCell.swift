@@ -19,6 +19,7 @@ class PhotoCell: UICollectionViewCell {
         picture.heightAnchor.constraint(equalToConstant: contentView.bounds.width).isActive = true
         picture.clipsToBounds = true
         picture.contentMode = .scaleAspectFill
+        picture.backgroundColor = .white
 
         picture.addSubview(selectedImage)
         selectedImage.translatesAutoresizingMaskIntoConstraints = false

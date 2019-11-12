@@ -25,7 +25,7 @@ class TabBar: UITabBarController, UITabBarControllerDelegate {
         main.tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
 
         viewControllers = [
-            UINavigationController(rootViewController: main)
+            DarkFontNavigationController(rootViewController: main)
         ]
     }
 }

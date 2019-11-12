@@ -53,6 +53,9 @@ class ProfileView: UIView {
         setNavButtons()
         setAva()
         setFields()
+        [username, email, password, repeatPassword].forEach {
+            $0.setEditFields(state: false)
+        }
         password.isHidden = true
         repeatPassword.isHidden = true
         renderBottomLine()
@@ -62,15 +65,17 @@ class ProfileView: UIView {
         height?.isActive = false
         setNavEditButtons()
 
-        height = self.heightAnchor.constraint(equalToConstant: self.bounds.height + 120)
+        height = self.heightAnchor.constraint(equalToConstant: self.bounds.height + 135)
         height?.isActive = true
 
         let tap = UITapGestureRecognizer()
         ava.isUserInteractionEnabled = true
         ava.addGestureRecognizer(tap)
         tap.addTarget(self, action: #selector(chooseAva))
+        [username, email, password, repeatPassword].forEach {
+            $0.setEditFields(state: true)
+        }
         setPassword()
-//        setFields()
     }
 
     @objc func closeProfile() {
@@ -88,7 +93,7 @@ class ProfileView: UIView {
     }
 
     @objc private func no_settings() {
-        height?.isActive = false
+        self.removeConstraint(height!)
         setupView()
     }
 
@@ -116,7 +121,7 @@ extension ProfileView {
         self.layer.shadowColor = Colors.darkDarkGray.cgColor
         self.layer.shadowRadius = 5.0
         self.layer.shadowOpacity = 50.0
-        height = self.heightAnchor.constraint(equalToConstant: 450)
+        height = self.heightAnchor.constraint(equalToConstant: 465)
         height?.isActive = true
         setNoEdit()
     }
@@ -134,13 +139,11 @@ extension ProfileView {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
             $0.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+            $0.heightAnchor.constraint(equalToConstant: 40).isActive = true
+            $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
         }
         username.topAnchor.constraint(equalTo: ava.bottomAnchor, constant: 30).isActive = true
-//        username.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 30).isActive = true
-
-        email.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 70).isActive = true
-//        email.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-//        email.widthAnchor.constraint(equalToConstant: 800).isActive = true
+        email.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 30).isActive = true
     }
 }
 
@@ -149,7 +152,7 @@ extension ProfileView {
     private func setNavButtons() {
         guard let markSettings = UIImage(named: "settings") else { return }
         let settings = SubstrateButton(image: markSettings, side: 33, target: self, action: #selector(setEdit),
-                                       substrateColor: Colors.yellow)
+                                       substrateColor: Colors.lightBlue)
         addSubview(settings)
         settings.translatesAutoresizingMaskIntoConstraints = false
         settings.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
@@ -192,7 +195,7 @@ extension ProfileView {
         addSubview(ava)
         ava.translatesAutoresizingMaskIntoConstraints = false
         ava.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        ava.topAnchor.constraint(equalTo: self.topAnchor, constant: 90).isActive = true
+        ava.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 33+30+7).isActive = true
         ava.widthAnchor.constraint(equalToConstant: 170).isActive = true
         ava.heightAnchor.constraint(equalToConstant: 170).isActive = true
         ava.contentMode = .scaleAspectFill
@@ -211,12 +214,13 @@ extension ProfileView {
         [password, repeatPassword].forEach {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+            $0.heightAnchor.constraint(equalToConstant: 40).isActive = true
+            $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
+            $0.isHidden = false
         }
         password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 30).isActive = true
-        password.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 30).isActive = true
-
-        repeatPassword.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 70).isActive = true
-        repeatPassword.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        repeatPassword.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 30).isActive = true
     }
 }
 

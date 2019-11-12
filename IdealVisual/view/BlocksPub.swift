@@ -25,8 +25,9 @@ class BlocksPub: UIView {
         if value != nil {
             icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
         } else {
-            icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.lightGray)
+            icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.darkGray)
             addButton = AddComponentsButton(text: "Добавить \(buttonIext)")
+            addButton?.setColor(state: false)
         }
         super.init(frame: .zero)
         view.addSubview(self)
@@ -81,6 +82,7 @@ class BlocksPub: UIView {
             buttonSave.topAnchor.constraint(equalTo: lineBottom.bottomAnchor, constant: 1).isActive = true
             self.heightAnchor.constraint(equalTo: icon.heightAnchor).isActive = true
             buttonSave.addTarget(self, action: #selector(saveTVContent), for: .touchUpInside)
+            buttonSave.setColor(state: true)
 
             addButton?.removeFromSuperview()
             icon.removeFromSuperview()
@@ -89,6 +91,7 @@ class BlocksPub: UIView {
                                    substrateColor: Colors.lightGray)
             rerenderIcon(icon: icon)
             textView?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
+            textView?.setTVColor(state: true)
             setUIEnabled(state: true)
         } else {
             addSubview(addButton!)
@@ -119,6 +122,7 @@ class BlocksPub: UIView {
         [lineTop, checkLabel, lineBottom, buttonSave].forEach { $0.removeFromSuperview() }
 
         textView = ContentField(text: value)
+        textView?.setTVColor(state: false)
         textView?.font = UIFont(name: "PingFang-SC-Regular", size: 14)
         addSubview(textView!)
         textView?.translatesAutoresizingMaskIntoConstraints = false
