@@ -29,10 +29,11 @@ class ProfileView: UIView {
     private let ava = UIImageView()
     private let logoutButton = UIButton()
 
-    private let username = InputFields(labelText: "Логин", text: "ketnipz")
-    private let email = InputFields(labelText: "Почта", text: "ketnipz@mail.ru")
-    private let password = InputFields(labelText: "Пароль", text: nil)
-    private let repeatPassword = InputFields(labelText: "Пароль", text: nil)
+    private let username = InputFields(labelImage: UIImage(named: "login"), text: "ketnipz513", placeholder: nil)
+    private let email = InputFields(labelImage: UIImage(named: "email"), text: "ketnipz@mail.ru", placeholder: nil)
+    private let password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль")
+    private let repeatPassword = InputFields(labelImage: UIImage(named: "password"), text: nil,
+                                             placeholder: "Повторите пароль")
 
     init(profileDelegate: ProfileDelegate) {
         self.delegateProfile = profileDelegate

@@ -25,6 +25,7 @@
 		18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 18AA6582237714F0004B9588 /* .swiftlint.yml */; };
 		18D4EEE5236DAE6A007C16D6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D4EEE4236DAE6A007C16D6 /* User.swift */; };
 		18E8C538237B47AB0064B4F0 /* DarkFontNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E8C537237B47AB0064B4F0 /* DarkFontNavigationController.swift */; };
+		18E8C53A237B7EE60064B4F0 /* SignUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E8C539237B7EE60064B4F0 /* SignUp.swift */; };
 		63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632194B70D0AC636CB2B847F /* PhotoCell.swift */; };
 		63219A4A265F4D025E33856C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219C5F3C3B40275C1AC524 /* MainView.swift */; };
 /* End PBXBuildFile section */
@@ -61,7 +62,7 @@
 		181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdealVisualUITests.swift; sourceTree = "<group>"; };
 		181B1ADB231DA6940081B01C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1838C7B723718358000A32A9 /* SignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
-		1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "PingFang-SC-Regular.ttf"; path = "../../Desktop/fonts/PingFang/PingFang-SC-Regular.ttf"; sourceTree = SOURCE_ROOT; };
+		1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "PingFang-SC-Regular.ttf"; path = "../../../../Desktop/fonts/PingFang/PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		18457F2D23636E3300568D81 /* BlocksPub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksPub.swift; sourceTree = "<group>"; };
 		1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
 		188B5FAF2361E47E00EA3701 /* PhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoView.swift; sourceTree = "<group>"; };
@@ -71,6 +72,7 @@
 		18AA6582237714F0004B9588 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		18D4EEE4236DAE6A007C16D6 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		18E8C537237B47AB0064B4F0 /* DarkFontNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DarkFontNavigationController.swift; sourceTree = "<group>"; };
+		18E8C539237B7EE60064B4F0 /* SignUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUp.swift; sourceTree = "<group>"; };
 		632194B70D0AC636CB2B847F /* PhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCell.swift; sourceTree = "<group>"; };
 		63219C5F3C3B40275C1AC524 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -184,6 +186,7 @@
 				18457F2D23636E3300568D81 /* BlocksPub.swift */,
 				1838C7B723718358000A32A9 /* SignIn.swift */,
 				18E8C537237B47AB0064B4F0 /* DarkFontNavigationController.swift */,
+				18E8C539237B7EE60064B4F0 /* SignUp.swift */,
 			);
 			path = view;
 			sourceTree = "<group>";
@@ -349,6 +352,7 @@
 				181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */,
 				63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */,
 				63219A4A265F4D025E33856C /* MainView.swift in Sources */,
+				18E8C53A237B7EE60064B4F0 /* SignUp.swift in Sources */,
 				1838C7B823718358000A32A9 /* SignIn.swift in Sources */,
 				180D6C1E234BCD4700AB52F5 /* TabBar.swift in Sources */,
 				188B5FB02361E47E00EA3701 /* PhotoView.swift in Sources */,

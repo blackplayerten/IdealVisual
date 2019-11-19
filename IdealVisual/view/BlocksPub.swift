@@ -18,6 +18,7 @@ class BlocksPub: UIView {
     private var buttonSave = AddComponentsButton(text: "Сохранить")
     private var textView: ContentField?
     private var addButton: AddComponentsButton?
+    private var bottomA = NSLayoutConstraint()
 
     init(value: String? = nil, iconImage: UIImage, buttonIext: String, view: UIView) {
         self.iconImage = iconImage
@@ -40,8 +41,9 @@ class BlocksPub: UIView {
             addButton?.translatesAutoresizingMaskIntoConstraints = false
             addButton?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
             addButton?.centerYAnchor.constraint(equalTo: icon.centerYAnchor).isActive = true
-            self.heightAnchor.constraint(equalTo: icon.heightAnchor).isActive = true
-            addButton?.addTarget(addButton, action: #selector(editTV), for: .touchUpInside)
+            addButton?.addTarget(self, action: #selector(editTV), for: .touchUpInside)
+            bottomA = self.bottomAnchor.constraint(equalTo: icon.bottomAnchor, constant: 20)
+            bottomA.isActive = true
         }
     }
 
@@ -51,41 +53,13 @@ class BlocksPub: UIView {
 
     func editText() {
         renderEditingTextView()
-
-        // edit one field separate
-//        if textView?.text != nil {
-//        icon = SubstrateButton(image: iconImage.self, side: 45, target: self, action: #selector(editTV),
-//                               substrateColor: Colors.blue)
-//        rerenderIcon(icon: icon)
-//        }
     }
 
     private func renderEditingTextView() {
         if textView?.text != nil {
-            [lineTop, lineBottom, checkLabel, buttonSave].forEach {
-                self.addSubview($0)
-                $0.translatesAutoresizingMaskIntoConstraints = false
-            }
-            lineTop.topAnchor.constraint(equalTo: self.topAnchor, constant: 1).isActive = true
-            lineBottom.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: 30).isActive = true
-
-            checkLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
-            checkLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 5).isActive = true
-            checkLabel.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-            checkLabel.font = UIFont(name: "PingFang-SC-Regular", size: 14)
-
-            checkLabel.text = "\(textView?.text.count ?? 0) / 2200"
-            guard let textViewCount = textView?.text.count else { return }
-            if textViewCount <= 2200 { checkLabel.textColor = Colors.darkGray } else { checkLabel.textColor = .red }
-
-            buttonSave.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -1).isActive = true
-            buttonSave.topAnchor.constraint(equalTo: lineBottom.bottomAnchor, constant: 1).isActive = true
-            self.heightAnchor.constraint(equalTo: icon.heightAnchor).isActive = true
-            buttonSave.addTarget(self, action: #selector(saveTVContent), for: .touchUpInside)
-            buttonSave.setColor(state: true)
-
             addButton?.removeFromSuperview()
             icon.removeFromSuperview()
+            renderDecorateForEditing()
             guard let cancelImage = UIImage(named: "close") else { return }
             icon = SubstrateButton(image: cancelImage, side: 45, target: self, action: #selector(cancel),
                                    substrateColor: Colors.lightGray)
@@ -93,8 +67,26 @@ class BlocksPub: UIView {
             textView?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
             textView?.setTVColor(state: true)
             setUIEnabled(state: true)
+
+            bottomA.isActive = false
+            bottomA = self.bottomAnchor.constraint(equalTo: buttonSave.bottomAnchor)
+            bottomA.isActive = true
         } else {
-            addSubview(addButton!)
+//            //TODO: textview on tap edit
+//            addButton?.removeFromSuperview()
+//            icon.removeFromSuperview()
+//            renderDecorateForEditing()
+//            guard let cancelImage = UIImage(named: "close") else { return }
+//            icon = SubstrateButton(image: cancelImage, side: 45, target: self, action: #selector(cancel),
+//                                   substrateColor: Colors.lightGray)
+//            rerenderIcon(icon: icon)
+//            textView?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
+//            textView?.setTVColor(state: true)
+//            setUIEnabled(state: true)
+//
+//            bottomA.isActive = false
+//            bottomA = self.bottomAnchor.constraint(equalTo: buttonSave.bottomAnchor)
+//            bottomA.isActive = true
         }
     }
 
@@ -106,6 +98,7 @@ class BlocksPub: UIView {
     }
 
     @objc private func saveTVContent() {
+        print("save")
         icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
         rerenderIcon(icon: icon)
         renderReadingTextView(value: textView?.text)
@@ -115,6 +108,29 @@ class BlocksPub: UIView {
         addSubview(icon)
         icon.centerYAnchor.constraint(equalTo: self.topAnchor, constant: 60).isActive = true
         icon.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
+    }
+
+    private func renderDecorateForEditing() {
+         [lineTop, lineBottom, checkLabel, buttonSave].forEach {
+            self.addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+        lineTop.topAnchor.constraint(equalTo: self.topAnchor, constant: 10).isActive = true
+        lineBottom.bottomAnchor.constraint(equalTo: textView!.bottomAnchor, constant: 3).isActive = true
+
+        checkLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        checkLabel.topAnchor.constraint(equalTo: lineTop.bottomAnchor, constant: 5).isActive = true
+        checkLabel.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+        checkLabel.font = UIFont(name: "PingFang-SC-Regular", size: 14)
+
+        checkLabel.text = "\(textView?.text.count ?? 0) / 2200"
+        guard let textViewCount = textView?.text.count else { return }
+        if textViewCount <= 2200 { checkLabel.textColor = Colors.darkGray } else { checkLabel.textColor = .red }
+
+        buttonSave.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -1).isActive = true
+        buttonSave.topAnchor.constraint(equalTo: lineBottom.bottomAnchor, constant: 1).isActive = true
+        buttonSave.addTarget(self, action: #selector(saveTVContent), for: .touchUpInside)
+        buttonSave.setColor(state: true)
     }
 
     private func renderReadingTextView(value: String? = nil) {
@@ -129,7 +145,10 @@ class BlocksPub: UIView {
         textView?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
         textView?.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
         textView?.topAnchor.constraint(equalTo: self.topAnchor, constant: 25).isActive = true
-        self.heightAnchor.constraint(equalTo: textView!.heightAnchor).isActive = true
+
+        self.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        bottomA = self.bottomAnchor.constraint(equalTo: textView!.bottomAnchor)
+        bottomA.isActive = true
     }
 
     required init?(coder: NSCoder) {

@@ -7,14 +7,18 @@
 //
 
 import Foundation
+import UIKit
 
 struct User {
-    let username: String?
-    let email: String?
-    let password: String?
-}
+    var username: String?
+    var email: String?
+    var password: String?
+    var ava: UIImage?
 
-let user = [
-    User(username: "ketnipz", email: nil, password: nil),
-    User(username: nil, email: "ketnipz@mail.ru", password: nil)
-]
+    init(username: String? = nil, email: String? = nil, password: String? = nil, ava: UIImage? = nil) {
+        self.username = username
+        self.email = email
+        self.password = password
+        self.ava = ava
+    }
+}

@@ -84,7 +84,6 @@ class PhotoView: UIViewController {
         date = BlocksPub(iconImage: UIImage(named: "date")!, buttonIext: "дату", view: scroll)
         guard let date = date else { return }
         date.topAnchor.constraint(equalTo: photo.bottomAnchor, constant: 5).isActive = true
-
         place = BlocksPub(
             value: """
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore

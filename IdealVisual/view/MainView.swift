@@ -326,11 +326,15 @@ extension MainView: UITabBarControllerDelegate {
 }
 
 extension MainView: ProfileDelegate {
-    internal func logOut() { auth() }
+    internal func logOut() {
+        profileV?.removeFromSuperview()
+        auth()
+    }
 
     private func auth() {
         let authVC = SignIn()
 //        authVC.modalPresentationStyle = .fullScreen
+//        navigationController?.pushViewController(authVC, animated: true)
         present(authVC, animated: true, completion: nil)
     }
 

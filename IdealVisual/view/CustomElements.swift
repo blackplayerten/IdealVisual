@@ -153,11 +153,11 @@ class LineClose: UIView {
 class InputFields: UIView, UITextFieldDelegate {
     let textField = UITextField()
     let labelMode = UILabel()
-    let label = UILabel()
+    let labelImage = UIImage()
 
-    init(labelText: String, text: String? = nil) {
+    init(labelImage: UIImage? = nil, text: String? = nil, placeholder: String? = nil) {
         super.init(frame: .zero)
-        [textField, labelMode, label].forEach {
+        [textField, labelMode].forEach {
             self.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -177,6 +177,12 @@ class InputFields: UIView, UITextFieldDelegate {
         textField.font = font2
         textField.textAlignment = .left
         textField.setContentHuggingPriority(UILayoutPriority(rawValue: 1), for: .horizontal)
+        textField.placeholder = placeholder
+        let attrPlaceholder = NSAttributedString(string: placeholder ?? "", attributes: [
+            NSAttributedString.Key.foregroundColor: Colors.lightGray,
+            NSAttributedString.Key.font: font1 as Any
+        ])
+        textField.attributedPlaceholder = attrPlaceholder
 
         labelMode.leftAnchor.constraint(equalTo: textField.rightAnchor, constant: 10).isActive = true
         guard let tvCount = textField.text?.count else { return }
@@ -188,13 +194,19 @@ class InputFields: UIView, UITextFieldDelegate {
         labelMode.font = font2
         labelMode.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 2000), for: .horizontal)
 
-        label.text = labelText
-        label.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
-        label.rightAnchor.constraint(equalTo: textField.leftAnchor, constant: -20).isActive = true
-        label.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        label.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        label.font = font1
-        label.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 2000), for: .horizontal)
+        let labelIV = UIImageView()
+        self.addSubview(labelIV)
+        labelIV.translatesAutoresizingMaskIntoConstraints = false
+        labelIV.image = labelImage
+        labelIV.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
+        labelIV.rightAnchor.constraint(equalTo: textField.leftAnchor, constant: -30).isActive = true
+        labelIV.layer.masksToBounds = true
+        labelIV.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        labelIV.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        labelIV.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        labelIV.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 2000), for: .horizontal)
+
+//        label.font = font1
     }
 
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange,
@@ -211,16 +223,32 @@ class InputFields: UIView, UITextFieldDelegate {
     func setEditFields(state: Bool) {
         if state == true {
             self.layer.borderColor = Colors.lightBlue.cgColor
-            label.textColor = Colors.lightBlue
+//            label.textColor = Colors.lightBlue
         } else {
             self.layer.borderColor = Colors.darkGray.cgColor
-            label.textColor = .black
+//            label.textColor = .black
         }
         labelMode.isHidden = !state
         textField.isUserInteractionEnabled = state
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+}
+
+class CheckMistakeLabel: UILabel {
+    init(text: String? = nil) {
+        super.init(frame: .zero)
+        self.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        self.widthAnchor.constraint(equalToConstant: 300).isActive = true
+        self.text = text
+        self.font = UIFont(name: "PingFang-SC-SemiBold", size: 12)
+        self.textColor = .red
+        self.textAlignment = .left
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 // attempt to make table layout
