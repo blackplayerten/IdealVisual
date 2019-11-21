@@ -8,14 +8,14 @@
 
 import Foundation
 import UIKit
+import CoreData
 
 class SignUp: UIViewController {
-    private let username = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин")
-    private let email = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта")
-    private let password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль")
-    private let repeatPassword = InputFields(labelImage: UIImage(named: "password"), text: nil,
+    private let usernameField = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин")
+    private let emailField = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта")
+    private let passwordField = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль")
+    private let repeatPasswordField = InputFields(labelImage: UIImage(named: "password"), text: nil,
                                              placeholder: "Повторите пароль")
-    private var user: User?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,7 +48,7 @@ class SignUp: UIViewController {
     }
 
     private func setAuthFields() {
-        [username, email, password, repeatPassword].forEach {
+        [usernameField, emailField, passwordField, repeatPasswordField].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
             $0.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
@@ -56,11 +56,11 @@ class SignUp: UIViewController {
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.setEditFields(state: true)
         }
-        username.topAnchor.constraint(equalTo: view.topAnchor,
+        usernameField.topAnchor.constraint(equalTo: view.topAnchor,
                                       constant: 200).isActive = true
-        email.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 40).isActive = true
-        password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 40).isActive = true
-        repeatPassword.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 40).isActive = true
+        emailField.topAnchor.constraint(equalTo: usernameField.bottomAnchor, constant: 40).isActive = true
+        passwordField.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 40).isActive = true
+        repeatPasswordField.topAnchor.constraint(equalTo: passwordField.bottomAnchor, constant: 40).isActive = true
         setAuthButtons()
     }
 
@@ -75,7 +75,8 @@ class SignUp: UIViewController {
             $0.layer.cornerRadius = 10
         }
 
-        createAccountButton.topAnchor.constraint(equalTo: repeatPassword.bottomAnchor, constant: 50).isActive = true
+        createAccountButton.topAnchor.constraint(equalTo: repeatPasswordField.bottomAnchor,
+                                                 constant: 50).isActive = true
         createAccountButton.widthAnchor.constraint(equalToConstant: 210).isActive = true
         createAccountButton.setTitleColor(.white, for: .normal)
         createAccountButton.backgroundColor = Colors.blue
@@ -88,21 +89,22 @@ class SignUp: UIViewController {
     }
 
     @objc private func createAccount() {
-
         if !checkValidInputs() {
-            print("invalid")
             return
         }
-        print("valid")
 
-        user = User()
-        user?.username = username.textField.text
-        user?.email = email.textField.text
-        user?.password = password.textField.text
+        guard
+            let username = usernameField.textField.text,
+            let email = emailField.textField.text
+        else {
+            return
+        }
+
+        CoreDataUser.createUser(username: username, email: email)
+        CoreDataUser.getUser()
     }
 
     private func checkValidInputs() -> Bool {
-
         let usernameMistake = CheckMistakeLabel()
         let emailMistake = CheckMistakeLabel()
         let passwordMistake = CheckMistakeLabel()
@@ -110,20 +112,19 @@ class SignUp: UIViewController {
 
         var areValid = true
 
-        areValid = false
-
         [usernameMistake, emailMistake, passwordMistake, repeatPasswordMistake].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.leftAnchor.constraint(equalTo: username.leftAnchor, constant: 5).isActive = true
+            $0.leftAnchor.constraint(equalTo: usernameField.leftAnchor, constant: 5).isActive = true
         }
         areValid = true
-        usernameMistake.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 3).isActive = true
-        emailMistake.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 3).isActive = true
-        passwordMistake.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 3).isActive = true
-        repeatPasswordMistake.topAnchor.constraint(equalTo: repeatPassword.bottomAnchor, constant: 3).isActive = true
+        usernameMistake.topAnchor.constraint(equalTo: usernameField.bottomAnchor, constant: 3).isActive = true
+        emailMistake.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 3).isActive = true
+        passwordMistake.topAnchor.constraint(equalTo: passwordField.bottomAnchor, constant: 3).isActive = true
+        repeatPasswordMistake.topAnchor.constraint(equalTo: repeatPasswordField.bottomAnchor,
+                                                   constant: 3).isActive = true
 
-        [username, email].forEach {
+        [usernameField, emailField].forEach {
             if $0.textField.text?.count != 0 {
                 $0.layer.borderColor = Colors.lightBlue.cgColor
                 usernameMistake.isHidden = true
@@ -140,7 +141,7 @@ class SignUp: UIViewController {
         }
 
         var passwordsAreValid = true
-        [password, repeatPassword].forEach {
+        [passwordField, repeatPasswordField].forEach {
             if $0.textField.text!.count < 8 {
                 areValid = false
                 passwordsAreValid = false
@@ -151,7 +152,7 @@ class SignUp: UIViewController {
             }
         }
 
-        if password.textField.text != repeatPassword.textField.text {
+        if passwordField.textField.text != repeatPasswordField.textField.text {
             areValid = false
             passwordsAreValid = false
             passwordMistake.isHidden = false
@@ -160,8 +161,8 @@ class SignUp: UIViewController {
             repeatPasswordMistake.text = "Пароли не совпадают"
         }
 
-        if password.textField.text != repeatPassword.textField.text && password.textField.text!.count < 8 &&
-            repeatPassword.textField.text!.count < 8 {
+        if passwordField.textField.text != repeatPasswordField.textField.text &&
+            passwordField.textField.text!.count < 8 && repeatPasswordField.textField.text!.count < 8 {
             areValid = false
             passwordsAreValid = false
             passwordMistake.isHidden = false
@@ -170,7 +171,7 @@ class SignUp: UIViewController {
             repeatPasswordMistake.text = "Слабый пароль, пароли не совпадают"
         }
 
-        [password, repeatPassword].forEach {
+        [passwordField, repeatPasswordField].forEach {
             if passwordsAreValid {
                 $0.layer.borderColor = Colors.lightBlue.cgColor
                 passwordMistake.isHidden = true
@@ -186,7 +187,7 @@ class SignUp: UIViewController {
     }
 
     @objc private func goTosignIn() {
-        let signInVC = SignIn()
+//        let signInVC = SignIn()
 //        signInVC.modalPresentationStyle = .fullScreen
 //        self.dismiss(animated: true, completion: nil)
     }

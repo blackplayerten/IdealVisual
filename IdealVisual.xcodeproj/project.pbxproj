@@ -14,6 +14,7 @@
 		181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 181B1AC2231DA6930081B01C /* LaunchScreen.storyboard */; };
 		181B1ACF231DA6940081B01C /* IdealVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1ACE231DA6940081B01C /* IdealVisualTests.swift */; };
 		181B1ADA231DA6940081B01C /* IdealVisualUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */; };
+		1830EB752385671200369CA4 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1830EB742385671200369CA4 /* DataManager.swift */; };
 		1838C7B823718358000A32A9 /* SignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1838C7B723718358000A32A9 /* SignIn.swift */; };
 		1838C7BA23748CF0000A32A9 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */; };
 		18457F2E23636E3300568D81 /* BlocksPub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18457F2D23636E3300568D81 /* BlocksPub.swift */; };
@@ -61,6 +62,7 @@
 		181B1AD5231DA6940081B01C /* IdealVisualUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IdealVisualUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdealVisualUITests.swift; sourceTree = "<group>"; };
 		181B1ADB231DA6940081B01C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1830EB742385671200369CA4 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		1838C7B723718358000A32A9 /* SignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
 		1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "PingFang-SC-Regular.ttf"; path = "../../../../Desktop/fonts/PingFang/PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		18457F2D23636E3300568D81 /* BlocksPub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksPub.swift; sourceTree = "<group>"; };
@@ -161,6 +163,7 @@
 			children = (
 				188B5FB42361E6CC00EA3701 /* Photo.swift */,
 				18D4EEE4236DAE6A007C16D6 /* User.swift */,
+				1830EB742385671200369CA4 /* DataManager.swift */,
 			);
 			path = models;
 			sourceTree = "<group>";
@@ -346,6 +349,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				189322B5234687CE004026FC /* CustomElements.swift in Sources */,
+				1830EB752385671200369CA4 /* DataManager.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
 				188B5FB52361E6CC00EA3701 /* Photo.swift in Sources */,

@@ -6,6 +6,7 @@
 //  Copyright © 2019 a.kurganova. All rights reserved.
 //
 
+import CoreData
 import Foundation
 import UIKit
 
@@ -90,6 +91,7 @@ class ProfileView: UIView {
     }
 
     @objc private func save_settings() {
+
         setupView()
     }
 
@@ -103,7 +105,7 @@ class ProfileView: UIView {
     }
 }
 
-//add view
+// MARK: add view
 extension ProfileView {
     func setup() {
         setupView()
@@ -128,12 +130,12 @@ extension ProfileView {
     }
 }
 
-// scroll and keyboard
+// MARK: scroll and keyboard
 extension ProfileView {
 
 }
 
-// text fields
+// MARK: text fields
 extension ProfileView {
     private func setFields() {
         [username, email].forEach {
@@ -148,7 +150,7 @@ extension ProfileView {
     }
 }
 
-//nav
+// MARK: nav
 extension ProfileView {
     private func setNavButtons() {
         guard let markSettings = UIImage(named: "settings") else { return }
@@ -190,7 +192,7 @@ extension ProfileView {
     }
 }
 
-//ava
+// MARK: ava
 extension ProfileView {
     private func setAva() {
         addSubview(ava)
@@ -204,12 +206,22 @@ extension ProfileView {
                                    .layerMinXMaxYCorner, .layerMinXMinYCorner]
         ava.layer.cornerRadius = 10
         ava.layer.masksToBounds = true
-        ava.image = UIImage(named: "default_profile")?.withRenderingMode(.alwaysOriginal)
+
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
+        do {
+            let users = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
+            let usersO = users as? [User]
+            let nowUser = usersO?.last
+            ava.image = nowUser?.value(forKey: "ava") as? UIImage
+        } catch {
+             print(error)
+        }
         ava.isUserInteractionEnabled = false
     }
 }
 
-// passwords
+
+// MARK: passwords
 extension ProfileView {
     private func setPassword() {
         [password, repeatPassword].forEach {
@@ -229,6 +241,7 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+            CoreDataUser.updateAvatar(image: selected)
             ava.image = selected
             //TODO: save in photo library if camera
         }
@@ -258,7 +271,7 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
     }
 }
 
-// bottom line
+// MARK: bottom line
 extension ProfileView {
     private func renderBottomLine() {
         addSubview(lineBottom)
