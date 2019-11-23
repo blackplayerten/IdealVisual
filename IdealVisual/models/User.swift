@@ -19,33 +19,33 @@ class CoreDataUser {
 
         managedObjectUser.setValue("\(username)", forKey: "username")
         managedObjectUser.setValue("\(email)", forKey: "email")
-        managedObjectUser.setValue("\(String(describing: UIImage(named: "default_profile")))", forKey: "ava")
+        managedObjectUser.setValue(NSURL(), forKey: "ava")
 
         DataManager.instance.saveContext()
     }
 
-    static func updateAvatar(image: UIImage) {
+    static func updateAvatar(imageURL: URL) {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
         do {
             let users = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
             let usersO = users as? [User]
             let nowUser = usersO?.last
-            nowUser?.setValue("\(String(describing: image))", forKey: "ava")
+            nowUser?.setValue(imageURL, forKey: "ava")
             DataManager.instance.saveContext()
         } catch {
             print(error)
         }
     }
 
-    static func getUser() {
+    static func getUsers() {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
         do {
             let users = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
             for user in (users as? [User])! {
                 print("""
-                        userData: \(user.username ?? "no userneme"),
-                                    \(user.email ?? "no email"),
-                                    \(user.ava ?? "no ava" as NSObject)
+                    userData:   \(user.username ?? "no userneme"),
+                                \(user.email ?? "no email"),
+                                \(String(describing: user.ava))
                     """)
             }
         } catch {

@@ -101,7 +101,7 @@ class SignUp: UIViewController {
         }
 
         CoreDataUser.createUser(username: username, email: email)
-        CoreDataUser.getUser()
+        CoreDataUser.getUsers()
     }
 
     private func checkValidInputs() -> Bool {

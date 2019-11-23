@@ -9,6 +9,7 @@
 import CoreData
 import Foundation
 import UIKit
+import Photos
 
 protocol ProfileDelegate: class {
     func chooseAvatar(picker: UIImagePickerController)
@@ -213,13 +214,13 @@ extension ProfileView {
             let usersO = users as? [User]
             let nowUser = usersO?.last
             ava.image = nowUser?.value(forKey: "ava") as? UIImage
+            CoreDataUser.getUsers()
         } catch {
              print(error)
         }
         ava.isUserInteractionEnabled = false
     }
 }
-
 
 // MARK: passwords
 extension ProfileView {
@@ -240,10 +241,19 @@ extension ProfileView {
 extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        // MARK: save selected image to fileSystem using fileManager
+        if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
+            // MARK: Get full path to selected image
+            let fileManager = FileManager.default
+            let imagesPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let imagePath = imagesPath.appendingPathComponent("\(url.lastPathComponent)")
+            print(imagePath)
+            CoreDataUser.updateAvatar(imageURL: imagePath)
+            CoreDataUser.getUsers()
+        }
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            CoreDataUser.updateAvatar(image: selected)
             ava.image = selected
-            //TODO: save in photo library if camera
+            // TODO: save in photo library if camera
         }
         delegateProfile?.dismissAlert()
     }
