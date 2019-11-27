@@ -81,9 +81,11 @@ class PhotoView: UIViewController {
     }
 
     private func setBlocks() {
-        date = BlocksPub(iconImage: UIImage(named: "date")!, buttonIext: "дату", view: scroll)
+        let datPicker = DatePickerBlock()
+        date = BlocksPub(iconImage: UIImage(named: "date")!, buttonIext: "дату", datePicker: datPicker, view: scroll)
         guard let date = date else { return }
         date.topAnchor.constraint(equalTo: photo.bottomAnchor, constant: 5).isActive = true
+        date.bottomAnchor.constraint(equalTo: photo.bottomAnchor, constant: 270).isActive = true
         place = BlocksPub(
             value: """
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
@@ -99,9 +101,9 @@ class PhotoView: UIViewController {
                 anim id est laborum.
             """,
 
-            iconImage: UIImage(named: "map")!, buttonIext: "место", view: scroll)
+            iconImage: UIImage(named: "map")!, buttonIext: "место", datePicker: nil, view: scroll)
             guard let place = place else { return }
-            place.topAnchor.constraint(equalTo: date.bottomAnchor, constant: 100).isActive = true
+            place.topAnchor.constraint(equalTo: date.bottomAnchor, constant: 10).isActive = true
             post = BlocksPub(
                 value: """
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
@@ -129,9 +131,9 @@ class PhotoView: UIViewController {
                 qui officia deserunt mollit anim id est laborum.
                 """,
 
-                iconImage: UIImage(named: "post")!, buttonIext: "пост", view: scroll)
+                iconImage: UIImage(named: "post")!, buttonIext: "пост", datePicker: nil, view: scroll)
             guard let post = post else { return }
-            post.topAnchor.constraint(equalTo: place.bottomAnchor, constant: 100).isActive = true
+            post.topAnchor.constraint(equalTo: place.bottomAnchor, constant: 10).isActive = true
 
             for value in [BlocksPub](arrayLiteral: date, place, post) {
                 value.translatesAutoresizingMaskIntoConstraints = false
@@ -149,8 +151,8 @@ class PhotoView: UIViewController {
     }
 
     @objc private func editBlock() {
-        self.date?.editText()
-        self.post?.editText()
-        self.place?.editText()
+        self.date?.editBlocks()
+        self.post?.editBlocks()
+        self.place?.editBlocks()
     }
 }

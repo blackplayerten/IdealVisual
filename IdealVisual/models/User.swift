@@ -37,7 +37,7 @@ class CoreDataUser {
         }
     }
 
-    static func getUsers() {
+    static func getUser() -> User? {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
         do {
             let users = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
@@ -48,9 +48,10 @@ class CoreDataUser {
                                 \(String(describing: user.ava))
                     """)
             }
+            return users.last as? User
         } catch {
             print(error)
         }
+        return nil
     }
-
 }

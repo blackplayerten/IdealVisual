@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="15508" systemVersion="19B88" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Feed" representedClassName="Feed" syncable="YES" codeGenerationType="class">
-        <attribute name="id_feed" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="post" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Post" inverseName="feed" inverseEntity="Post"/>
         <relationship name="user" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="feed" inverseEntity="User"/>
     </entity>
@@ -18,7 +17,7 @@
         <relationship name="feed" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Feed" inverseName="user" inverseEntity="Feed"/>
     </entity>
     <elements>
-        <element name="Feed" positionX="199.7265625" positionY="-149.34765625" width="128" height="88"/>
+        <element name="Feed" positionX="199.7265625" positionY="-149.34765625" width="128" height="73"/>
         <element name="Post" positionX="437.71875" positionY="-258.0703125" width="128" height="103"/>
         <element name="User" positionX="-28.9765625" positionY="-273.95703125" width="128" height="103"/>
     </elements>

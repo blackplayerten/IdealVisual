@@ -123,6 +123,8 @@ class MainView: UIViewController {
 
         content.addSubview(refreshControl)
         refreshControl.tintColor = Colors.lightBlue
+
+        CoreDataFeed.setFeed()
     }
 }
 

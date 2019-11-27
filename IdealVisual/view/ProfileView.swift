@@ -214,7 +214,7 @@ extension ProfileView {
             let usersO = users as? [User]
             let nowUser = usersO?.last
             ava.image = nowUser?.value(forKey: "ava") as? UIImage
-            CoreDataUser.getUsers()
+//            CoreDataUser.getUser()
         } catch {
              print(error)
         }
@@ -249,7 +249,7 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
             let imagePath = imagesPath.appendingPathComponent("\(url.lastPathComponent)")
             print(imagePath)
             CoreDataUser.updateAvatar(imageURL: imagePath)
-            CoreDataUser.getUsers()
+            CoreDataUser.getUser()
         }
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             ava.image = selected

@@ -18,12 +18,15 @@ class BlocksPub: UIView {
     private var buttonSave = AddComponentsButton(text: "Сохранить")
     private var textView: ContentField?
     private var addButton: AddComponentsButton?
+    private var datePicker: DatePickerBlock?
     private var bottomA = NSLayoutConstraint()
 
-    init(value: String? = nil, iconImage: UIImage, buttonIext: String, view: UIView) {
+    init(value: String? = nil, iconImage: UIImage, buttonIext: String, datePicker: DatePickerBlock? = nil,
+         view: UIView) {
         self.iconImage = iconImage
+        self.datePicker = datePicker
 
-        if value != nil {
+        if value != nil || datePicker != nil {
             icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
         } else {
             icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.darkGray)
@@ -34,8 +37,12 @@ class BlocksPub: UIView {
         view.addSubview(self)
         rerenderIcon(icon: icon)
 
-        if value != nil {
-            renderReadingTextView(value: value)
+        if value != nil || datePicker != nil {
+            if datePicker != nil {
+                renderPicker(datePicker: datePicker)
+            } else {
+                renderReadingTextView(value: value)
+            }
         } else {
             addSubview(addButton!)
             addButton?.translatesAutoresizingMaskIntoConstraints = false
@@ -48,61 +55,20 @@ class BlocksPub: UIView {
     }
 
     @objc private func editTV() {
-        renderEditingTextView()
-    }
-
-    func editText() {
-        renderEditingTextView()
-    }
-
-    private func renderEditingTextView() {
-        if textView?.text != nil {
-            addButton?.removeFromSuperview()
-            icon.removeFromSuperview()
-            renderDecorateForEditing()
-            guard let cancelImage = UIImage(named: "close") else { return }
-            icon = SubstrateButton(image: cancelImage, side: 45, target: self, action: #selector(cancel),
-                                   substrateColor: Colors.lightGray)
-            rerenderIcon(icon: icon)
-            textView?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
-            textView?.setTVColor(state: true)
-            setUIEnabled(state: true)
-
-            bottomA.isActive = false
-            bottomA = self.bottomAnchor.constraint(equalTo: buttonSave.bottomAnchor)
-            bottomA.isActive = true
+        if datePicker != nil {
+            renderEditingDate()
         } else {
-//            //TODO: textview on tap edit
-//            addButton?.removeFromSuperview()
-//            icon.removeFromSuperview()
-//            renderDecorateForEditing()
-//            guard let cancelImage = UIImage(named: "close") else { return }
-//            icon = SubstrateButton(image: cancelImage, side: 45, target: self, action: #selector(cancel),
-//                                   substrateColor: Colors.lightGray)
-//            rerenderIcon(icon: icon)
-//            textView?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
-//            textView?.setTVColor(state: true)
-//            setUIEnabled(state: true)
-//
-//            bottomA.isActive = false
-//            bottomA = self.bottomAnchor.constraint(equalTo: buttonSave.bottomAnchor)
-//            bottomA.isActive = true
+            renderEditingTextView()
         }
     }
 
-    @objc private func cancel() {
-        icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
-        rerenderIcon(icon: icon)
-        renderReadingTextView(value: textView?.text)
-        // TODO: think about editing non-empty text
+    func editBlocks() {
+        if datePicker != nil {
+            renderEditingDate()
+        } else {
+            renderEditingTextView()
+        }
     }
-
-    @objc private func saveTVContent() {
-        print("save")
-        icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
-        rerenderIcon(icon: icon)
-        renderReadingTextView(value: textView?.text)
-   }
 
     private func rerenderIcon(icon: SubstrateButton) {
         addSubview(icon)
@@ -116,17 +82,19 @@ class BlocksPub: UIView {
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
         lineTop.topAnchor.constraint(equalTo: self.topAnchor, constant: 10).isActive = true
-        lineBottom.bottomAnchor.constraint(equalTo: textView!.bottomAnchor, constant: 3).isActive = true
+        if textView?.text != nil {
+            lineBottom.bottomAnchor.constraint(equalTo: textView!.bottomAnchor, constant: 3).isActive = true
+            checkLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
+            checkLabel.topAnchor.constraint(equalTo: lineTop.bottomAnchor, constant: 5).isActive = true
+            checkLabel.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+            checkLabel.font = UIFont(name: "PingFang-SC-Regular", size: 14)
 
-        checkLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
-        checkLabel.topAnchor.constraint(equalTo: lineTop.bottomAnchor, constant: 5).isActive = true
-        checkLabel.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
-        checkLabel.font = UIFont(name: "PingFang-SC-Regular", size: 14)
-
-        checkLabel.text = "\(textView?.text.count ?? 0) / 2200"
-        guard let textViewCount = textView?.text.count else { return }
-        if textViewCount <= 2200 { checkLabel.textColor = Colors.darkGray } else { checkLabel.textColor = .red }
-
+            checkLabel.text = "\(textView?.text.count ?? 0) / 2200"
+            guard let textViewCount = textView?.text.count else { return }
+            if textViewCount <= 2200 { checkLabel.textColor = Colors.darkGray } else { checkLabel.textColor = .red }
+        } else {
+            lineBottom.bottomAnchor.constraint(equalTo: datePicker!.bottomAnchor, constant: 3).isActive = true
+        }
         buttonSave.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -1).isActive = true
         buttonSave.topAnchor.constraint(equalTo: lineBottom.bottomAnchor, constant: 1).isActive = true
         buttonSave.addTarget(self, action: #selector(saveTVContent), for: .touchUpInside)
@@ -150,6 +118,95 @@ class BlocksPub: UIView {
         bottomA = self.bottomAnchor.constraint(equalTo: textView!.bottomAnchor)
         bottomA.isActive = true
     }
+
+     private func renderEditingTextView() {
+            if textView?.text != nil {
+                addButton?.removeFromSuperview()
+                icon.removeFromSuperview()
+                renderDecorateForEditing()
+                guard let cancelImage = UIImage(named: "close") else { return }
+                icon = SubstrateButton(image: cancelImage, side: 45, target: self, action: #selector(cancel),
+                                       substrateColor: Colors.lightGray)
+                rerenderIcon(icon: icon)
+                textView?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
+                textView?.setTVColor(state: true)
+                setUIEnabled(state: true)
+
+                bottomA.isActive = false
+                bottomA = self.bottomAnchor.constraint(equalTo: buttonSave.bottomAnchor)
+                bottomA.isActive = true
+            } else {
+    //            //TODO: textview on tap edit
+    //            addButton?.removeFromSuperview()
+    //            icon.removeFromSuperview()
+    //            renderDecorateForEditing()
+    //            guard let cancelImage = UIImage(named: "close") else { return }
+    //            icon = SubstrateButton(image: cancelImage, side: 45, target: self, action: #selector(cancel),
+    //                                   substrateColor: Colors.lightGray)
+    //            rerenderIcon(icon: icon)
+    //            textView?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
+    //            textView?.setTVColor(state: true)
+    //            setUIEnabled(state: true)
+    //
+    //            bottomA.isActive = false
+    //            bottomA = self.bottomAnchor.constraint(equalTo: buttonSave.bottomAnchor)
+    //            bottomA.isActive = true
+            }
+        }
+
+    private func renderPicker(datePicker: DatePickerBlock? = nil) {
+            [lineTop, checkLabel, lineBottom, buttonSave].forEach { $0.removeFromSuperview() }
+            if datePicker != nil {
+                guard let datePicker = datePicker else { return }
+                addSubview(datePicker)
+                datePicker.translatesAutoresizingMaskIntoConstraints = false
+                datePicker.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
+                datePicker.rightAnchor.constraint(equalTo: self.rightAnchor).isActive = true
+                datePicker.topAnchor.constraint(equalTo: self.topAnchor, constant: 20).isActive = true
+                datePicker.setEditingMode(state: false)
+            }
+        }
+
+    private func renderEditingDate() {
+        if datePicker != nil {
+            addButton?.removeFromSuperview()
+            icon.removeFromSuperview()
+            guard let cancelImage = UIImage(named: "close") else { return }
+            icon = SubstrateButton(image: cancelImage, side: 45, target: self, action: #selector(cancel),
+                                   substrateColor: Colors.lightGray)
+            rerenderIcon(icon: icon)
+            renderDecorateForEditing()
+            datePicker?.leftAnchor.constraint(equalTo: icon.rightAnchor, constant: 20).isActive = true
+            datePicker?.setEditingMode(state: true)
+
+            bottomA.isActive = false
+            bottomA = self.bottomAnchor.constraint(equalTo: buttonSave.bottomAnchor)
+            bottomA.isActive = true
+        }
+    }
+
+    @objc private func saveTVContent() {
+         print("save")
+         icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
+         rerenderIcon(icon: icon)
+         if datePicker != nil {
+             renderPicker(datePicker: datePicker)
+         } else {
+            renderReadingTextView(value: textView?.text)
+        }
+    }
+
+    @objc private func cancel() {
+
+        icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
+        rerenderIcon(icon: icon)
+        if datePicker != nil {
+            renderPicker(datePicker: datePicker)
+        } else {
+            renderReadingTextView(value: textView?.text)
+        }
+           // TODO: think about editing non-empty text
+       }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

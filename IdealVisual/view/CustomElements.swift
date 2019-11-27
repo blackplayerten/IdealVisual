@@ -82,7 +82,9 @@ class AddComponentsButton: UIButton {
         }
     }
 
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 extension UIButton {
@@ -96,6 +98,32 @@ extension UIButton {
     )
     setAttributedTitle(titleString, for: .normal)
   }
+}
+
+class DatePickerBlock: UIDatePicker {
+    init() {
+        super.init(frame: .zero)
+        self.locale = Locale(identifier: "ru")
+        self.addTarget(self, action: #selector(chooseDate(_:)), for: .valueChanged)
+    }
+
+    @objc func chooseDate(_ sender: UIDatePicker) {
+        _ = Calendar.current.dateComponents([.day, .month, .timeZone], from: sender.date)
+        self.minimumDate = Calendar.current.date(byAdding: .day, value: 0, to: Date())
+        self.layer.cornerRadius = 20
+    }
+
+    func setEditingMode(state: Bool) {
+        if state == true {
+            self.isUserInteractionEnabled = true
+        } else {
+            self.isUserInteractionEnabled = false
+        }
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 class ContentField: UITextView {
@@ -205,8 +233,6 @@ class InputFields: UIView, UITextFieldDelegate {
         labelIV.heightAnchor.constraint(equalToConstant: 20).isActive = true
         labelIV.widthAnchor.constraint(equalToConstant: 20).isActive = true
         labelIV.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 2000), for: .horizontal)
-
-//        label.font = font1
     }
 
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange,
@@ -251,8 +277,7 @@ class CheckMistakeLabel: UILabel {
     }
 }
 
-// attempt to make table layout
-
+// MARK: attempt to make table layout
 //class UserTable: UITableView, UITableViewDelegate, UITableViewDataSource {
 //    let user_cell: String = "UserTableCell"
 //    let detail_cell: String = "DetailTableCell"
