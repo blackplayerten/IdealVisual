@@ -82,28 +82,17 @@ class PhotoView: UIViewController {
 
     private func setBlocks() {
         let datPicker = DatePickerBlock()
-        date = BlocksPub(iconImage: UIImage(named: "date")!, buttonIext: "дату", datePicker: datPicker, view: scroll)
+        date = BlocksPub(value: nil, iconImage: UIImage(named: "date")!, buttonIext: "дату",
+                         datePicker: datPicker, view: scroll)
         guard let date = date else { return }
         date.topAnchor.constraint(equalTo: photo.bottomAnchor, constant: 5).isActive = true
         date.bottomAnchor.constraint(equalTo: photo.bottomAnchor, constant: 270).isActive = true
         place = BlocksPub(
-            value: """
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-                et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-                dolore eu fugiatnulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-                officia deserunt mollit anim id est laborum.
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore magna
-                aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-                consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
-                anim id est laborum.
-            """,
+            value: nil,
 
             iconImage: UIImage(named: "map")!, buttonIext: "место", datePicker: nil, view: scroll)
             guard let place = place else { return }
-            place.topAnchor.constraint(equalTo: date.bottomAnchor, constant: 10).isActive = true
+            place.topAnchor.constraint(equalTo: date.bottomAnchor, constant: 5).isActive = true
             post = BlocksPub(
                 value: """
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
@@ -133,7 +122,7 @@ class PhotoView: UIViewController {
 
                 iconImage: UIImage(named: "post")!, buttonIext: "пост", datePicker: nil, view: scroll)
             guard let post = post else { return }
-            post.topAnchor.constraint(equalTo: place.bottomAnchor, constant: 10).isActive = true
+            post.topAnchor.constraint(equalTo: place.bottomAnchor, constant: 20).isActive = true
 
             for value in [BlocksPub](arrayLiteral: date, place, post) {
                 value.translatesAutoresizingMaskIntoConstraints = false
