@@ -19,7 +19,7 @@
 		1838C7BA23748CF0000A32A9 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */; };
 		18457F2E23636E3300568D81 /* BlocksPub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18457F2D23636E3300568D81 /* BlocksPub.swift */; };
 		1863C743236496F0001EB5F8 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */; };
-		188B5FB02361E47E00EA3701 /* PhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PhotoView.swift */; };
+		188B5FB02361E47E00EA3701 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PostView.swift */; };
 		188B5FB52361E6CC00EA3701 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FB42361E6CC00EA3701 /* Photo.swift */; };
 		1893229E23466104004026FC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229D23466104004026FC /* ProfileView.swift */; };
 		189322B5234687CE004026FC /* CustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* CustomElements.swift */; };
@@ -68,7 +68,7 @@
 		1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "PingFang-SC-Regular.ttf"; path = "../../../../Desktop/fonts/PingFang/PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		18457F2D23636E3300568D81 /* BlocksPub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksPub.swift; sourceTree = "<group>"; };
 		1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
-		188B5FAF2361E47E00EA3701 /* PhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoView.swift; sourceTree = "<group>"; };
+		188B5FAF2361E47E00EA3701 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		188B5FB42361E6CC00EA3701 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
@@ -188,7 +188,7 @@
 				1893229D23466104004026FC /* ProfileView.swift */,
 				189322B4234687CE004026FC /* CustomElements.swift */,
 				180D6C1D234BCD4700AB52F5 /* TabBar.swift */,
-				188B5FAF2361E47E00EA3701 /* PhotoView.swift */,
+				188B5FAF2361E47E00EA3701 /* PostView.swift */,
 				18457F2D23636E3300568D81 /* BlocksPub.swift */,
 				1838C7B723718358000A32A9 /* SignIn.swift */,
 				18E8C537237B47AB0064B4F0 /* DarkFontNavigationController.swift */,
@@ -363,7 +363,7 @@
 				18FEC809238BCDC800B6B217 /* Feed.swift in Sources */,
 				1838C7B823718358000A32A9 /* SignIn.swift in Sources */,
 				180D6C1E234BCD4700AB52F5 /* TabBar.swift in Sources */,
-				188B5FB02361E47E00EA3701 /* PhotoView.swift in Sources */,
+				188B5FB02361E47E00EA3701 /* PostView.swift in Sources */,
 				18E8C538237B47AB0064B4F0 /* DarkFontNavigationController.swift in Sources */,
 				18457F2E23636E3300568D81 /* BlocksPub.swift in Sources */,
 				18D4EEE5236DAE6A007C16D6 /* User.swift in Sources */,

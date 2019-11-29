@@ -134,7 +134,7 @@ extension MainView: UICollectionViewDelegate {
             let cell = collectionView.cellForItem(at: indexPath)
             if let selectCell = cell as? PhotoCell { selectCell.selectedImage.isHidden = false }
         } else {
-            let detailPhoto = PhotoView()
+            let detailPhoto = PostView()
             detailPhoto.publication = photos[indexPath.item]
             self.navigationController?.pushViewController(detailPhoto, animated: true)
         }

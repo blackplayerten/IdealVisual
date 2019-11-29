@@ -18,16 +18,6 @@ struct Colors {
     static let darkDarkGray = UIColor(red: 0.23, green: 0.23, blue: 0.23, alpha: 1)
 }
 
-struct Auth {
-    let username: String? = "Логин"
-    let password: String? = "Пароль"
-    let email: String? = "Эл. почта"
-}
-
-let auth = [
-    Auth()
-]
-
 class SubstrateButton: UIView {
     init(image: UIImage, side: CGFloat = 35, target: Any? = nil, action: Selector? = nil,
          substrateColor: UIColor? = nil) {
@@ -100,8 +90,8 @@ extension UIButton {
   }
 }
 
-class DatePickerBlock: UIDatePicker {
-    init() {
+class DatePickerComponent: UIDatePicker {
+    init(datePicker: UIDatePicker? = nil) {
         super.init(frame: .zero)
         self.locale = Locale(identifier: "ru")
         self.addTarget(self, action: #selector(chooseDate(_:)), for: .valueChanged)
@@ -126,7 +116,7 @@ class DatePickerBlock: UIDatePicker {
     }
 }
 
-class ContentField: UITextView {
+class TextViewComponent: UITextView {
     init(text: String? = nil) {
         super.init(frame: .zero, textContainer: nil)
         isScrollEnabled = false
@@ -134,12 +124,11 @@ class ContentField: UITextView {
         font = UIFont(name: "PingFang-SC-Regular", size: 14)
         self.text = text
         textAlignment = .left
-        isUserInteractionEnabled = false
         allowsEditingTextAttributes = true
     }
 
-    func setTVColor(state: Bool) {
-        if state == true {
+    func changeTextViewColorWhileEditing(editingMode: Bool) {
+        if editingMode == true {
             textColor = Colors.darkDarkGray
         } else {
             textColor = Colors.darkGray
