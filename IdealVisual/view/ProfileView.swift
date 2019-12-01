@@ -64,7 +64,8 @@ class ProfileView: UIView {
         renderBottomLine()
     }
 
-    @objc private func setEdit() {
+    @objc
+    private func setEdit() {
         height?.isActive = false
         setNavEditButtons()
 
@@ -81,27 +82,31 @@ class ProfileView: UIView {
         setPassword()
     }
 
-    @objc func closeProfile() {
+    @objc
+    func closeProfile() {
         height?.isActive = false
         removeFromSuperview()
         delegateProfile?.enableTabBarButton()
     }
 
-    @objc private func hide() {
+    @objc
+    private func hide() {
         self.endEditing(true)
     }
 
-    @objc private func save_settings() {
-
+    @objc
+    private func save_settings() {
         setupView()
     }
 
-    @objc private func no_settings() {
+    @objc
+    private func no_settings() {
         self.removeConstraint(height!)
         setupView()
     }
 
-    @objc private func logout() {
+    @objc
+    private func logout() {
         delegateProfile?.logOut()
     }
 }
@@ -241,6 +246,7 @@ extension ProfileView {
 extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        
         // MARK: save selected image to fileSystem using fileManager
         if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
             // MARK: Get full path to selected image
@@ -249,7 +255,7 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
             let imagePath = imagesPath.appendingPathComponent("\(url.lastPathComponent)")
             print(imagePath)
             CoreDataUser.updateAvatar(imageURL: imagePath)
-            CoreDataUser.getUser()
+//            CoreDataUser.getUser()
         }
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             ava.image = selected

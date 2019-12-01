@@ -5,6 +5,7 @@
         <relationship name="user" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="feed" inverseEntity="User"/>
     </entity>
     <entity name="Post" representedClassName="Post" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="photo" attributeType="URI"/>
         <attribute name="place" attributeType="String"/>
         <attribute name="text" attributeType="String"/>
@@ -18,7 +19,7 @@
     </entity>
     <elements>
         <element name="Feed" positionX="199.7265625" positionY="-149.34765625" width="128" height="73"/>
-        <element name="Post" positionX="437.71875" positionY="-258.0703125" width="128" height="103"/>
+        <element name="Post" positionX="437.71875" positionY="-258.0703125" width="128" height="118"/>
         <element name="User" positionX="-28.9765625" positionY="-273.95703125" width="128" height="103"/>
     </elements>
 </model>

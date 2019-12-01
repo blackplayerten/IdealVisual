@@ -43,13 +43,10 @@ class PostView: UIViewController {
 
         view.addSubview(scroll)
         scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
-        scroll.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
-        scroll.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
-        scroll.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-        let bhgscvgjw = view.bounds.size.height
-        // FIXME: height content on 7
-        scroll.contentSize = CGSize(width: self.view.bounds.size.width, height: bhgscvgjw + 1970)
+        scroll.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        scroll.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        scroll.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
     }
 
     private func setupNavItems() {
@@ -72,7 +69,9 @@ class PostView: UIViewController {
 
         scroll.addSubview(photo)
         photo.translatesAutoresizingMaskIntoConstraints = false
-        photo.widthAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
+//        photo.widthAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
+        photo.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        photo.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         photo.heightAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
         photo.topAnchor.constraint(equalTo: scroll.topAnchor, constant: -marginTop).isActive = true
         photo.contentMode = .scaleAspectFit
@@ -80,7 +79,7 @@ class PostView: UIViewController {
         guard let markEdit = UIImage(named: "edit")?.withRenderingMode(.alwaysOriginal) else { return }
         let edit = SubstrateButton(image: markEdit, side: 35, target: self, action: #selector(editBlock),
                                    substrateColor: Colors.darkGray)
-        self.view.addSubview(edit)
+        view.addSubview(edit)
         edit.translatesAutoresizingMaskIntoConstraints = false
         edit.topAnchor.constraint(equalTo: photo.bottomAnchor, constant: -45).isActive = true
         edit.rightAnchor.constraint(equalTo: photo.rightAnchor, constant: -10).isActive = true
@@ -88,18 +87,17 @@ class PostView: UIViewController {
 
     private func setBlocks() {
         let blockPostType = BlockPostType.self
-//        let datPicker = DatePickerBlock()
 
         date = BlockPost(
-            value: nil,
-            iconImage: UIImage(named: "date")!, buttonIext: "дату", datePicker: nil, view: scroll,
+            textValue: nil,
+            iconImage: UIImage(named: "date")!, buttonIext: "Добавить дату", datePicker: nil, view: scroll,
             blockPostType: blockPostType.datePicker
         )
         guard let date = date else { return }
 
         place = BlockPost(
             // swiftlint:disable all
-            value: """
+            textValue: """
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut \
                 labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex  \
                 ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla \
@@ -123,20 +121,24 @@ class PostView: UIViewController {
                 laborum.
                 """,
             // swiftlint:enable all
-            iconImage: UIImage(named: "map")!, buttonIext: "место", datePicker: nil, view: scroll,
+            iconImage: UIImage(named: "map")!, buttonIext: "Добавить место", datePicker: nil, view: scroll,
             blockPostType: blockPostType.textView
         )
         guard let place = place else { return }
 
         post = BlockPost(
-            value: nil,
-            iconImage: UIImage(named: "post")!, buttonIext: "пост", datePicker: nil, view: scroll,
+            textValue: nil,
+            iconImage: UIImage(named: "post")!, buttonIext: "Добавить пост", datePicker: nil, view: scroll,
             blockPostType: blockPostType.textView
         )
         guard let post = post else { return }
 
         var prev = photo as UIView
-        for value in [BlockPost](arrayLiteral: date, place, post) {
+        for value in [BlockPost](arrayLiteral:
+            date,
+            place,
+            post
+        ) {
             value.translatesAutoresizingMaskIntoConstraints = false
             value.leftAnchor.constraint(equalTo: view.leftAnchor, constant: margin).isActive = true
             value.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -margin).isActive = true
@@ -145,6 +147,8 @@ class PostView: UIViewController {
 
             prev = value
         }
+        // Allows scroll view to resize dynamically
+        prev.bottomAnchor.constraint(equalTo: scroll.bottomAnchor, constant: -margin).isActive = true
     }
 
     private func fill() {

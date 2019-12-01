@@ -9,6 +9,7 @@
 import UIKit
 import Foundation
 import MobileCoreServices
+import CoreData
 
 class MainView: UIViewController {
     private var refreshControl = UIRefreshControl()
@@ -123,8 +124,6 @@ class MainView: UIViewController {
 
         content.addSubview(refreshControl)
         refreshControl.tintColor = Colors.lightBlue
-
-        CoreDataFeed.setFeed()
     }
 }
 
@@ -281,8 +280,17 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
 
    func imagePickerController(_ picker: UIImagePickerController,
                               didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
+            // MARK: Get full path to selected image
+            let fileManager = FileManager.default
+            let imagesPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let imagePath = imagesPath.appendingPathComponent("\(url.lastPathComponent)")
+            CoreDataPost.createPost(photoURL: imagePath,
+                                    date: Date.init(timeIntervalSinceNow: 0.2),
+                                    place: "place", text: "text")
+            CoreDataFeed.setFeed()
+        }
         if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            //FIXME: fix crop image
             photos.append(Photo(photo: selected))
             content.isHidden = false
             content.reloadData()

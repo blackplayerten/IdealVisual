@@ -24,6 +24,7 @@
 		1893229E23466104004026FC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229D23466104004026FC /* ProfileView.swift */; };
 		189322B5234687CE004026FC /* CustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* CustomElements.swift */; };
 		18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 18AA6582237714F0004B9588 /* .swiftlint.yml */; };
+		18ACE2A42391AB78008B05B8 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ACE2A32391AB78008B05B8 /* Post.swift */; };
 		18D4EEE5236DAE6A007C16D6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D4EEE4236DAE6A007C16D6 /* User.swift */; };
 		18E8C538237B47AB0064B4F0 /* DarkFontNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E8C537237B47AB0064B4F0 /* DarkFontNavigationController.swift */; };
 		18E8C53A237B7EE60064B4F0 /* SignUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E8C539237B7EE60064B4F0 /* SignUp.swift */; };
@@ -73,6 +74,7 @@
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
 		18AA6582237714F0004B9588 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		18ACE2A32391AB78008B05B8 /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 		18D4EEE4236DAE6A007C16D6 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		18E8C537237B47AB0064B4F0 /* DarkFontNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DarkFontNavigationController.swift; sourceTree = "<group>"; };
 		18E8C539237B7EE60064B4F0 /* SignUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUp.swift; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 				18D4EEE4236DAE6A007C16D6 /* User.swift */,
 				1830EB742385671200369CA4 /* DataManager.swift */,
 				18FEC808238BCDC800B6B217 /* Feed.swift */,
+				18ACE2A32391AB78008B05B8 /* Post.swift */,
 			);
 			path = models;
 			sourceTree = "<group>";
@@ -355,6 +358,7 @@
 				1830EB752385671200369CA4 /* DataManager.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
+				18ACE2A42391AB78008B05B8 /* Post.swift in Sources */,
 				188B5FB52361E6CC00EA3701 /* Photo.swift in Sources */,
 				181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */,
 				63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */,
