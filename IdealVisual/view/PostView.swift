@@ -47,6 +47,7 @@ class PostView: UIViewController {
         scroll.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         scroll.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+
     }
 
     private func setupNavItems() {
@@ -69,7 +70,6 @@ class PostView: UIViewController {
 
         scroll.addSubview(photo)
         photo.translatesAutoresizingMaskIntoConstraints = false
-//        photo.widthAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
         photo.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         photo.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         photo.heightAnchor.constraint(equalToConstant: view.bounds.width).isActive = true

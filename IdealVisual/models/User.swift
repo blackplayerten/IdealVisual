@@ -11,26 +11,44 @@ import UIKit
 import CoreData
 
 class CoreDataUser {
-    static func createUser(username: String, email: String) {
+    static private var cacheUser: User?
+
+    static func createUser(username: String, email: String) -> User? {
         let entityDescriptionUser = NSEntityDescription.entity(forEntityName: "User",
                                                                in: DataManager.instance.managedObjectContext)
         let managedObjectUser = NSManagedObject(entity: entityDescriptionUser!,
                                                 insertInto: DataManager.instance.managedObjectContext)
 
-        managedObjectUser.setValue("\(username)", forKey: "username")
-        managedObjectUser.setValue("\(email)", forKey: "email")
-        managedObjectUser.setValue(NSURL(), forKey: "ava")
+        managedObjectUser.setValue(username, forKey: "username")
+        managedObjectUser.setValue(email, forKey: "email")
+        managedObjectUser.setValue(NSURL(string: ""), forKey: "ava")
+
+        cacheUser = managedObjectUser.managedObjectContext?.registeredObjects.first as? User
 
         DataManager.instance.saveContext()
+        return cacheUser
     }
 
-    static func updateAvatar(imageURL: URL) {
+    static func updateUser(username: String?, email: String?, avatar: URL?) {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
         do {
             let users = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
-            let usersO = users as? [User]
-            let nowUser = usersO?.last
-            nowUser?.setValue(imageURL, forKey: "ava")
+            cacheUser = users.last as? User
+            if let username = username {
+                if username != "" {
+                    cacheUser?.setValue(username, forKey: "username")
+                }
+            }
+            if let email = email {
+                if email != "" {
+                    cacheUser?.setValue(email, forKey: "email")
+                }
+            }
+            if let avatar = avatar {
+                if avatar != URL(fileURLWithPath: "") {
+                    cacheUser?.setValue(avatar, forKey: "ava")
+                }
+            }
             DataManager.instance.saveContext()
         } catch {
             print(error)
@@ -38,20 +56,30 @@ class CoreDataUser {
     }
 
     static func getUser() -> User? {
+        if cacheUser != nil {
+            return cacheUser
+        }
+
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
         do {
             let users = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
-            for user in (users as? [User])! {
-                print("""
-                    userData:   \(user.username ?? "no userneme"),
-                                \(user.email ?? "no email"),
-                                \(String(describing: user.ava))
-                    """)
-            }
-            return users.last as? User
+            cacheUser = users.last as? User
+            return cacheUser
         } catch {
             print(error)
         }
         return nil
+    }
+
+    private static func cleanCache() {
+        cacheUser = nil
+    }
+
+    static func deleteUser() {
+        guard let cacheUser = cacheUser else { return }
+        DataManager.instance.managedObjectContext.delete(cacheUser)
+        DataManager.instance.saveContext()
+
+        cleanCache()
     }
 }

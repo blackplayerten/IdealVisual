@@ -20,6 +20,13 @@ protocol ProfileDelegate: class {
 }
 
 class ProfileView: UIView {
+    struct State {
+        var username = ""
+        var email = ""
+    }
+
+    private var state = State()
+
     private weak var delegateProfile: ProfileDelegate?
     private var testAva = UIImagePickerController()
     private let scroll = UIScrollView()
@@ -31,11 +38,20 @@ class ProfileView: UIView {
     private let ava = UIImageView()
     private let logoutButton = UIButton()
 
-    private let username = InputFields(labelImage: UIImage(named: "login"), text: "ketnipz513", placeholder: nil)
-    private let email = InputFields(labelImage: UIImage(named: "email"), text: "ketnipz@mail.ru", placeholder: nil)
-    private let password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль")
-    private let repeatPassword = InputFields(labelImage: UIImage(named: "password"), text: nil,
-                                             placeholder: "Повторите пароль")
+    private let username = InputFields(labelImage: UIImage(named: "login"),
+                                       text: CoreDataUser.getUser()?.username,
+                                       placeholder: nil, validator: checkValidUsername)
+    private let email = InputFields(labelImage: UIImage(named: "email"),
+                                    text: CoreDataUser.getUser()?.email,
+                                    placeholder: nil, validator: checkValidEmail)
+    private let password = InputFields(labelImage: UIImage(named: "password"),
+                                       text: nil, placeholder: "Пароль",
+                                       textContentType: .newPassword, validator: checkValidPassword)
+    private let repeatPassword = InputFields(labelImage: UIImage(named: "password"),
+                                             text: nil, placeholder: "Повторите пароль",
+                                             textContentType: .newPassword, validator: checkValidPassword)
+
+    private var urlAva: URL?
 
     init(profileDelegate: ProfileDelegate) {
         self.delegateProfile = profileDelegate
@@ -47,6 +63,7 @@ class ProfileView: UIView {
     private func setNoEdit() {
         testAva.delegate = self
         testAva.allowsEditing = true
+        ava.isUserInteractionEnabled = false
 
         let swipe = UISwipeGestureRecognizer()
         swipe.direction = .up
@@ -66,6 +83,9 @@ class ProfileView: UIView {
 
     @objc
     private func setEdit() {
+        state.username = username.textField.text ?? ""
+        state.email = email.textField.text ?? ""
+
         height?.isActive = false
         setNavEditButtons()
 
@@ -96,12 +116,45 @@ class ProfileView: UIView {
 
     @objc
     private func save_settings() {
+        let usernameIsValid = username.isValid()
+        let emailIsValid = email.isValid()
+        var pairIsValid = true
+        if password.textField.text?.count != 0 || repeatPassword.textField.text?.count != 0 {
+            pairIsValid = checkValidPasswordPair(field: password, fieldRepeat: repeatPassword)
+        }
+        if !(usernameIsValid && emailIsValid && pairIsValid) {
+            return
+        }
+
+        guard let usrInput = username.textField.text,
+            let emlInput = email.textField.text
+        else { return }
+        if usrInput == "" && emlInput == "" && urlAva == nil {
+            return
+        }
+        CoreDataUser.updateUser(username: usrInput, email: emlInput, avatar: urlAva)
+
+        password.textField.text = ""
+        password.clearState()
+        repeatPassword.textField.text = ""
+        repeatPassword.clearState()
+
         setupView()
     }
 
     @objc
     private func no_settings() {
-        self.removeConstraint(height!)
+        username.textField.text = state.username
+        email.textField.text = state.email
+        password.textField.text = ""
+        repeatPassword.textField.text = ""
+
+        username.clearState()
+        email.clearState()
+        password.clearState()
+        repeatPassword.clearState()
+
+        removeConstraint(height!)
         setupView()
     }
 
@@ -141,21 +194,6 @@ extension ProfileView {
 
 }
 
-// MARK: text fields
-extension ProfileView {
-    private func setFields() {
-        [username, email].forEach {
-            addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-            $0.heightAnchor.constraint(equalToConstant: 40).isActive = true
-            $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
-        }
-        username.topAnchor.constraint(equalTo: ava.bottomAnchor, constant: 30).isActive = true
-        email.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 30).isActive = true
-    }
-}
-
 // MARK: nav
 extension ProfileView {
     private func setNavButtons() {
@@ -179,7 +217,8 @@ extension ProfileView {
         ).isActive = true
     }
 
-    @objc private func setNavEditButtons() {
+    @objc
+    private func setNavEditButtons() {
         guard let markYes = UIImage(named: "yes") else { return }
         let yes = SubstrateButton(image: markYes, side: 33, target: self, action: #selector(save_settings),
                                   substrateColor: Colors.yellow)
@@ -198,32 +237,18 @@ extension ProfileView {
     }
 }
 
-// MARK: ava
+// MARK: set username, email
 extension ProfileView {
-    private func setAva() {
-        addSubview(ava)
-        ava.translatesAutoresizingMaskIntoConstraints = false
-        ava.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        ava.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 33+30+7).isActive = true
-        ava.widthAnchor.constraint(equalToConstant: 170).isActive = true
-        ava.heightAnchor.constraint(equalToConstant: 170).isActive = true
-        ava.contentMode = .scaleAspectFill
-        ava.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner,
-                                   .layerMinXMaxYCorner, .layerMinXMinYCorner]
-        ava.layer.cornerRadius = 10
-        ava.layer.masksToBounds = true
-
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
-        do {
-            let users = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
-            let usersO = users as? [User]
-            let nowUser = usersO?.last
-            ava.image = nowUser?.value(forKey: "ava") as? UIImage
-//            CoreDataUser.getUser()
-        } catch {
-             print(error)
+    private func setFields() {
+        [username, email].forEach {
+            addSubview($0)
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+            $0.heightAnchor.constraint(equalToConstant: 40).isActive = true
+            $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
         }
-        ava.isUserInteractionEnabled = false
+        username.topAnchor.constraint(equalTo: ava.bottomAnchor, constant: 30).isActive = true
+        email.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 30).isActive = true
     }
 }
 
@@ -243,24 +268,54 @@ extension ProfileView {
     }
 }
 
+// MARK: ava
+extension ProfileView {
+    private func setAva() {
+        addSubview(ava)
+        ava.translatesAutoresizingMaskIntoConstraints = false
+        ava.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        ava.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 33+30+7).isActive = true
+        ava.widthAnchor.constraint(equalToConstant: 170).isActive = true
+        ava.heightAnchor.constraint(equalToConstant: 170).isActive = true
+        ava.contentMode = .scaleAspectFill
+        ava.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner,
+                                   .layerMinXMaxYCorner, .layerMinXMinYCorner]
+        ava.layer.cornerRadius = 10
+        ava.layer.masksToBounds = true
+
+        guard let unWrapAvaName = CoreDataUser.getUser()?.ava!.lastPathComponent else { return }
+        _ = GetAvatarUser.setAvatarUser(nameAvatarByUrl: unWrapAvaName, place: ava)
+    }
+}
+
 extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        
         // MARK: save selected image to fileSystem using fileManager
         if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
-            // MARK: Get full path to selected image
-            let fileManager = FileManager.default
-            let imagesPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let imagePath = imagesPath.appendingPathComponent("\(url.lastPathComponent)")
-            print(imagePath)
-            CoreDataUser.updateAvatar(imageURL: imagePath)
-//            CoreDataUser.getUser()
+            if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+                ava.image = selected
+
+                // get full path to selected image
+                let fileManager = FileManager.default
+                let imagesPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+                let imagePath = imagesPath.appendingPathComponent("\(url.lastPathComponent)")
+                urlAva = imagePath
+                print(imagePath)
+
+                // save image as url to document directory in app
+                if let data = selected.jpegData(compressionQuality: 1.0),
+                    !FileManager.default.fileExists(atPath: urlAva!.path) {
+                    do {
+                        try data.write(to: imagePath)
+                        print("image saved to \(imagesPath)")
+                    } catch {
+                        print("image ne saved to \(imagesPath), because: ", error)
+                    }
+                }
+            }
         }
-        if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            ava.image = selected
-            // TODO: save in photo library if camera
-        }
+
         delegateProfile?.dismissAlert()
     }
 

@@ -28,20 +28,20 @@ class SubstrateButton: UIView {
         }
         let substrate = UIImageView()
         substrate.image = image
-        self.translatesAutoresizingMaskIntoConstraints = false
-        self.widthAnchor.constraint(equalToConstant: side).isActive = true
-        self.heightAnchor.constraint(equalToConstant: side).isActive = true
-        self.layer.cornerRadius = 10
-        self.backgroundColor = substrateColor
+        translatesAutoresizingMaskIntoConstraints = false
+        widthAnchor.constraint(equalToConstant: side).isActive = true
+        heightAnchor.constraint(equalToConstant: side).isActive = true
+        layer.cornerRadius = 10
+        backgroundColor = substrateColor
 
-        self.addSubview(button)
+        addSubview(button)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
         button.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         button.widthAnchor.constraint(equalTo: self.widthAnchor).isActive = true
         button.heightAnchor.constraint(equalTo: self.heightAnchor).isActive = true
 
-        self.addSubview(substrate)
+        addSubview(substrate)
         substrate.translatesAutoresizingMaskIntoConstraints = false
         substrate.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
         substrate.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
@@ -93,21 +93,21 @@ extension UIButton {
 class DatePickerComponent: UIDatePicker {
     init(datePicker: UIDatePicker? = nil) {
         super.init(frame: .zero)
-        self.locale = Locale(identifier: "ru")
-        self.addTarget(self, action: #selector(chooseDate(_:)), for: .valueChanged)
+        locale = Locale(identifier: "ru")
+        addTarget(self, action: #selector(chooseDate(_:)), for: .valueChanged)
     }
 
     @objc func chooseDate(_ sender: UIDatePicker) {
         _ = Calendar.current.dateComponents([.day, .month, .timeZone], from: sender.date)
-        self.minimumDate = Calendar.current.date(byAdding: .day, value: 0, to: Date())
-        self.layer.cornerRadius = 20
+        minimumDate = Calendar.current.date(byAdding: .day, value: 0, to: Date())
+        layer.cornerRadius = 20
     }
 
     func setEditingMode(state: Bool) {
         if state == true {
-            self.isUserInteractionEnabled = true
+            isUserInteractionEnabled = true
         } else {
-            self.isUserInteractionEnabled = false
+            isUserInteractionEnabled = false
         }
     }
 
@@ -146,7 +146,7 @@ class Line: UIView {
         let line = CGRect(x: 0, y: 0, width: 355, height: 1.0)
         let view = UIView(frame: line)
         view.backgroundColor = Colors.lightGray
-        self.addSubview(view)
+        addSubview(view)
         view.heightAnchor.constraint(equalToConstant: 1).isActive = true
     }
 
@@ -159,7 +159,7 @@ class LineClose: UIView {
         let line = CGRect(x: 0, y: 0, width: 50, height: 4.0)
         let view = UIView(frame: line)
         view.backgroundColor = Colors.darkGray
-        self.addSubview(view)
+        addSubview(view)
         view.heightAnchor.constraint(equalToConstant: 4).isActive = true
         view.layer.cornerRadius = 3
     }
@@ -172,17 +172,29 @@ class InputFields: UIView, UITextFieldDelegate {
     let labelMode = UILabel()
     let labelImage = UIImage()
 
-    init(labelImage: UIImage? = nil, text: String? = nil, placeholder: String? = nil) {
+    let mistakeLabel: CheckMistakeLabel?
+    private let validator: Validator?
+
+    init(labelImage: UIImage? = nil, text: String? = nil, placeholder: String? = nil,
+         textContentType: UITextContentType? = nil, keyboardType: UIKeyboardType = .default,
+         validator: Validator? = nil) {
+        self.validator = validator
+        if validator != nil {
+            self.mistakeLabel = CheckMistakeLabel()
+        } else {
+            self.mistakeLabel = nil
+        }
+
         super.init(frame: .zero)
         [textField, labelMode].forEach {
-            self.addSubview($0)
+            addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
 
-        self.translatesAutoresizingMaskIntoConstraints = false
-        self.backgroundColor = .white
-        self.layer.borderWidth = 0.5
-        self.layer.cornerRadius = 10
+        translatesAutoresizingMaskIntoConstraints = false
+        backgroundColor = .white
+        layer.borderWidth = 0.5
+        layer.cornerRadius = 10
 
         let font1 = UIFont(name: "PingFang-SC-SemiBold", size: 14)
         let font2 = UIFont(name: "PingFang-SC-Regular", size: 14)
@@ -201,6 +213,14 @@ class InputFields: UIView, UITextFieldDelegate {
         ])
         textField.attributedPlaceholder = attrPlaceholder
 
+        textField.textContentType = textContentType
+        textField.keyboardType = keyboardType
+        if textContentType == .password || textContentType == .newPassword {
+            textField.isSecureTextEntry = true
+        }
+        textField.autocorrectionType = .no
+        textField.autocapitalizationType = .none
+
         labelMode.leftAnchor.constraint(equalTo: textField.rightAnchor, constant: 10).isActive = true
         guard let tvCount = textField.text?.count else { return }
         labelMode.text = "\(50 - tvCount)"
@@ -211,8 +231,16 @@ class InputFields: UIView, UITextFieldDelegate {
         labelMode.font = font2
         labelMode.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 2000), for: .horizontal)
 
+        if let mistakeLabel = mistakeLabel {
+            addSubview(mistakeLabel)
+            mistakeLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            mistakeLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: -5).isActive = true
+            mistakeLabel.leftAnchor.constraint(equalTo: textField.leftAnchor, constant: 5).isActive = true
+        }
+
         let labelIV = UIImageView()
-        self.addSubview(labelIV)
+        addSubview(labelIV)
         labelIV.translatesAutoresizingMaskIntoConstraints = false
         labelIV.image = labelImage
         labelIV.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
@@ -226,6 +254,17 @@ class InputFields: UIView, UITextFieldDelegate {
 
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange,
                    replacementString string: String) -> Bool {
+        if let text = textField.text {
+            let currentString: NSString = text as NSString
+            let newString: NSString = currentString.replacingCharacters(in: range, with: string) as NSString
+
+            textField.text = newString as String
+
+            _ = isValid()
+
+            textField.text = currentString as String
+        }
+
         let newLength = (textField.text!.count + string.count) - range.length
         if newLength <= 50 {
             self.labelMode.text = "\(50 - newLength)"
@@ -235,16 +274,41 @@ class InputFields: UIView, UITextFieldDelegate {
         }
     }
 
+    func isValid() -> Bool {
+        var success = true
+        if let validator = validator {
+            guard let mistakeLabel = mistakeLabel else { return true }
+            success = validator(self, mistakeLabel)
+        }
+
+        return success
+    }
+
     func setEditFields(state: Bool) {
-        if state == true {
-            self.layer.borderColor = Colors.lightBlue.cgColor
-//            label.textColor = Colors.lightBlue
+        if state {
+            layer.borderColor = Colors.lightBlue.cgColor
         } else {
-            self.layer.borderColor = Colors.darkGray.cgColor
-//            label.textColor = .black
+            layer.borderColor = Colors.darkGray.cgColor
         }
         labelMode.isHidden = !state
         textField.isUserInteractionEnabled = state
+    }
+
+    func setValidationState(isValid: Bool) {
+        if isValid {
+            layer.borderColor = Colors.lightBlue.cgColor
+        } else {
+            layer.borderColor = UIColor.red.cgColor
+        }
+    }
+
+    func clearState() {
+        if let text = textField.text {
+            self.labelMode.text = "\(50 - text.count)"
+        } else {
+            self.labelMode.text = String(50)
+        }
+        mistakeLabel?.isHidden = true
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -253,151 +317,15 @@ class InputFields: UIView, UITextFieldDelegate {
 class CheckMistakeLabel: UILabel {
     init(text: String? = nil) {
         super.init(frame: .zero)
-        self.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        self.widthAnchor.constraint(equalToConstant: 300).isActive = true
+        heightAnchor.constraint(equalToConstant: 30).isActive = true
+        widthAnchor.constraint(equalToConstant: 300).isActive = true
         self.text = text
-        self.font = UIFont(name: "PingFang-SC-SemiBold", size: 12)
-        self.textColor = .red
-        self.textAlignment = .left
+        font = UIFont(name: "PingFang-SC-SemiBold", size: 12)
+        textColor = .red
+        textAlignment = .left
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
-// MARK: attempt to make table layout
-//class UserTable: UITableView, UITableViewDelegate, UITableViewDataSource {
-//    let user_cell: String = "UserTableCell"
-//    let detail_cell: String = "DetailTableCell"
-//    let auth_cell: String = "AuthTableCell"
-//    let view: UIView
-//    var dataUser = [User]()
-//    var dataAuth = [Auth]()
-//
-//    init(view: UIView) {
-//        self.view = view
-//        dataUser = user
-//        dataAuth = auth
-//        super.init(frame: .zero, style: .plain)
-//        self.delegate = self
-//        self.dataSource = self
-//        self.separatorStyle = .none
-//        self.register(UserTableCell.self, forCellReuseIdentifier: user_cell)
-//        self.register(AuthTableCell.self, forCellReuseIdentifier: auth_cell)
-//    }
-//
-//    required init?(coder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
-//
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        dataUser.count
-//    }
-//
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: user_cell, for: indexPath)
-//        if let user_cel = cell as? UserTableCell {
-//            user_cel.set()
-//            user_cel.fill(with: dataUser[indexPath.row])
-//        }
-//        if let auth_cel = cell as? AuthTableCell {
-//            auth_cel.set()
-//            auth_cel.fill(with: dataAuth[indexPath.row])
-//        }
-//        return cell
-//    }
-//
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: user_cell, for: indexPath) as! UserTableCell
-//        cell.editField()
-//    }
-//}
-//
-//class UserTableCell: UITableViewCell {
-//    var usernameField = UITextField()
-//    var emailField = UILabel()
-//    var passwordField = UILabel()
-//
-//    func fill(with model: User) {
-//        fillCells(with: model)
-//    }
-//
-//    private func fillCells(with model: User) {
-//        usernameField.text = model.username
-//        emailField.text = model.email
-//        passwordField.text = model.password
-//    }
-//
-//    func set() {
-//        setup()
-//    }
-//
-//    private func setup() {
-//        self.backgroundColor = .white
-//        self.isUserInteractionEnabled = true
-//        self.selectionStyle = .none
-//
-//        addSubview(usernameField)
-//        usernameField.isUserInteractionEnabled = false
-//        usernameField.translatesAutoresizingMaskIntoConstraints = false
-//        usernameField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-//        usernameField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-//
-//        addSubview(emailField)
-//        emailField.isUserInteractionEnabled = false
-//        emailField.translatesAutoresizingMaskIntoConstraints = false
-//        emailField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-//        emailField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-//
-//        addSubview(passwordField)
-//        passwordField.isUserInteractionEnabled = false
-//        passwordField.translatesAutoresizingMaskIntoConstraints = false
-//        passwordField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-//        passwordField.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-//    }
-//
-//    func editField() {
-//        edit()
-//    }
-//
-//    private func edit() {
-//        self.backgroundColor = Colors.blue
-//        usernameField.isUserInteractionEnabled = true
-//        emailField.isUserInteractionEnabled = true
-//        passwordField.isUserInteractionEnabled = true
-//    }
-//}
-//
-//class AuthTableCell: UITableViewCell {
-//    var usr = UITextField()
-//
-//
-//    func fill(with model: Auth) {
-//        fillCells(with: model)
-//    }
-//
-//    private func fillCells(with model: Auth) {
-//        usr.text = model.username
-//
-//    }
-//
-//    func set() { setup() }
-//
-//    private func setup() {
-//        self.backgroundColor = .white
-//        self.isUserInteractionEnabled = true
-//
-//        addSubview(usr)
-//        usr.translatesAutoresizingMaskIntoConstraints = false
-//        usr.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-//        usr.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-//        checkMaxLength(textField: usr, maxLength: 30)
-//    }
-//
-//    func checkMaxLength(textField: UITextField!, maxLength: Int) {
-//        if (textField.text!.count > maxLength) {
-//            textField.deleteBackward()
-//        }
-//    }
-//}

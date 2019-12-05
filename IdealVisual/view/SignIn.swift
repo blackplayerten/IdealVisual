@@ -10,8 +10,10 @@ import Foundation
 import UIKit
 
 class SignIn: UIViewController {
-    private let username = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин")
-    private let password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль")
+    private let username = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
+                                       textContentType: .username, validator: checkValidUsername)
+    private let password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль",
+                                       textContentType: .password, validator: checkValidPassword)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,6 +57,7 @@ class SignIn: UIViewController {
         username.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
                                       constant: 300).isActive = true
         password.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 30).isActive = true
+
         setAuthButtons()
     }
 
@@ -72,7 +75,7 @@ class SignIn: UIViewController {
         signInButton.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 50).isActive = true
         signInButton.widthAnchor.constraint(equalToConstant: 120).isActive = true
         signInButton.backgroundColor = Colors.blue
-        signInButton.addTarget(self, action: #selector(goTosignIn), for: .touchUpInside)
+        signInButton.addTarget(self, action: #selector(checkAuth), for: .touchUpInside)
 
         signUpButton.topAnchor.constraint(equalTo: signInButton.bottomAnchor, constant: 20).isActive = true
         signUpButton.widthAnchor.constraint(equalToConstant: 150).isActive = true
@@ -80,14 +83,27 @@ class SignIn: UIViewController {
         signUpButton.addTarget(self, action: #selector(goTosignUp), for: .touchUpInside)
     }
 
-    @objc private func goTosignIn() {
-        let mainVC = MainView()
-//        mainVC.modalPresentationStyle = .fullScreen
-        present(mainVC, animated: true, completion: nil)
+    //TODO: check password
+    @objc
+    private func checkAuth() {
+        let usernameIsValid = username.isValid()
+        let passwordIsValid = password.isValid()
+        if !usernameIsValid && !passwordIsValid {
+            return
+        }
+//        autoLogin()
     }
 
-    @objc private func goTosignUp() {
+    private func autoLogin() {
+        let tabBar = TabBar()
+        tabBar.modalPresentationStyle = .fullScreen
+        present(tabBar, animated: true, completion: nil)
+    }
+
+    @objc
+    private func goTosignUp() {
         let signUpVc = SignUp()
+        signUpVc.modalPresentationStyle = .fullScreen
         present(signUpVc, animated: true, completion: nil)
     }
 }

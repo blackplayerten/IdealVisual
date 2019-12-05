@@ -18,11 +18,13 @@
 		1838C7B823718358000A32A9 /* SignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1838C7B723718358000A32A9 /* SignIn.swift */; };
 		1838C7BA23748CF0000A32A9 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */; };
 		18457F2E23636E3300568D81 /* BlocksPub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18457F2D23636E3300568D81 /* BlocksPub.swift */; };
+		184EB37723971D3F00256255 /* GetAvatarUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184EB37623971D3F00256255 /* GetAvatarUser.swift */; };
 		1863C743236496F0001EB5F8 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */; };
 		188B5FB02361E47E00EA3701 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PostView.swift */; };
 		188B5FB52361E6CC00EA3701 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FB42361E6CC00EA3701 /* Photo.swift */; };
 		1893229E23466104004026FC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229D23466104004026FC /* ProfileView.swift */; };
 		189322B5234687CE004026FC /* CustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* CustomElements.swift */; };
+		18999E202398F8E6003C0F44 /* checkValid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18999E1F2398F8E6003C0F44 /* checkValid.swift */; };
 		18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 18AA6582237714F0004B9588 /* .swiftlint.yml */; };
 		18ACE2A42391AB78008B05B8 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ACE2A32391AB78008B05B8 /* Post.swift */; };
 		18D4EEE5236DAE6A007C16D6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D4EEE4236DAE6A007C16D6 /* User.swift */; };
@@ -68,11 +70,14 @@
 		1838C7B723718358000A32A9 /* SignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
 		1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "PingFang-SC-Regular.ttf"; path = "../../../../Desktop/fonts/PingFang/PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		18457F2D23636E3300568D81 /* BlocksPub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksPub.swift; sourceTree = "<group>"; };
+		184EB37623971D3F00256255 /* GetAvatarUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAvatarUser.swift; sourceTree = "<group>"; };
 		1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
 		188B5FAF2361E47E00EA3701 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		188B5FB42361E6CC00EA3701 /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
+		18999E1D239801DB003C0F44 /* IdealVisual.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IdealVisual.entitlements; sourceTree = "<group>"; };
+		18999E1F2398F8E6003C0F44 /* checkValid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = checkValid.swift; sourceTree = "<group>"; };
 		18AA6582237714F0004B9588 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		18ACE2A32391AB78008B05B8 /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 		18D4EEE4236DAE6A007C16D6 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -133,6 +138,8 @@
 		181B1AB5231DA6930081B01C /* IdealVisual */ = {
 			isa = PBXGroup;
 			children = (
+				18999E1E2398F83C003C0F44 /* view-model */,
+				18999E1D239801DB003C0F44 /* IdealVisual.entitlements */,
 				188B5FB32361E68200EA3701 /* models */,
 				1893229F2346809B004026FC /* fonts */,
 				181B1AB6231DA6930081B01C /* AppDelegate.swift */,
@@ -183,19 +190,28 @@
 			path = fonts;
 			sourceTree = "<group>";
 		};
+		18999E1E2398F83C003C0F44 /* view-model */ = {
+			isa = PBXGroup;
+			children = (
+				189322B4234687CE004026FC /* CustomElements.swift */,
+				184EB37623971D3F00256255 /* GetAvatarUser.swift */,
+				18999E1F2398F8E6003C0F44 /* checkValid.swift */,
+			);
+			path = "view-model";
+			sourceTree = "<group>";
+		};
 		632195CA3321E1A5988D39D1 /* view */ = {
 			isa = PBXGroup;
 			children = (
-				632194B70D0AC636CB2B847F /* PhotoCell.swift */,
-				63219C5F3C3B40275C1AC524 /* MainView.swift */,
-				1893229D23466104004026FC /* ProfileView.swift */,
-				189322B4234687CE004026FC /* CustomElements.swift */,
 				180D6C1D234BCD4700AB52F5 /* TabBar.swift */,
 				188B5FAF2361E47E00EA3701 /* PostView.swift */,
+				63219C5F3C3B40275C1AC524 /* MainView.swift */,
+				632194B70D0AC636CB2B847F /* PhotoCell.swift */,
+				18E8C539237B7EE60064B4F0 /* SignUp.swift */,
+				1893229D23466104004026FC /* ProfileView.swift */,
 				18457F2D23636E3300568D81 /* BlocksPub.swift */,
 				1838C7B723718358000A32A9 /* SignIn.swift */,
 				18E8C537237B47AB0064B4F0 /* DarkFontNavigationController.swift */,
-				18E8C539237B7EE60064B4F0 /* SignUp.swift */,
 			);
 			path = view;
 			sourceTree = "<group>";
@@ -356,7 +372,9 @@
 			files = (
 				189322B5234687CE004026FC /* CustomElements.swift in Sources */,
 				1830EB752385671200369CA4 /* DataManager.swift in Sources */,
+				184EB37723971D3F00256255 /* GetAvatarUser.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
+				18999E202398F8E6003C0F44 /* checkValid.swift in Sources */,
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
 				18ACE2A42391AB78008B05B8 /* Post.swift in Sources */,
 				188B5FB52361E6CC00EA3701 /* Photo.swift in Sources */,
@@ -537,6 +555,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = IdealVisual/IdealVisual.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = D9U48T4MSD;
 				INFOPLIST_FILE = IdealVisual/Info.plist;
@@ -555,6 +574,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = IdealVisual/IdealVisual.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = D9U48T4MSD;
 				INFOPLIST_FILE = IdealVisual/Info.plist;

@@ -188,7 +188,7 @@ class BlockPost: UIView {
         checkLabel.translatesAutoresizingMaskIntoConstraints = false
 
         checkLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
-        checkLabel.topAnchor.constraint(equalTo: lineTop.bottomAnchor).isActive = true
+        checkLabel.topAnchor.constraint(equalTo: topAnchor).isActive = true
         checkLabel.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
 
         guard let charactersCount = textView?.text.count else { return }

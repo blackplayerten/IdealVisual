@@ -18,6 +18,7 @@ class MainView: UIViewController {
     private let photo = UIButton()
     private var photos = [Photo]()
     private var profileV: ProfileView?
+//    private var urlAva: URL?
     private var editMode: Bool = false
 
     lazy fileprivate var content: UICollectionView = {
@@ -43,12 +44,12 @@ class MainView: UIViewController {
         view.backgroundColor = .white
 
         // FIXME: stub
-        for characters in 1...19 {
-            let strName = String(characters)
-            let mypath = "test/" + strName
-            guard let img = UIImage(named: mypath) else { return }
-            photos.append(Photo(photo: img))
-        }
+//        for characters in 1...19 {
+//            let strName = String(characters)
+//            let mypath = "test/" + strName
+//            guard let img = UIImage(named: mypath) else { return }
+//            photos.append(Photo(photo: img))
+//        }
 
         self.tabBarController?.delegate = self
         choose.delegate = self
@@ -68,11 +69,21 @@ class MainView: UIViewController {
     }
 
     private func setNavItems() {
+        // TODO: доделать апдейт аватарки и обрезка
+//        guard let inputAva = urlAva else { return }
+//        CoreDataUser.updateUser(username: nil, email: nil, avatar: inputAva)
         let profileV = UIButton()
         profileV.translatesAutoresizingMaskIntoConstraints = false
         profileV.clipsToBounds = true
+//        let aaa = UIImage()
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: profileV)
-        profileV.setBackgroundImage(UIImage(named: "default_profile"), for: .normal)
+        guard let unwrapAvaCoreData = CoreDataUser.getUser()?.ava!.lastPathComponent else { return }
+        guard let unWrapAvaName = GetAvatarUser.setAvatarUser(nameAvatarByUrl: unwrapAvaCoreData, place: nil)
+            else { return }
+        print("unWrapAvaName: \(unWrapAvaName)")
+        profileV.setBackgroundImage(UIImage(named: unWrapAvaName), for: .normal)
+//        urlAva = URL(fileURLWithPath: unwrapAvaCoreData)
+//        profileV.setBackgroundImage(UIImage(contentsOfFile: unWrapAvaName), for: .normal)
         profileV.widthAnchor.constraint(equalToConstant: 33).isActive = true
         profileV.heightAnchor.constraint(equalToConstant: 33).isActive = true
         profileV.layer.cornerRadius = 10
@@ -338,19 +349,21 @@ extension MainView: UITabBarControllerDelegate {
 extension MainView: ProfileDelegate {
     internal func logOut() {
         profileV?.removeFromSuperview()
+        CoreDataUser.deleteUser()
         auth()
     }
 
     private func auth() {
         let authVC = SignIn()
-//        authVC.modalPresentationStyle = .fullScreen
-//        navigationController?.pushViewController(authVC, animated: true)
+        authVC.modalPresentationStyle = .fullScreen
         present(authVC, animated: true, completion: nil)
     }
 
-    @objc internal func profile() { show_profile() }
+    @objc
+    internal func profile() { show_profile() }
 
-    @objc private func show_profile() {
+    @objc
+    private func show_profile() {
         disableTabBarButton()
         guard let profileV = profileV else { return }
         view.addSubview(profileV)

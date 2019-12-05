@@ -11,11 +11,16 @@ import UIKit
 import CoreData
 
 class SignUp: UIViewController {
-    private let usernameField = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин")
-    private let emailField = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта")
-    private let passwordField = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль")
+    private let usernameField = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
+                                            textContentType: .username, validator: checkValidUsername)
+    private let emailField = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
+                                         textContentType: .emailAddress, keyboardType: .emailAddress,
+                                         validator: checkValidEmail)
+    private let passwordField = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль",
+                                            textContentType: .newPassword, validator: checkValidPassword)
     private let repeatPasswordField = InputFields(labelImage: UIImage(named: "password"), text: nil,
-                                             placeholder: "Повторите пароль")
+                                             placeholder: "Повторите пароль",
+                                             textContentType: .newPassword, validator: checkValidPassword)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -85,7 +90,7 @@ class SignUp: UIViewController {
         signInButton.topAnchor.constraint(equalTo: createAccountButton.bottomAnchor, constant: 20).isActive = true
         signInButton.widthAnchor.constraint(equalToConstant: 150).isActive = true
         signInButton.setColor(state: false)
-        createAccountButton.addTarget(self, action: #selector(goTosignIn), for: .touchUpInside)
+        signInButton.addTarget(self, action: #selector(goToSignIn), for: .touchUpInside)
     }
 
     @objc private func createAccount() {
@@ -100,95 +105,27 @@ class SignUp: UIViewController {
             return
         }
 
-        CoreDataUser.createUser(username: username, email: email)
-//        CoreDataUser.getUser()
+        _ = CoreDataUser.createUser(username: username, email: email)
+        autoLogin()
     }
 
     private func checkValidInputs() -> Bool {
-        let usernameMistake = CheckMistakeLabel()
-        let emailMistake = CheckMistakeLabel()
-        let passwordMistake = CheckMistakeLabel()
-        let repeatPasswordMistake = CheckMistakeLabel()
-
-        var areValid = true
-
-        [usernameMistake, emailMistake, passwordMistake, repeatPasswordMistake].forEach {
-            view.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.leftAnchor.constraint(equalTo: usernameField.leftAnchor, constant: 5).isActive = true
-        }
-        areValid = true
-        usernameMistake.topAnchor.constraint(equalTo: usernameField.bottomAnchor, constant: 3).isActive = true
-        emailMistake.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 3).isActive = true
-        passwordMistake.topAnchor.constraint(equalTo: passwordField.bottomAnchor, constant: 3).isActive = true
-        repeatPasswordMistake.topAnchor.constraint(equalTo: repeatPasswordField.bottomAnchor,
-                                                   constant: 3).isActive = true
-
-        [usernameField, emailField].forEach {
-            if $0.textField.text?.count != 0 {
-                $0.layer.borderColor = Colors.lightBlue.cgColor
-                usernameMistake.isHidden = true
-                emailMistake.isHidden = true
-                emailMistake.isHidden = true
-            } else {
-                $0.layer.borderColor = UIColor.red.cgColor
-                usernameMistake.text = "Имя пользователя не может быть пустым"
-                emailMistake.text = "Электронная почта не может быть пустой"
-                usernameMistake.isHidden = false
-                emailMistake.isHidden = false
-                areValid = false
-            }
-        }
-
-        var passwordsAreValid = true
-        [passwordField, repeatPasswordField].forEach {
-            if $0.textField.text!.count < 8 {
-                areValid = false
-                passwordsAreValid = false
-                passwordMistake.isHidden = false
-                repeatPasswordMistake.isHidden = false
-                passwordMistake.text = "Слабый пароль"
-                repeatPasswordMistake.text = "Слабый пароль"
-            }
-        }
-
-        if passwordField.textField.text != repeatPasswordField.textField.text {
-            areValid = false
-            passwordsAreValid = false
-            passwordMistake.isHidden = false
-            repeatPasswordMistake.isHidden = false
-            passwordMistake.text = "Пароли не совпадают"
-            repeatPasswordMistake.text = "Пароли не совпадают"
-        }
-
-        if passwordField.textField.text != repeatPasswordField.textField.text &&
-            passwordField.textField.text!.count < 8 && repeatPasswordField.textField.text!.count < 8 {
-            areValid = false
-            passwordsAreValid = false
-            passwordMistake.isHidden = false
-            repeatPasswordMistake.isHidden = false
-            passwordMistake.text = "Слабый пароль, пароли не совпадают"
-            repeatPasswordMistake.text = "Слабый пароль, пароли не совпадают"
-        }
-
-        [passwordField, repeatPasswordField].forEach {
-            if passwordsAreValid {
-                $0.layer.borderColor = Colors.lightBlue.cgColor
-                passwordMistake.isHidden = true
-                repeatPasswordMistake.isHidden = true
-            } else {
-                $0.layer.borderColor = UIColor.red.cgColor
-                passwordMistake.isHidden = false
-                repeatPasswordMistake.isHidden = false
-            }
-        }
-
-        return areValid
+        let usernameIsValid = usernameField.isValid()
+        let emailIsValid = emailField.isValid()
+        let pairIsValid = checkValidPasswordPair(field: passwordField, fieldRepeat: repeatPasswordField)
+        return usernameIsValid && emailIsValid && pairIsValid
     }
 
-    @objc private func goTosignIn() {
-//        let signInVC = SignIn()
-//        signInVC.modalPresentationStyle = .fullScreen
-//        self.dismiss(animated: true, completion: nil)
+    private func autoLogin() {
+        let tabBar = TabBar()
+        tabBar.modalPresentationStyle = .fullScreen
+        present(tabBar, animated: true, completion: nil)
+    }
+
+    @objc
+    private func goToSignIn() {
+        let signIn = SignIn()
+        signIn.modalPresentationStyle = .fullScreen
+        present(signIn, animated: true, completion: nil)
     }
 }
