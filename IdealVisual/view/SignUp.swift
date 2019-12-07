@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import CoreData
 
-class SignUp: UIViewController {
+final class SignUp: UIViewController {
     private let usernameField = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
                                             textContentType: .username, validator: checkValidUsername)
     private let emailField = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",

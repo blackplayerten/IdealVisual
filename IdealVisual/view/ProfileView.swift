@@ -19,7 +19,7 @@ protocol ProfileDelegate: class {
     func logOut()
 }
 
-class ProfileView: UIView {
+final class ProfileView: UIView {
     struct State {
         var username = ""
         var email = ""
@@ -51,7 +51,7 @@ class ProfileView: UIView {
                                              text: nil, placeholder: "Повторите пароль",
                                              textContentType: .newPassword, validator: checkValidPassword)
 
-    private var urlAva: URL?
+    private var urlAva: String?
 
     init(profileDelegate: ProfileDelegate) {
         self.delegateProfile = profileDelegate
@@ -89,7 +89,7 @@ class ProfileView: UIView {
         height?.isActive = false
         setNavEditButtons()
 
-        height = self.heightAnchor.constraint(equalToConstant: self.bounds.height + 135)
+        height = self.heightAnchor.constraint(equalToConstant: self.bounds.height + 155)
         height?.isActive = true
 
         let tap = UITapGestureRecognizer()
@@ -283,39 +283,21 @@ extension ProfileView {
         ava.layer.cornerRadius = 10
         ava.layer.masksToBounds = true
 
-        guard let unWrapAvaName = CoreDataUser.getUser()?.ava!.lastPathComponent else { return }
-        _ = GetAvatarUser.setAvatarUser(nameAvatarByUrl: unWrapAvaName, place: ava)
+        guard let unWrapAvaName = CoreDataUser.getUser()?.ava else { return }
+        ava.image = getPhoto(namePhoto: unWrapAvaName, typePhoto: .avatar)
     }
 }
 
 extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        // MARK: save selected image to fileSystem using fileManager
         if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
             if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 ava.image = selected
-
-                // get full path to selected image
-                let fileManager = FileManager.default
-                let imagesPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-                let imagePath = imagesPath.appendingPathComponent("\(url.lastPathComponent)")
-                urlAva = imagePath
-                print(imagePath)
-
-                // save image as url to document directory in app
-                if let data = selected.jpegData(compressionQuality: 1.0),
-                    !FileManager.default.fileExists(atPath: urlAva!.path) {
-                    do {
-                        try data.write(to: imagePath)
-                        print("image saved to \(imagesPath)")
-                    } catch {
-                        print("image ne saved to \(imagesPath), because: ", error)
-                    }
-                }
+                _ = savePhoto(photo: selected, typePhoto: .avatar, fileName: url.lastPathComponent)
+                urlAva = getFolderName(typePhoto: .avatar) + "/" + url.lastPathComponent
             }
         }
-
         delegateProfile?.dismissAlert()
     }
 

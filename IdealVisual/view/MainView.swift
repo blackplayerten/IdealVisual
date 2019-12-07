@@ -11,15 +11,16 @@ import Foundation
 import MobileCoreServices
 import CoreData
 
-class MainView: UIViewController {
+final class MainView: UIViewController {
     private var refreshControl = UIRefreshControl()
     private let helpText = UILabel()
     fileprivate var choose = UIImagePickerController()
     private let photo = UIButton()
-    private var photos = [Photo]()
     private var profileV: ProfileView?
 //    private var urlAva: URL?
     private var editMode: Bool = false
+
+    private var posts = [Post]()
 
     lazy fileprivate var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -43,23 +44,17 @@ class MainView: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
 
-        // FIXME: stub
-//        for characters in 1...19 {
-//            let strName = String(characters)
-//            let mypath = "test/" + strName
-//            guard let img = UIImage(named: mypath) else { return }
-//            photos.append(Photo(photo: img))
-//        }
-
         self.tabBarController?.delegate = self
         choose.delegate = self
         choose.sourceType = .photoLibrary
         choose.allowsEditing = true
+
         profileV = ProfileView(profileDelegate: self)
         setNavTitle()
         setNavItems()
     }
 
+    // MARK: navigation items
     private func setNavTitle() {
         let titleV = UILabel()
         titleV.text = "Лента"
@@ -77,19 +72,16 @@ class MainView: UIViewController {
         profileV.clipsToBounds = true
 //        let aaa = UIImage()
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: profileV)
-        guard let unwrapAvaCoreData = CoreDataUser.getUser()?.ava!.lastPathComponent else { return }
-        guard let unWrapAvaName = GetAvatarUser.setAvatarUser(nameAvatarByUrl: unwrapAvaCoreData, place: nil)
+        guard let unwrapAvaCoreData = CoreDataUser.getUser()?.ava else { return }
+        guard let unWrapAva = getPhoto(namePhoto: unwrapAvaCoreData, typePhoto: .avatar)
             else { return }
-        print("unWrapAvaName: \(unWrapAvaName)")
-        profileV.setBackgroundImage(UIImage(named: unWrapAvaName), for: .normal)
-//        urlAva = URL(fileURLWithPath: unwrapAvaCoreData)
-//        profileV.setBackgroundImage(UIImage(contentsOfFile: unWrapAvaName), for: .normal)
+        profileV.setBackgroundImage(unWrapAva, for: .normal)
         profileV.widthAnchor.constraint(equalToConstant: 33).isActive = true
         profileV.heightAnchor.constraint(equalToConstant: 33).isActive = true
         profileV.layer.cornerRadius = 10
         profileV.addTarget(self, action: #selector(profile), for: .touchUpInside)
 
-        if photos.isEmpty == false {
+        if CoreDataPost.getPosts()?.count != 0 {
             guard let markEdit = UIImage(named: "edit_gray") else { return }
             navigationItem.leftBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: markEdit,
                                                                                        side: 35,
@@ -117,6 +109,7 @@ class MainView: UIViewController {
         ))
     }
 
+    // MARK: init collection view
     private func initContent() {
         content.translatesAutoresizingMaskIntoConstraints = false
         content.delegate = self
@@ -138,6 +131,45 @@ class MainView: UIViewController {
     }
 }
 
+// MARK: picker
+extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    internal func showAlert(alert: UIAlertController) { present(alert, animated: true) }
+
+    private func openGallery() { present(choose, animated: true, completion: nil) }
+
+    func imagePickerController(_ picker: UIImagePickerController,
+                               didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
+            if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+                let fileName = url.lastPathComponent
+                _ = savePhoto(photo: selected, typePhoto: .post, fileName: fileName)
+
+                guard let post = CoreDataPost.createPost(
+                    photo: getFolderName(typePhoto: .post) + "/" + fileName,
+                    date: Date(timeIntervalSince1970: 0), place: "", text: "", orderNum: posts.count
+                ) else { return }
+                posts.append(post)
+            }
+            content.isHidden = false
+            content.reloadData()
+            setNavItems()
+        }
+        dismissAlert()
+    }
+
+    func dismissAlert() { dismiss(animated: true, completion: nil) }
+
+    func chooseAvatar(picker: UIImagePickerController) { present(picker, animated: true, completion: nil) }
+
+    @objc private func choose_photo() {
+        let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "Галерея", style: .default, handler: { _ in self.openGallery() }))
+        alert.addAction(UIAlertAction(title: "Отменить", style: UIAlertAction.Style.cancel, handler: nil))
+        present(alert, animated: true)
+    }
+}
+
+// MARK: delegate
 extension MainView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if editMode == true {
@@ -145,7 +177,8 @@ extension MainView: UICollectionViewDelegate {
             if let selectCell = cell as? PhotoCell { selectCell.selectedImage.isHidden = false }
         } else {
             let detailPhoto = PostView()
-            detailPhoto.publication = photos[indexPath.item]
+            detailPhoto.publication = posts[indexPath.item]
+            detailPhoto.photo.image = getPhoto(namePhoto: posts[indexPath.item].photo!, typePhoto: .post)
             self.navigationController?.pushViewController(detailPhoto, animated: true)
         }
     }
@@ -158,36 +191,10 @@ extension MainView: UICollectionViewDelegate {
     }
 }
 
-extension MainView {
-    @objc private func edit() {
-        editMode = true
-        setNavEditItems()
-        initContent()
-        content.allowsMultipleSelection = true
-        content.dragInteractionEnabled = false
-    }
-
-    @objc private func no() {
-        setNavItems()
-        editMode = false
-    }
-
-    @objc private func save() {
-        if editMode == true {
-            if let selectedCells = content.indexPathsForSelectedItems {
-                let items = selectedCells.map { $0.item }.sorted().reversed()
-                for item in items { photos.remove(at: item) }
-                content.deleteItems(at: selectedCells)
-            }
-            setNavItems()
-        }
-        editMode = false
-    }
-}
-
+// MARK: data source
 extension MainView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return photos.count
+        return posts.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) ->
@@ -195,7 +202,8 @@ extension MainView: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
             if let unwrapCell = cell as? PhotoCell {
                 unwrapCell.backgroundColor = .gray
-                unwrapCell.picture.image = photos[indexPath.item].photo
+                unwrapCell.picture.image = getPhoto(namePhoto: posts[indexPath.item].photo!,
+                                                    typePhoto: .post)
                 unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
                                           height: view.bounds.width / 3 - 1)
             }
@@ -203,7 +211,11 @@ extension MainView: UICollectionViewDataSource {
     }
 
     private func checkPhotos() {
-        if photos.isEmpty {
+        guard let postsCD = CoreDataPost.getPosts() else { return }
+        if postsCD.count != 0 {
+            posts = postsCD
+            content.isHidden = false
+        } else {
             content.isHidden = true
             setHelp()
             helpText.text = """
@@ -227,10 +239,14 @@ extension MainView: UICollectionViewDataSource {
     }
 }
 
+// MARK: drag & drop
 extension MainView: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
                         at indexPath: IndexPath) -> [UIDragItem] {
-        let image = photos[indexPath.row].photo
+        guard let imageURL = posts[indexPath.row].photo,
+            let image = getPhoto(namePhoto: imageURL, typePhoto: .post)
+        else { fatalError() }
+
         let provider = NSItemProvider(object: image)
         let dragItem = UIDragItem(itemProvider: provider)
         return [dragItem]
@@ -253,9 +269,9 @@ extension MainView: UICollectionViewDropDelegate {
         for item in items {
             guard let sourceIndexPath = item.sourceIndexPath else { return }
             collectionView.performBatchUpdates({
-                let moveImage = photos[sourceIndexPath.item]
-                photos.remove(at: sourceIndexPath.item)
-                photos.insert(moveImage, at: destinationIndexPath.item)
+                let moveImage = posts[sourceIndexPath.item]
+                posts.remove(at: sourceIndexPath.item)
+                posts.insert(moveImage, at: destinationIndexPath.item)
 
                 content.deleteItems(at: [sourceIndexPath])
                 content.insertItems(at: [destinationIndexPath])
@@ -270,6 +286,7 @@ extension MainView: UICollectionViewDropDelegate {
     }
 }
 
+// MARK: refresh control
 extension MainView: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(tick),
@@ -284,44 +301,43 @@ extension MainView: UICollectionViewDataSourcePrefetching {
     }
 }
 
-extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    internal func showAlert(alert: UIAlertController) { present(alert, animated: true) }
-
-    private func openGallery() { present(choose, animated: true, completion: nil) }
-
-   func imagePickerController(_ picker: UIImagePickerController,
-                              didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
-            // MARK: Get full path to selected image
-            let fileManager = FileManager.default
-            let imagesPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let imagePath = imagesPath.appendingPathComponent("\(url.lastPathComponent)")
-            CoreDataPost.createPost(photoURL: imagePath,
-                                    date: Date.init(timeIntervalSinceNow: 0.2),
-                                    place: "place", text: "text")
-            CoreDataFeed.setFeed()
-        }
-        if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            photos.append(Photo(photo: selected))
-            content.isHidden = false
-            content.reloadData()
-            setNavItems()
-        }
-        dismissAlert()
+// MARK: edit collection view
+extension MainView {
+    @objc
+    private func edit() {
+        editMode = true
+        setNavEditItems()
+        initContent()
+        content.allowsMultipleSelection = true
+        content.dragInteractionEnabled = false
     }
 
-    func dismissAlert() { dismiss(animated: true, completion: nil) }
+    @objc
+    private func no() {
+        setNavItems()
+        editMode = false
+    }
 
-    func chooseAvatar(picker: UIImagePickerController) { present(picker, animated: true, completion: nil) }
-
-    @objc private func choose_photo() {
-        let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "Галерея", style: .default, handler: { _ in self.openGallery() }))
-        alert.addAction(UIAlertAction(title: "Отменить", style: UIAlertAction.Style.cancel, handler: nil))
-        present(alert, animated: true)
+    @objc
+    private func save() {
+        if editMode {
+            if let selectedCells = content.indexPathsForSelectedItems {
+                let items = selectedCells.map { $0.item }.sorted().reversed()
+                for item in items {
+                    let delPost = posts.remove(at: item)
+                    let photoPath = delPost.photo ?? ""
+                    CoreDataPost.deletePost(post: delPost)
+                    deleteFile(filePath: photoPath)
+                }
+                content.deleteItems(at: selectedCells)
+            }
+            setNavItems()
+            editMode = false
+        }
     }
 }
 
+// MARK: tab bar
 extension MainView: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         if self.tabBarController?.selectedIndex == 0 { self.choose_photo() }
@@ -346,6 +362,7 @@ extension MainView: UITabBarControllerDelegate {
     }
 }
 
+// MARK: profile delegate
 extension MainView: ProfileDelegate {
     internal func logOut() {
         profileV?.removeFromSuperview()

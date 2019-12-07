@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class SignIn: UIViewController {
+final class SignIn: UIViewController {
     private let username = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
                                        textContentType: .username, validator: checkValidUsername)
     private let password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль",

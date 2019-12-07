@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-class DarkFontNavigationController: UINavigationController {
+final class DarkFontNavigationController: UINavigationController {
     override var preferredStatusBarStyle: UIStatusBarStyle {
         .lightContent
     }

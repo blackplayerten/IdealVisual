@@ -9,32 +9,39 @@
 import Foundation
 import UIKit
 
-class BlockPost: UIView {
+protocol BlockDelegate: class {
+    func updateBlock(from: BlockPost)
+}
+
+final class BlockPost: UIView {
+    private let delegatePost: BlockDelegate?
     private var icon: SubstrateButton
     private var iconImage: UIImage
     private let checkLabel = UILabel()
     private var lineTop = Line()
     private var lineBottom = Line()
     private var buttonSave = AddComponentsButton(text: "Сохранить")
-    private var textView: TextViewComponent?
-    private var datePicker: DatePickerComponent?
+    var textView: TextViewComponent?
+    var datePicker: DatePickerComponent?
     private var topAnchorTextOrPicker: NSLayoutConstraint?
     private var bottomAnchorTextOrPicker: NSLayoutConstraint?
     private var addButton: AddComponentsButton?
     private var blockPostType: BlockPostType
 
     init(textValue: String? = nil, iconImage: UIImage, buttonIext: String, datePicker: DatePickerComponent? = nil,
-         view: UIView, blockPostType: BlockPostType) {
+         view: UIView, blockPostType: BlockPostType, delegatePost: BlockDelegate? = nil) {
         self.iconImage = iconImage
         self.blockPostType = blockPostType
 
-        if textValue != nil || datePicker != nil {
+        if textValue != nil && textValue != "" ||
+            datePicker != nil && datePicker?.date != Date(timeIntervalSince1970: 0) {
             icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
         } else {
             icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.darkGray)
             addButton = AddComponentsButton(text: buttonIext)
             addButton?.setColor(state: false)
         }
+        self.delegatePost = delegatePost
         super.init(frame: .zero)
 
         view.addSubview(self)
@@ -42,12 +49,12 @@ class BlockPost: UIView {
 
         switch blockPostType {
         case .datePicker:
-            if datePicker == nil {
+            if datePicker == nil || datePicker?.date == Date(timeIntervalSince1970: 0) {
                 renderAddButton()
                 return
             }
         case .textView:
-            if textValue == nil {
+            if textValue == nil || textValue == "" {
                 renderAddButton()
                 return
             }
@@ -203,7 +210,6 @@ class BlockPost: UIView {
     private func renderSaveButton() {
         buttonSave.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
         buttonSave.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -3).isActive = true
-//        buttonSave.topAnchor.constraint(equalTo: lineBottom.bottomAnchor, constant: 5).isActive = true
         buttonSave.addTarget(self, action: #selector(saveTVContent), for: .touchUpInside)
         buttonSave.setColor(state: true)
     }
@@ -232,6 +238,7 @@ class BlockPost: UIView {
             }
             if commitChanges {
                 // save
+                delegatePost?.updateBlock(from: self)
             }
         case .textView:
             guard let textView = textView else { return }
@@ -240,6 +247,7 @@ class BlockPost: UIView {
             }
             if commitChanges {
                 // save
+                delegatePost?.updateBlock(from: self)
             }
         }
 

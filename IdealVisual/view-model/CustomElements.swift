@@ -116,7 +116,7 @@ class DatePickerComponent: UIDatePicker {
     }
 }
 
-class TextViewComponent: UITextView {
+class TextViewComponent: UITextView, UITextViewDelegate {
     init(text: String? = nil) {
         super.init(frame: .zero, textContainer: nil)
         isScrollEnabled = false
@@ -168,6 +168,8 @@ class LineClose: UIView {
 }
 
 class InputFields: UIView, UITextFieldDelegate {
+    let blockView = UIView()
+
     let textField = UITextField()
     let labelMode = UILabel()
     let labelImage = UIImage()
@@ -186,8 +188,15 @@ class InputFields: UIView, UITextFieldDelegate {
         }
 
         super.init(frame: .zero)
+        addSubview(blockView)
+        blockView.translatesAutoresizingMaskIntoConstraints = false
+        blockView.widthAnchor.constraint(equalToConstant: 300).isActive = true
+        blockView.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        blockView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        blockView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+
         [textField, labelMode].forEach {
-            addSubview($0)
+            blockView.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
 
@@ -223,7 +232,7 @@ class InputFields: UIView, UITextFieldDelegate {
 
         labelMode.leftAnchor.constraint(equalTo: textField.rightAnchor, constant: 10).isActive = true
         guard let tvCount = textField.text?.count else { return }
-        labelMode.text = "\(50 - tvCount)"
+        labelMode.text = "\(tvCount)/50"
         labelMode.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -20).isActive = true
         labelMode.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         labelMode.heightAnchor.constraint(equalToConstant: 30).isActive = true
@@ -235,8 +244,8 @@ class InputFields: UIView, UITextFieldDelegate {
             addSubview(mistakeLabel)
             mistakeLabel.translatesAutoresizingMaskIntoConstraints = false
 
-            mistakeLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: -5).isActive = true
-            mistakeLabel.leftAnchor.constraint(equalTo: textField.leftAnchor, constant: 5).isActive = true
+            mistakeLabel.topAnchor.constraint(equalTo: bottomAnchor).isActive = true
+            mistakeLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
         }
 
         let labelIV = UIImageView()
@@ -267,7 +276,7 @@ class InputFields: UIView, UITextFieldDelegate {
 
         let newLength = (textField.text!.count + string.count) - range.length
         if newLength <= 50 {
-            self.labelMode.text = "\(50 - newLength)"
+            self.labelMode.text = "\(newLength)/50"
             return true
         } else {
             return false
@@ -304,7 +313,7 @@ class InputFields: UIView, UITextFieldDelegate {
 
     func clearState() {
         if let text = textField.text {
-            self.labelMode.text = "\(50 - text.count)"
+            self.labelMode.text = "\(text.count)/50"
         } else {
             self.labelMode.text = String(50)
         }
@@ -317,7 +326,7 @@ class InputFields: UIView, UITextFieldDelegate {
 class CheckMistakeLabel: UILabel {
     init(text: String? = nil) {
         super.init(frame: .zero)
-        heightAnchor.constraint(equalToConstant: 30).isActive = true
+        heightAnchor.constraint(equalToConstant: 20).isActive = true
         widthAnchor.constraint(equalToConstant: 300).isActive = true
         self.text = text
         font = UIFont(name: "PingFang-SC-SemiBold", size: 12)

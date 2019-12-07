@@ -21,7 +21,7 @@ class CoreDataUser {
 
         managedObjectUser.setValue(username, forKey: "username")
         managedObjectUser.setValue(email, forKey: "email")
-        managedObjectUser.setValue(NSURL(string: ""), forKey: "ava")
+        managedObjectUser.setValue("", forKey: "ava")
 
         cacheUser = managedObjectUser.managedObjectContext?.registeredObjects.first as? User
 
@@ -29,7 +29,7 @@ class CoreDataUser {
         return cacheUser
     }
 
-    static func updateUser(username: String?, email: String?, avatar: URL?) {
+    static func updateUser(username: String?, email: String?, avatar: String?) {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "User")
         do {
             let users = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
@@ -45,7 +45,7 @@ class CoreDataUser {
                 }
             }
             if let avatar = avatar {
-                if avatar != URL(fileURLWithPath: "") {
+                if avatar != "" {
                     cacheUser?.setValue(avatar, forKey: "ava")
                 }
             }

@@ -17,7 +17,7 @@ class CoreDataFeed {
         let managedObjectFeed = NSManagedObject(entity: entityDescriptionFeed!,
                                                 insertInto: DataManager.instance.managedObjectContext)
         managedObjectFeed.setValue(CoreDataUser.getUser(), forKey: "user")
-        managedObjectFeed.setValue(CoreDataPost.getPosts(), forKey: "post")
+//        managedObjectFeed.setValue(CoreDataPost.getPosts(), forKey: "post")
         DataManager.instance.saveContext()
     }
 }

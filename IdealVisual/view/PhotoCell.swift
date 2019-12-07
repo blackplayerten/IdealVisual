@@ -7,7 +7,7 @@
 import Foundation
 import UIKit
 
-class PhotoCell: UICollectionViewCell {
+final class PhotoCell: UICollectionViewCell {
     var picture = UIImageView()
     var selectedImage = UIImageView()
 

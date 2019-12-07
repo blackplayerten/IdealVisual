@@ -14,8 +14,8 @@ enum BlockPostType {
     case textView
 }
 
-class PostView: UIViewController {
-    var publication: Photo?
+final class PostView: UIViewController {
+    var publication: Post?
     let photo = UIImageView()
     var scroll = UIScrollView()
     let margin: CGFloat = 30.0
@@ -33,7 +33,6 @@ class PostView: UIViewController {
         setInteraction()
         setupNavItems()
         setBlocks()
-        fill()
     }
 
     private func setInteraction() {
@@ -88,57 +87,36 @@ class PostView: UIViewController {
     private func setBlocks() {
         let blockPostType = BlockPostType.self
 
+        var dcp: DatePickerComponent?
+        if let date = publication?.date {
+            if date != Date() {
+                dcp = DatePickerComponent()
+                dcp?.date = date
+            }
+        }
         date = BlockPost(
             textValue: nil,
-            iconImage: UIImage(named: "date")!, buttonIext: "Добавить дату", datePicker: nil, view: scroll,
-            blockPostType: blockPostType.datePicker
+            iconImage: UIImage(named: "date")!, buttonIext: "Добавить дату", datePicker: dcp, view: scroll,
+            blockPostType: blockPostType.datePicker, delegatePost: self
         )
         guard let date = date else { return }
 
         place = BlockPost(
-            // swiftlint:disable all
-            textValue: """
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut \
-                labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex  \
-                ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla \
-                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est  \
-                laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et \
-                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea \
-                commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla \
-                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est \
-                laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et \
-                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea \
-                commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla \
-                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est \
-                laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et \
-                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea \
-                commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla \
-                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est \
-                laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et \
-                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea \
-                commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla \
-                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est \
-                laborum.
-                """,
-            // swiftlint:enable all
+            textValue: publication?.place,
             iconImage: UIImage(named: "map")!, buttonIext: "Добавить место", datePicker: nil, view: scroll,
-            blockPostType: blockPostType.textView
+            blockPostType: blockPostType.textView, delegatePost: self
         )
         guard let place = place else { return }
 
         post = BlockPost(
-            textValue: nil,
+            textValue: publication?.text,
             iconImage: UIImage(named: "post")!, buttonIext: "Добавить пост", datePicker: nil, view: scroll,
-            blockPostType: blockPostType.textView
+            blockPostType: blockPostType.textView, delegatePost: self
         )
         guard let post = post else { return }
 
         var prev = photo as UIView
-        for value in [BlockPost](arrayLiteral:
-            date,
-            place,
-            post
-        ) {
+        for value in [BlockPost](arrayLiteral: date, place, post) {
             value.translatesAutoresizingMaskIntoConstraints = false
             value.leftAnchor.constraint(equalTo: view.leftAnchor, constant: margin).isActive = true
             value.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -margin).isActive = true
@@ -151,10 +129,6 @@ class PostView: UIViewController {
         prev.bottomAnchor.constraint(equalTo: scroll.bottomAnchor, constant: -margin).isActive = true
     }
 
-    private func fill() {
-        photo.image = publication?.photo
-    }
-
     @objc private func back() {
         navigationController?.popViewController(animated: true)
     }
@@ -163,5 +137,23 @@ class PostView: UIViewController {
         self.date?.setEditingBlock()
         self.post?.setEditingBlock()
         self.place?.setEditingBlock()
+    }
+}
+
+extension PostView: BlockDelegate {
+    func updateBlock(from: BlockPost) {
+        guard let publication = publication else { return }
+        if from == self.post {
+            print("FROM")
+            CoreDataPost.updatePost(post: publication, text: post?.textView?.text)
+        } else if from == self.place {
+            print("PLACE")
+            CoreDataPost.updatePost(post: publication, place: post?.textView?.text)
+        } else if from == self.date {
+            print("DATE")
+            CoreDataPost.updatePost(post: publication, date: post?.datePicker?.date)
+        } else {
+            print("UNKNOWN")
+        }
     }
 }

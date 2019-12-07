@@ -11,26 +11,51 @@ import Foundation
 import UIKit
 
 class CoreDataPost {
-    static func createPost(photoURL: URL, date: Date, place: String, text: String) {
+    static private var post: Post?
+
+    static func createPost(photo: String, date: Date, place: String, text: String, orderNum: Int) -> Post? {
         let entityDescriptionPost = NSEntityDescription.entity(forEntityName: "Post",
                                                                in: DataManager.instance.managedObjectContext)
         let managedObjectPost = NSManagedObject(entity: entityDescriptionPost!,
                                                 insertInto: DataManager.instance.managedObjectContext)
 
-        managedObjectPost.setValue(photoURL, forKey: "photo")
+        managedObjectPost.setValue(photo, forKey: "photo")
         managedObjectPost.setValue(date, forKey: "date")
         managedObjectPost.setValue(place, forKey: "place")
         managedObjectPost.setValue(text, forKey: "text")
+        managedObjectPost.setValue(Int64(orderNum), forKey: "orderNum")
 
         DataManager.instance.saveContext()
+
+        post = managedObjectPost as? Post
+        print("create")
+        return post
     }
 
-    static func getPosts() -> NSSet? {
+    static func updatePost(post: Post, date: Date? = nil, place: String? = nil, text: String? = nil) {
+        do {
+            if let date = date {
+                post.setValue(date, forKey: "date")
+            }
+            if let place = place {
+                post.setValue(place, forKey: "place")
+            }
+            if let text = text {
+                post.setValue(text, forKey: "text")
+            }
+            try DataManager.instance.managedObjectContext.save()
+            DataManager.instance.saveContext()
+            print(post)
+        } catch {
+            print(error)
+        }
+    }
+
+    static func getPosts() -> [Post]? {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Post")
         do {
             let posts = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
-            print("postsData: \(NSSet(array: posts))")
-            return NSSet(array: posts)
+            return posts as? [Post]
         } catch {
             print(error)
         }
@@ -41,18 +66,16 @@ class CoreDataPost {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Post")
         do {
             let posts = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
-            for post0 in (posts as? [Post])! {
-                print("""
-                    postData:   \(String(describing: post0.photo)),
-                                \(String(describing: post0.date)),
-                                \(post0.place ?? "no place")
-                                \(post0.text ?? "no text")
-                    """)
-            }
-            return posts.last as? Post
+            post = posts.last as? Post
+            return post
         } catch {
             print(error)
         }
         return nil
+    }
+
+    static func deletePost(post: Post) {
+        DataManager.instance.managedObjectContext.delete(post)
+        DataManager.instance.saveContext()
     }
 }
