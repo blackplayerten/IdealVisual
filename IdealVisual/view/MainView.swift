@@ -17,10 +17,14 @@ final class MainView: UIViewController {
     fileprivate var choose = UIImagePickerController()
     private let photo = UIButton()
     private var profileV: ProfileView?
-//    private var urlAva: URL?
+    private var urlAva: String?
     private var editMode: Bool = false
 
-    private var posts = [Post]()
+    private var sectionChanges = [(type: NSFetchedResultsChangeType, sectionIndex: Int)]()
+    private var itemChanges = [(type: NSFetchedResultsChangeType, indexPath: IndexPath?, newIndexPath: IndexPath?)]()
+
+    private var postFetcher: NSFetchedResultsController<Post>?
+//    private var posts = [Post]()
 
     lazy fileprivate var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -50,6 +54,18 @@ final class MainView: UIViewController {
         choose.allowsEditing = true
 
         profileV = ProfileView(profileDelegate: self)
+
+        postFetcher = CoreDataPost.getPosts()
+        postFetcher?.delegate = self
+
+        do {
+            try postFetcher?.performFetch()
+        } catch {
+            let fetchError = error as NSError
+            print("Unable to Save Note")
+            print("\(fetchError), \(fetchError.localizedDescription)")
+        }
+
         setNavTitle()
         setNavItems()
     }
@@ -65,32 +81,28 @@ final class MainView: UIViewController {
 
     private func setNavItems() {
         // TODO: доделать апдейт аватарки и обрезка
-//        guard let inputAva = urlAva else { return }
-//        CoreDataUser.updateUser(username: nil, email: nil, avatar: inputAva)
         let profileV = UIButton()
         profileV.translatesAutoresizingMaskIntoConstraints = false
         profileV.clipsToBounds = true
-//        let aaa = UIImage()
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: profileV)
         guard let unwrapAvaCoreData = CoreDataUser.getUser()?.ava else { return }
-        guard let unWrapAva = getPhoto(namePhoto: unwrapAvaCoreData, typePhoto: .avatar)
-            else { return }
+        let unWrapAva = getPhoto(namePhoto: unwrapAvaCoreData, typePhoto: .avatar)
         profileV.setBackgroundImage(unWrapAva, for: .normal)
         profileV.widthAnchor.constraint(equalToConstant: 33).isActive = true
         profileV.heightAnchor.constraint(equalToConstant: 33).isActive = true
         profileV.layer.cornerRadius = 10
         profileV.addTarget(self, action: #selector(profile), for: .touchUpInside)
 
-        if CoreDataPost.getPosts()?.count != 0 {
+        initContent()
+        if postFetcher?.fetchedObjects?.count != 0 {
             guard let markEdit = UIImage(named: "edit_gray") else { return }
             navigationItem.leftBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: markEdit,
-                                                                                       side: 35,
-                                                                                       target: self,
-                                                                                       action: #selector(edit)
+                                                                                           side: 35,
+                                                                                           target: self,
+                                                                                           action: #selector(edit)
             ))
         } else { navigationItem.leftBarButtonItem = nil }
         checkPhotos()
-        initContent()
     }
 
     private func setNavEditItems() {
@@ -115,8 +127,8 @@ final class MainView: UIViewController {
         content.delegate = self
         content.dataSource = self
         content.dragInteractionEnabled = true
-        content.dragDelegate = self
-        content.dropDelegate = self
+//        content.dragDelegate = self
+//        content.dropDelegate = self
         content.prefetchDataSource = self
         content.register(PhotoCell.self, forCellWithReuseIdentifier: "cell")
         content.reloadData()
@@ -144,11 +156,11 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
                 let fileName = url.lastPathComponent
                 _ = savePhoto(photo: selected, typePhoto: .post, fileName: fileName)
 
-                guard let post = CoreDataPost.createPost(
+                _ = CoreDataPost.createPost(
                     photo: getFolderName(typePhoto: .post) + "/" + fileName,
-                    date: Date(timeIntervalSince1970: 0), place: "", text: "", orderNum: posts.count
-                ) else { return }
-                posts.append(post)
+                    date: Date(timeIntervalSince1970: 0), place: "", text: "",
+                    orderNum: postFetcher?.fetchedObjects?.count ?? 0
+                )
             }
             content.isHidden = false
             content.reloadData()
@@ -177,8 +189,10 @@ extension MainView: UICollectionViewDelegate {
             if let selectCell = cell as? PhotoCell { selectCell.selectedImage.isHidden = false }
         } else {
             let detailPhoto = PostView()
-            detailPhoto.publication = posts[indexPath.item]
-            detailPhoto.photo.image = getPhoto(namePhoto: posts[indexPath.item].photo!, typePhoto: .post)
+            guard let posts = postFetcher?.fetchedObjects else { return }
+            let post = posts[indexPath.item]
+            detailPhoto.publication = post
+            detailPhoto.photo.image = getPhoto(namePhoto: post.photo!, typePhoto: .post)
             self.navigationController?.pushViewController(detailPhoto, animated: true)
         }
     }
@@ -193,16 +207,32 @@ extension MainView: UICollectionViewDelegate {
 
 // MARK: data source
 extension MainView: UICollectionViewDataSource {
+//    func numberOfSections(in collectionView: UICollectionView) -> Int {
+//        return postFetcher?.sections?.count ?? 0
+//    }
+
+//    func collectionView(_ collectionView: UICollectionView, titleForHeaderInSection section: Int) -> String? {
+//        return nil
+//    }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return posts.count
+        guard let sections = postFetcher?.sections else {
+            return 0
+        }
+
+        let sectionInfo = sections[section]
+        return sectionInfo.numberOfObjects
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) ->
         UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
             if let unwrapCell = cell as? PhotoCell {
+                guard let post = postFetcher?.object(at: indexPath) else { fatalError() }
+
                 unwrapCell.backgroundColor = .gray
-                unwrapCell.picture.image = getPhoto(namePhoto: posts[indexPath.item].photo!,
+
+                unwrapCell.picture.image = getPhoto(namePhoto: post.photo!,
                                                     typePhoto: .post)
                 unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
                                           height: view.bounds.width / 3 - 1)
@@ -211,9 +241,7 @@ extension MainView: UICollectionViewDataSource {
     }
 
     private func checkPhotos() {
-        guard let postsCD = CoreDataPost.getPosts() else { return }
-        if postsCD.count != 0 {
-            posts = postsCD
+        if postFetcher?.fetchedObjects?.count != 0 {
             content.isHidden = false
         } else {
             content.isHidden = true
@@ -240,64 +268,97 @@ extension MainView: UICollectionViewDataSource {
 }
 
 // MARK: drag & drop
-extension MainView: UICollectionViewDragDelegate {
-    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
-                        at indexPath: IndexPath) -> [UIDragItem] {
-        guard let imageURL = posts[indexPath.row].photo,
-            let image = getPhoto(namePhoto: imageURL, typePhoto: .post)
-        else { fatalError() }
+//extension MainView: UICollectionViewDragDelegate {
+//    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
+//                        at indexPath: IndexPath) -> [UIDragItem] {
+//        guard let imageURL = posts[indexPath.row].photo,
+//            let image = getPhoto(namePhoto: imageURL, typePhoto: .post)
+//        else { fatalError() }
+//
+//        let provider = NSItemProvider(object: image)
+//        let dragItem = UIDragItem(itemProvider: provider)
+//        return [
+//    }
+//}
 
-        let provider = NSItemProvider(object: image)
-        let dragItem = UIDragItem(itemProvider: provider)
-        return [dragItem]
+//extension MainView: UICollectionViewDropDelegate {
+//    func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
+//        return session.canLoadObjects(ofClass: UIImage.self)
+//    }
+//
+//    func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
+//        return UIDropProposal(operation: .move)
+//    }
+//
+//    func collectionView(_ collectionView: UICollectionView,
+//                        performDropWith coordinator: UICollectionViewDropCoordinator) {
+//        let items = coordinator.items
+//        let destinationIndexPath = coordinator.destinationIndexPath ?? IndexPath(item: 0, section: 0)
+//        for item in items {
+////            guard let sourceIndexPath = item.sourceIndexPath else { return }
+//            collectionView.performBatchUpdates({
+////                let moveImage = postFetcher?.fetchedObjects?[sourceIndexPath.item]
+////                posts.remove(at: sourceIndexPath.item)
+////                posts.insert(moveImage, at: destinationIndexPath.item)
+////
+////                content.deleteItems(at: [sourceIndexPath])
+////                content.insertItems(at: [destinationIndexPath])
+//            })
+//            coordinator.drop(item.dragItem, toItemAt: destinationIndexPath)
+//        }
+//    }
+//
+//    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession,
+//                        withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
+//           return UICollectionViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
+//    }
+//}
+
+// MARK: fetchResultControllerDelegate
+extension MainView: NSFetchedResultsControllerDelegate {
+
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+                    didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int,
+                    for type: NSFetchedResultsChangeType) {
+        sectionChanges.append((type, sectionIndex))
     }
-}
 
-extension MainView: UICollectionViewDropDelegate {
-    func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
-        return session.canLoadObjects(ofClass: UIImage.self)
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
+                    didChange anObject: Any, at indexPath: IndexPath?,
+                    for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        itemChanges.append((type, indexPath, newIndexPath))
     }
 
-    func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
-        return UIDropProposal(operation: .move)
-    }
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        content.performBatchUpdates({
+            for change in self.itemChanges {
+                switch change.type {
+                case .insert: content.insertItems(at: [change.newIndexPath!])
+                case .delete: content.deleteItems(at: [change.indexPath!])
+                case .update: content.reloadItems(at: [change.indexPath!])
+                case .move:
+                    content.deleteItems(at: [change.indexPath!])
+                    content.insertItems(at: [change.newIndexPath!])
+                @unknown default:
+                    fatalError()
+                }
+//                self.content.reloadData()
+            }
+            self.itemChanges.removeAll()
+        })
 
-    func collectionView(_ collectionView: UICollectionView,
-                        performDropWith coordinator: UICollectionViewDropCoordinator) {
-        let items = coordinator.items
-        let destinationIndexPath = coordinator.destinationIndexPath ?? IndexPath(item: 0, section: 0)
-        for item in items {
-            guard let sourceIndexPath = item.sourceIndexPath else { return }
-            collectionView.performBatchUpdates({
-                let moveImage = posts[sourceIndexPath.item]
-                posts.remove(at: sourceIndexPath.item)
-                posts.insert(moveImage, at: destinationIndexPath.item)
+        content.performBatchUpdates({
+            for change in self.sectionChanges {
+                switch change.type {
+                case .insert: content.insertSections([change.sectionIndex])
+                case .delete: content.deleteSections([change.sectionIndex])
+                default: break
+                }
+            }
+            self.sectionChanges.removeAll()
+        })
 
-                content.deleteItems(at: [sourceIndexPath])
-                content.insertItems(at: [destinationIndexPath])
-            })
-            coordinator.drop(item.dragItem, toItemAt: destinationIndexPath)
-        }
-    }
-
-    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession,
-                        withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
-           return UICollectionViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
-    }
-}
-
-// MARK: refresh control
-extension MainView: UICollectionViewDataSourcePrefetching {
-    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
-        _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(tick),
-                                         userInfo: nil, repeats: true)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
-    }
-
-    @objc private func tick() {
-        refreshControl.endRefreshing()
+//        self.content.reloadData()
     }
 }
 
@@ -324,7 +385,8 @@ extension MainView {
             if let selectedCells = content.indexPathsForSelectedItems {
                 let items = selectedCells.map { $0.item }.sorted().reversed()
                 for item in items {
-                    let delPost = posts.remove(at: item)
+                    guard let posts = postFetcher?.fetchedObjects else { fatalError() }
+                    let delPost = posts[item]
                     let photoPath = delPost.photo ?? ""
                     CoreDataPost.deletePost(post: delPost)
                     deleteFile(filePath: photoPath)
@@ -334,6 +396,21 @@ extension MainView {
             setNavItems()
             editMode = false
         }
+    }
+}
+
+// MARK: refresh control
+extension MainView: UICollectionViewDataSourcePrefetching {
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(tick),
+                                         userInfo: nil, repeats: true)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+    }
+
+    @objc private func tick() {
+        refreshControl.endRefreshing()
     }
 }
 

@@ -51,15 +51,23 @@ class CoreDataPost {
         }
     }
 
-    static func getPosts() -> [Post]? {
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Post")
-        do {
-            let posts = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
-            return posts as? [Post]
-        } catch {
-            print(error)
-        }
-        return nil
+    static func getPosts() -> NSFetchedResultsController<Post> {
+//        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Post")
+        let fetchRequest: NSFetchRequest<Post> = Post.fetchRequest()
+//        do {
+//        let posts = try? DataManager.instance.managedObjectContext.fetch(fetchRequest)
+
+            let sortDesc = NSSortDescriptor(key: "photo", ascending: true)
+            fetchRequest.sortDescriptors = [sortDesc]
+            let fetchResultController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: DataManager.instance.managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
+
+            return fetchResultController
+//        } catch {
+//
+//        }
+//            return posts as? [Post]
+//        }
+//        return
     }
 
     static func getPost() -> Post? {
