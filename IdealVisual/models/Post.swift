@@ -13,7 +13,7 @@ import UIKit
 class CoreDataPost {
     static private var post: Post?
 
-    static func createPost(photo: String, date: Date, place: String, text: String, orderNum: Int) -> Post? {
+    static func createPost(photo: String, date: Date, place: String, text: String, indexPhoto: Int) -> Post? {
         let entityDescriptionPost = NSEntityDescription.entity(forEntityName: "Post",
                                                                in: DataManager.instance.managedObjectContext)
         let managedObjectPost = NSManagedObject(entity: entityDescriptionPost!,
@@ -23,12 +23,12 @@ class CoreDataPost {
         managedObjectPost.setValue(date, forKey: "date")
         managedObjectPost.setValue(place, forKey: "place")
         managedObjectPost.setValue(text, forKey: "text")
-        managedObjectPost.setValue(Int64(orderNum), forKey: "orderNum")
+        managedObjectPost.setValue(Int64(indexPhoto), forKey: "indexPhoto")
 
         DataManager.instance.saveContext()
 
         post = managedObjectPost as? Post
-        print("create")
+        print("create post, index: \(indexPhoto)")
         return post
     }
 
@@ -44,31 +44,25 @@ class CoreDataPost {
                 post.setValue(text, forKey: "text")
             }
             try DataManager.instance.managedObjectContext.save()
-            DataManager.instance.saveContext()
+//            DataManager.instance.saveContext()
             print(post)
         } catch {
             print(error)
         }
     }
 
+    // swiftlint:disable line_length
     static func getPosts() -> NSFetchedResultsController<Post> {
-//        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Post")
         let fetchRequest: NSFetchRequest<Post> = Post.fetchRequest()
-//        do {
-//        let posts = try? DataManager.instance.managedObjectContext.fetch(fetchRequest)
-
-            let sortDesc = NSSortDescriptor(key: "photo", ascending: true)
-            fetchRequest.sortDescriptors = [sortDesc]
-            let fetchResultController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: DataManager.instance.managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
-
-            return fetchResultController
-//        } catch {
-//
-//        }
-//            return posts as? [Post]
-//        }
-//        return
+        let sortDesc = NSSortDescriptor(key: "indexPhoto", ascending: true)
+        fetchRequest.sortDescriptors = [sortDesc]
+        let fetchResultController = NSFetchedResultsController(fetchRequest: fetchRequest,
+                                                               managedObjectContext: DataManager.instance.managedObjectContext,
+                                                               sectionNameKeyPath: nil, cacheName: nil
+        )
+        return fetchResultController
     }
+    // swiftlint:enable line_length
 
     static func getPost() -> Post? {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Post")
@@ -84,6 +78,20 @@ class CoreDataPost {
 
     static func deletePost(post: Post) {
         DataManager.instance.managedObjectContext.delete(post)
+        DataManager.instance.saveContext()
+    }
+
+    static func swapPosts(_ posts: [Post], source: Int, dest: Int) {
+        var posts = posts
+        let draggedPost = posts.remove(at: source)
+        posts.insert(draggedPost, at: dest)
+
+        // better to reinit all indices than reinit indices for elements after new drop position,
+        // because they can be broken
+        for (index, post) in posts.enumerated() {
+            post.indexPhoto = Int64(index)
+        }
+
         DataManager.instance.saveContext()
     }
 }

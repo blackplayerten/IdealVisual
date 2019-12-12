@@ -75,7 +75,6 @@
 		188B5FAF2361E47E00EA3701 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
-		18999E1D239801DB003C0F44 /* IdealVisual.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IdealVisual.entitlements; sourceTree = "<group>"; };
 		18999E1F2398F8E6003C0F44 /* checkValid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = checkValid.swift; sourceTree = "<group>"; };
 		18AA6582237714F0004B9588 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		18ACE2A32391AB78008B05B8 /* Post.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
@@ -139,7 +138,6 @@
 			isa = PBXGroup;
 			children = (
 				18999E1E2398F83C003C0F44 /* view-model */,
-				18999E1D239801DB003C0F44 /* IdealVisual.entitlements */,
 				188B5FB32361E68200EA3701 /* models */,
 				1893229F2346809B004026FC /* fonts */,
 				181B1AB6231DA6930081B01C /* AppDelegate.swift */,
