@@ -28,6 +28,15 @@ final class BlockPost: UIView {
     private var addButton: AddComponentsButton?
     private var blockPostType: BlockPostType
 
+    struct State {
+        var date = Date(timeIntervalSince1970: 0)
+        var place = ""
+        var post = ""
+    }
+
+    private var state = State()
+
+// MARK:- init
     init(textValue: String? = nil, iconImage: UIImage, buttonIext: String, datePicker: DatePickerComponent? = nil,
          view: UIView, blockPostType: BlockPostType, delegatePost: BlockDelegate? = nil) {
         self.iconImage = iconImage
@@ -63,6 +72,7 @@ final class BlockPost: UIView {
         setBlockElement(value: textValue, editingMode: false)
     }
 
+// MARK:- add button
     private func renderAddButton() {
         guard let addButton = addButton else { return }
         addSubview(addButton)
@@ -75,7 +85,7 @@ final class BlockPost: UIView {
         addButton.setColor(state: false)
     }
 
-    // MARK: render block elemnts: datePicker or textView without editing mode
+    // MARK:- render block elemnts: datePicker or textView without editing mode
     private func setBlockElement(value: String? = nil, editingMode: Bool) {
         var alreadyInited = false
         let view: UIView
@@ -152,6 +162,7 @@ final class BlockPost: UIView {
         icon.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
     }
 
+// MARK:- render editing elements
     private func renderEditElements() {
         [lineTop, lineBottom, buttonSave].forEach {
             addSubview($0)
@@ -183,13 +194,14 @@ final class BlockPost: UIView {
 
         topAnchorTextOrPicker.isActive = true
 
-        bottomAnchorTextOrPicker = view.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -1-3-20)
+        bottomAnchorTextOrPicker = view.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -45)
         bottomAnchorTextOrPicker.isActive = true
 
         renderSaveButton()
         lineBottom.bottomAnchor.constraint(equalTo: buttonSave.topAnchor, constant: -5).isActive = true
     }
 
+// MARK: checklabel
     private func renderCheckLabel() {
         addSubview(checkLabel)
         checkLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -207,15 +219,16 @@ final class BlockPost: UIView {
         }
     }
 
+// MARK: save button
     private func renderSaveButton() {
         buttonSave.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
         buttonSave.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -3).isActive = true
-        buttonSave.addTarget(self, action: #selector(saveTVContent), for: .touchUpInside)
+        buttonSave.addTarget(self, action: #selector(save), for: .touchUpInside)
         buttonSave.setColor(state: true)
     }
 
-    // MARK: cancel or save editing, set constraints to initial values
-    @objc private func saveTVContent() {
+    // MARK:- cancel or save editing, set constraints to initial values
+    @objc private func save() {
         finishEditing(commitChanges: true)
     }
 
@@ -237,8 +250,9 @@ final class BlockPost: UIView {
                 contentIsNotNil = false
             }
             if commitChanges {
-                // save
                 delegatePost?.updateBlock(from: self)
+            } else {
+                datePicker.date = state.date
             }
         case .textView:
             guard let textView = textView else { return }
@@ -248,6 +262,8 @@ final class BlockPost: UIView {
             if commitChanges {
                 // save
                 delegatePost?.updateBlock(from: self)
+            } else {
+//                textView.text = state.text
             }
         }
 

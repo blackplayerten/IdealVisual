@@ -72,7 +72,7 @@ final class MainView: UIViewController {
         checkPhotos()
     }
 
-    // MARK: navigation items
+// MARK:- navigation items
     private func setNavTitle() {
         let titleV = UILabel()
         titleV.text = "Лента"
@@ -122,7 +122,7 @@ final class MainView: UIViewController {
         ))
     }
 
-    // MARK: init collection view
+// MARK:- init collection view
     private func initContent() {
         content.translatesAutoresizingMaskIntoConstraints = false
         content.delegate = self
@@ -144,7 +144,7 @@ final class MainView: UIViewController {
     }
 }
 
-// MARK: picker
+// MARK-: picker
 extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     internal func showAlert(alert: UIAlertController) { present(alert, animated: true) }
 
@@ -205,7 +205,7 @@ extension MainView: UICollectionViewDelegate {
     }
 }
 
-// MARK: data source
+// MARK:- data source
 extension MainView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         guard let sections = postFetcher?.sections else {
@@ -259,7 +259,7 @@ extension MainView: UICollectionViewDataSource {
     }
 }
 
-// MARK: drag & drop
+// MARK:- drag & drop
 extension MainView: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
                         at indexPath: IndexPath) -> [UIDragItem] {
@@ -300,7 +300,7 @@ extension MainView: UICollectionViewDropDelegate {
     }
 }
 
-// MARK: fetchResultControllerDelegate
+// MARK:- fetchResultControllerDelegate
 extension MainView: NSFetchedResultsControllerDelegate {
 
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
@@ -334,7 +334,7 @@ extension MainView: NSFetchedResultsControllerDelegate {
     }
 }
 
-// MARK: edit collection view
+// MARK:- edit collection view
 extension MainView {
     @objc
     private func edit() {
@@ -373,11 +373,11 @@ extension MainView {
     }
 }
 
-// MARK: refresh control
+// MARK:- refresh control
 extension MainView: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(tick),
-                                         userInfo: nil, repeats: true)
+                                 userInfo: nil, repeats: true)
     }
 
     func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
@@ -388,7 +388,7 @@ extension MainView: UICollectionViewDataSourcePrefetching {
     }
 }
 
-// MARK: tab bar
+// MARK:- tab bar
 extension MainView: UITabBarControllerDelegate {
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         if self.tabBarController?.selectedIndex == 0 { self.choose_photo() }
@@ -413,7 +413,7 @@ extension MainView: UITabBarControllerDelegate {
     }
 }
 
-// MARK: profile delegate
+// MARK:- profile delegate
 extension MainView: ProfileDelegate {
     internal func logOut() {
         profileV?.removeFromSuperview()
