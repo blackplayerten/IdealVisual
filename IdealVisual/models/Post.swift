@@ -44,7 +44,6 @@ class CoreDataPost {
                 post.setValue(text, forKey: "text")
             }
             try DataManager.instance.managedObjectContext.save()
-//            DataManager.instance.saveContext()
             print(post)
         } catch {
             print(error)

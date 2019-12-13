@@ -148,10 +148,10 @@ extension PostView: BlockDelegate {
             CoreDataPost.updatePost(post: publication, text: post?.textView?.text)
         } else if from == self.place {
             print("PLACE")
-            CoreDataPost.updatePost(post: publication, place: post?.textView?.text)
+            CoreDataPost.updatePost(post: publication, place: place?.textView?.text)
         } else if from == self.date {
             print("DATE")
-            CoreDataPost.updatePost(post: publication, date: post?.datePicker?.date)
+            CoreDataPost.updatePost(post: publication, date: date?.datePicker?.date)
         } else {
             print("UNKNOWN")
         }

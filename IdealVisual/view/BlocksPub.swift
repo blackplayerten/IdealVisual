@@ -36,7 +36,7 @@ final class BlockPost: UIView {
 
     private var state = State()
 
-// MARK:- init
+// MARK: - init
     init(textValue: String? = nil, iconImage: UIImage, buttonIext: String, datePicker: DatePickerComponent? = nil,
          view: UIView, blockPostType: BlockPostType, delegatePost: BlockDelegate? = nil) {
         self.iconImage = iconImage
@@ -72,7 +72,7 @@ final class BlockPost: UIView {
         setBlockElement(value: textValue, editingMode: false)
     }
 
-// MARK:- add button
+// MARK: - add button
     private func renderAddButton() {
         guard let addButton = addButton else { return }
         addSubview(addButton)
@@ -85,7 +85,7 @@ final class BlockPost: UIView {
         addButton.setColor(state: false)
     }
 
-    // MARK:- render block elemnts: datePicker or textView without editing mode
+    // MARK: - render block elemnts: datePicker or textView without editing mode
     private func setBlockElement(value: String? = nil, editingMode: Bool) {
         var alreadyInited = false
         let view: UIView
@@ -162,7 +162,7 @@ final class BlockPost: UIView {
         icon.leftAnchor.constraint(equalTo: self.leftAnchor).isActive = true
     }
 
-// MARK:- render editing elements
+// MARK: - render editing elements
     private func renderEditElements() {
         [lineTop, lineBottom, buttonSave].forEach {
             addSubview($0)
@@ -227,7 +227,7 @@ final class BlockPost: UIView {
         buttonSave.setColor(state: true)
     }
 
-    // MARK:- cancel or save editing, set constraints to initial values
+    // MARK: - cancel or save editing, set constraints to initial values
     @objc private func save() {
         finishEditing(commitChanges: true)
     }

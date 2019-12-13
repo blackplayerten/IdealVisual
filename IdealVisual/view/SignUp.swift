@@ -105,8 +105,26 @@ final class SignUp: UIViewController {
             return
         }
 
-        _ = CoreDataUser.createUser(username: username, email: email)
-        autoLogin()
+        NetworkManager.createUser(newUser: JsonUserModel(usernameStr: username, emailStr: email),
+                               completion: { (user, error) in
+            DispatchQueue.main.async {
+                if let error = error {
+                    switch error {
+                    case "User already exists":
+                        self.usernameField.setValidationState(isValid: false)
+                    default:
+                        print("Get user error: \(error)")
+                    }
+                    return
+                }
+                guard let user = user else {
+                    fatalError("empty body and error")
+                }
+
+                _ = CoreDataUser.createUser(username: user.usernameStr, email: user.emailStr)
+                self.autoLogin()
+            }
+        })
     }
 
     private func checkValidInputs() -> Bool {

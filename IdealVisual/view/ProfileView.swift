@@ -60,7 +60,7 @@ final class ProfileView: UIView {
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-// MARK:- no edit mode
+// MARK: - no edit mode
     private func setNoEdit() {
         testAva.delegate = self
         testAva.allowsEditing = true
@@ -82,7 +82,7 @@ final class ProfileView: UIView {
         renderBottomLine()
     }
 
-// MARK:- edit mode
+// MARK: - edit mode
     @objc
     private func setEdit() {
         state.username = username.textField.text ?? ""
@@ -121,7 +121,7 @@ final class ProfileView: UIView {
         self.endEditing(true)
     }
 
-// MARK:- save/not save settings
+// MARK: - save/not save settings
     @objc
     private func save_settings() {
         let usernameIsValid = username.isValid()
@@ -167,7 +167,7 @@ final class ProfileView: UIView {
     }
 }
 
-// MARK:- add view
+// MARK: - add view
 extension ProfileView {
     func setup() {
         setupView()
@@ -192,12 +192,12 @@ extension ProfileView {
     }
 }
 
-// MARK:- scroll and keyboard
+// MARK: - scroll and keyboard
 extension ProfileView {
 
 }
 
-// MARK:- nav
+// MARK: - nav
 extension ProfileView {
     private func setNavButtons() {
         guard let markSettings = UIImage(named: "settings") else { return }
@@ -240,7 +240,7 @@ extension ProfileView {
     }
 }
 
-// MARK:- set username, email
+// MARK: - set username, email
 extension ProfileView {
     private func setFields() {
         [username, email].forEach {
@@ -255,7 +255,7 @@ extension ProfileView {
     }
 }
 
-// MARK:- passwords
+// MARK: - passwords
 extension ProfileView {
     private func setPassword() {
         [password, repeatPassword].forEach {
@@ -271,7 +271,7 @@ extension ProfileView {
     }
 }
 
-// MARK:- ava
+// MARK: - ava
 extension ProfileView {
     private func setAva() {
         addSubview(ava)
@@ -327,7 +327,7 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
     }
 }
 
-// MARK:- bottom line
+// MARK: - bottom line
 extension ProfileView {
     private func renderBottomLine() {
         addSubview(lineBottom)

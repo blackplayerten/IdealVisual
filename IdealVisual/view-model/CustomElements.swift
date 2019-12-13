@@ -18,7 +18,7 @@ struct Colors {
     static let darkDarkGray = UIColor(red: 0.23, green: 0.23, blue: 0.23, alpha: 1)
 }
 
-// MARK:- substrate button
+// MARK: - substrate button
 class SubstrateButton: UIView {
     init(image: UIImage, side: CGFloat = 35, target: Any? = nil, action: Selector? = nil,
          substrateColor: UIColor? = nil) {
@@ -53,7 +53,7 @@ class SubstrateButton: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
-// MARK:- add button
+// MARK: - add button
 class AddComponentsButton: UIButton {
     init(text: String) {
         super.init(frame: .zero)
@@ -92,7 +92,7 @@ extension UIButton {
   }
 }
 
-// MARK:- date picker
+// MARK: - date picker
 class DatePickerComponent: UIDatePicker {
     init(datePicker: UIDatePicker? = nil) {
         super.init(frame: .zero)
@@ -119,7 +119,7 @@ class DatePickerComponent: UIDatePicker {
     }
 }
 
-// MARK:- text view
+// MARK: - text view
 class TextViewComponent: UITextView, UITextViewDelegate {
     // TODO: delegate for symbols input
 //    let blockView = UIView()
@@ -156,7 +156,7 @@ class TextViewComponent: UITextView, UITextViewDelegate {
     }
 }
 
-// MARK:- top/botto line in block post
+// MARK: - top/botto line in block post
 class Line: UIView {
     init() {
         super.init(frame: .zero)
@@ -170,7 +170,7 @@ class Line: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
-// MARK:- line for swipe in profile view
+// MARK: - line for swipe in profile view
 class LineClose: UIView {
     init() {
         super.init(frame: .zero)
@@ -185,7 +185,7 @@ class LineClose: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
-// MARK:- text field
+// MARK: - text field
 class InputFields: UIView, UITextFieldDelegate {
     let blockView = UIView()
 
@@ -342,7 +342,7 @@ class InputFields: UIView, UITextFieldDelegate {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
-// MARK:- mistakes on text field
+// MARK: - mistakes on text field
 class CheckMistakeLabel: UILabel {
     init(text: String? = nil) {
         super.init(frame: .zero)
