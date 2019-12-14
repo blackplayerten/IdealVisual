@@ -128,23 +128,13 @@ class TextViewComponent: UITextView, UITextViewDelegate {
     init(text: String? = nil, countCB: @escaping (Int) -> Void) {
         self.countCB = countCB
         super.init(frame: .zero, textContainer: nil)
+        self.delegate = self
         isScrollEnabled = false
         textContainer.lineBreakMode = NSLineBreakMode.byWordWrapping
         font = UIFont(name: "PingFang-SC-Regular", size: 14)
         self.text = text
         textAlignment = .left
         allowsEditingTextAttributes = true
-
-        self.delegate = self
-
-//        super.init(frame: .zero)
-//        addSubview(blockView)
-//        blockView.translatesAutoresizingMaskIntoConstraints = false
-//        blockView.widthAnchor.constraint(equalToConstant: 300).isActive = true
-//        blockView.heightAnchor.constraint(equalToConstant: 60).isActive = true
-//        blockView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-//        blockView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-
     }
 
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {

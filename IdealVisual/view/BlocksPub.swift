@@ -83,14 +83,19 @@ final class BlockPost: UIView {
 
     // MARK: - render block elemnts: datePicker or textView without editing mode
     private func setBlockElement(value: String? = nil, editingMode: Bool) {
-        var alreadyInited = false
+        if !editingMode {
+            if let topAnchorTextOrPicker = topAnchorTextOrPicker {
+                self.removeConstraint(topAnchorTextOrPicker)
+            }
+            if let bottomAnchorTextOrPicker = bottomAnchorTextOrPicker {
+               self.removeConstraint(bottomAnchorTextOrPicker)
+           }
+        }
         let view: UIView
         switch blockPostType {
         case .textView:
             if textView == nil {
                 textView = TextViewComponent(text: value, countCB: getCount(count:))
-            } else {
-                alreadyInited = true
             }
             textView?.changeTextViewColorWhileEditing(editingMode: editingMode)
             guard let textView = textView else { return }
@@ -98,8 +103,6 @@ final class BlockPost: UIView {
         case .datePicker:
             if datePicker == nil {
                 datePicker = DatePickerComponent(datePicker: datePicker)
-            } else {
-                alreadyInited = true
             }
             guard let datePicker = datePicker else { return }
             view = datePicker
@@ -110,10 +113,6 @@ final class BlockPost: UIView {
         view.translatesAutoresizingMaskIntoConstraints = false
 
         reinitLeftAndRightConstraints(view: view)
-
-        if alreadyInited {
-            return
-        }
 
         if let topAnchorTextOrPicker = topAnchorTextOrPicker {
             self.removeConstraint(topAnchorTextOrPicker)
@@ -175,6 +174,8 @@ final class BlockPost: UIView {
 
 // MARK: - render editing elements
     private func renderEditElements() {
+        bottomAnchorTextOrPicker?.isActive = false
+
         [lineTop, lineBottom, buttonSave].forEach {
             addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -191,9 +192,9 @@ final class BlockPost: UIView {
         let view: UIView
         switch blockPostType {
         case .textView:
+            renderCheckLabel()
             guard let textView = textView else { return }
             view = textView
-            renderCheckLabel()
 
             topAnchorTextOrPicker = view.topAnchor.constraint(equalTo: checkLabel.bottomAnchor)
         case .datePicker:
@@ -220,18 +221,18 @@ final class BlockPost: UIView {
         checkLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
         checkLabel.topAnchor.constraint(equalTo: topAnchor).isActive = true
         checkLabel.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-
-        guard let charactersCount = textView?.text.count else { return }
-        checkLabel.text = "\(charactersCount) / 2200"
-        if charactersCount <= 2200 {
-            checkLabel.textColor = Colors.darkGray
-        } else {
-            checkLabel.textColor = .red
-        }
+        checkLabel.text = "0 / 2200"
+        checkLabel.textColor = Colors.darkGray
     }
 
     func getCount(count: Int) {
         checkLabel.text = "\(count) / 2200"
+
+        if count <= 2200 {
+            checkLabel.textColor = Colors.darkGray
+        } else {
+            checkLabel.textColor = .red
+        }
     }
 
 // MARK: save button
@@ -261,7 +262,7 @@ final class BlockPost: UIView {
         case .datePicker:
             guard let datePicker = datePicker else { return }
             if datePicker.date == Date(timeIntervalSince1970: 0) {
-                contentIsNil = true // ???
+                contentIsNil = true
             }
             if commitChanges {
                 delegatePost?.updateBlock(from: self)
@@ -311,16 +312,17 @@ final class BlockPost: UIView {
             datePicker?.removeFromSuperview()
             datePicker = nil
         }
-        removeConstraints([topAnchorTextOrPicker!, bottomAnchorTextOrPicker!])
+        [topAnchorTextOrPicker, bottomAnchorTextOrPicker].forEach { $0?.isActive = false}
     }
 
     private func removeDecorateElements() {
-        [lineTop, checkLabel, lineBottom, buttonSave].forEach { $0.removeFromSuperview() }
 
         guard var topAnchorTextOrPicker = topAnchorTextOrPicker,
                 var bottomAnchorTextOrPicker = bottomAnchorTextOrPicker
         else { return }
         [topAnchorTextOrPicker, bottomAnchorTextOrPicker].forEach { $0.isActive = false }
+
+        [lineTop, checkLabel, lineBottom, buttonSave].forEach { $0.removeFromSuperview() }
 
         let view: UIView
         switch blockPostType {
@@ -332,10 +334,10 @@ final class BlockPost: UIView {
             view = datePicker
         }
 
-        topAnchorTextOrPicker = view.topAnchor.constraint(equalTo: topAnchor)
+        topAnchorTextOrPicker = view.topAnchor.constraint(greaterThanOrEqualTo: topAnchor)
         bottomAnchorTextOrPicker = view.bottomAnchor.constraint(equalTo: bottomAnchor)
 
-        [topAnchorTextOrPicker, bottomAnchorTextOrPicker].forEach { $0.isActive = true }
+        [topAnchorTextOrPicker, bottomAnchorTextOrPicker].forEach { $0?.isActive = true }
     }
 
     required init?(coder: NSCoder) {
