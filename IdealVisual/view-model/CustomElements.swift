@@ -123,8 +123,10 @@ class DatePickerComponent: UIDatePicker {
 class TextViewComponent: UITextView, UITextViewDelegate {
     // TODO: delegate for symbols input
 //    let blockView = UIView()
+    private let countCB: (Int) -> Void
 
-    init(text: String? = nil) {
+    init(text: String? = nil, countCB: @escaping (Int) -> Void) {
+        self.countCB = countCB
         super.init(frame: .zero, textContainer: nil)
         isScrollEnabled = false
         textContainer.lineBreakMode = NSLineBreakMode.byWordWrapping
@@ -132,6 +134,8 @@ class TextViewComponent: UITextView, UITextViewDelegate {
         self.text = text
         textAlignment = .left
         allowsEditingTextAttributes = true
+
+        self.delegate = self
 
 //        super.init(frame: .zero)
 //        addSubview(blockView)
@@ -141,6 +145,13 @@ class TextViewComponent: UITextView, UITextViewDelegate {
 //        blockView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
 //        blockView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
 
+    }
+
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        let newLength = (textView.text!.count + text.count) - range.length
+        countCB(newLength)
+
+        return true
     }
 
     func changeTextViewColorWhileEditing(editingMode: Bool) {

@@ -28,13 +28,8 @@ final class BlockPost: UIView {
     private var addButton: AddComponentsButton?
     private var blockPostType: BlockPostType
 
-    struct State {
-        var date = Date(timeIntervalSince1970: 0)
-        var place = ""
-        var post = ""
-    }
-
-    private var state = State()
+    private var textState: String?
+    private var dateState: Date?
 
 // MARK: - init
     init(textValue: String? = nil, iconImage: UIImage, buttonIext: String, datePicker: DatePickerComponent? = nil,
@@ -51,6 +46,7 @@ final class BlockPost: UIView {
             addButton?.setColor(state: false)
         }
         self.delegatePost = delegatePost
+        self.datePicker = datePicker
         super.init(frame: .zero)
 
         view.addSubview(self)
@@ -92,7 +88,7 @@ final class BlockPost: UIView {
         switch blockPostType {
         case .textView:
             if textView == nil {
-                textView = TextViewComponent(text: value)
+                textView = TextViewComponent(text: value, countCB: getCount(count:))
             } else {
                 alreadyInited = true
             }
@@ -139,6 +135,21 @@ final class BlockPost: UIView {
 
     @objc
     private func objc_SetEditingBlock() {
+        switch blockPostType {
+        case .textView:
+            if let text = textView?.text {
+                if text.count != 0 {
+                    textState = text
+                }
+            }
+        case .datePicker:
+            if let date = datePicker?.date {
+                if date != Date(timeIntervalSince1970: 0) {
+                    dateState = date
+                }
+            }
+        }
+
         addButton?.removeFromSuperview()
 
         icon.removeFromSuperview()
@@ -219,6 +230,10 @@ final class BlockPost: UIView {
         }
     }
 
+    func getCount(count: Int) {
+        checkLabel.text = "\(count) / 2200"
+    }
+
 // MARK: save button
     private func renderSaveButton() {
         buttonSave.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
@@ -241,34 +256,38 @@ final class BlockPost: UIView {
 
         icon.removeFromSuperview()
 
-        var contentIsNotNil = true
+        var contentIsNil = false
         switch blockPostType {
         case .datePicker:
             guard let datePicker = datePicker else { return }
-            // TODO: get date picker input value
-            if true {
-                contentIsNotNil = false
+            if datePicker.date == Date(timeIntervalSince1970: 0) {
+                contentIsNil = true // ???
             }
             if commitChanges {
                 delegatePost?.updateBlock(from: self)
+            } else if let dateState = dateState {
+                datePicker.date = dateState
+                contentIsNil = false
             } else {
-                datePicker.date = state.date
+                contentIsNil = true
             }
         case .textView:
             guard let textView = textView else { return }
             if textView.text == nil || textView.text.count == 0 { // check
-                contentIsNotNil = false
+                contentIsNil = true
             }
             if commitChanges {
-                // save
                 delegatePost?.updateBlock(from: self)
+            } else if let textState = textState {
+                textView.text = textState
+                contentIsNil = false
             } else {
-//                textView.text = state.text
+                contentIsNil = true
             }
         }
 
         // content is not nil: render blue icon, set block element with non-editing mode
-        if contentIsNotNil {
+        if !contentIsNil {
             icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
             renderSubstrateIcon()
 

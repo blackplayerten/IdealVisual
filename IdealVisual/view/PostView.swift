@@ -129,11 +129,13 @@ final class PostView: UIViewController {
         prev.bottomAnchor.constraint(equalTo: scroll.bottomAnchor, constant: -margin).isActive = true
     }
 
-    @objc private func back() {
+    @objc
+    private func back() {
         navigationController?.popViewController(animated: true)
     }
 
-    @objc private func editBlock() {
+    @objc
+    private func editBlock() {
         self.date?.setEditingBlock()
         self.post?.setEditingBlock()
         self.place?.setEditingBlock()
