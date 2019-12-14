@@ -221,7 +221,8 @@ final class BlockPost: UIView {
         checkLabel.heightAnchor.constraint(equalToConstant: 20).isActive = true
         checkLabel.topAnchor.constraint(equalTo: topAnchor).isActive = true
         checkLabel.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-        checkLabel.text = "0 / 2200"
+        guard let tvCount = textView?.text.count else { return }
+        checkLabel.text = "\(tvCount) / 2200"
         checkLabel.textColor = Colors.darkGray
     }
 
