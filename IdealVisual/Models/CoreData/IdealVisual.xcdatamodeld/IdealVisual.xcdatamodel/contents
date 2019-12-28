@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="15702" systemVersion="19C57" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Feed" representedClassName="Feed" syncable="YES" codeGenerationType="class">
+        <relationship name="post" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Post" inverseName="feed" inverseEntity="Post"/>
+        <relationship name="user" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="feed" inverseEntity="User"/>
+    </entity>
+    <entity name="Post" representedClassName="Post" syncable="YES" codeGenerationType="class">
+        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="indexPhoto" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="photo" attributeType="String"/>
+        <attribute name="place" attributeType="String"/>
+        <attribute name="text" attributeType="String"/>
+        <relationship name="feed" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Feed" inverseName="post" inverseEntity="Feed"/>
+    </entity>
+    <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
+        <attribute name="ava" attributeType="String"/>
+        <attribute name="email" attributeType="String"/>
+        <attribute name="token" optional="YES" attributeType="String"/>
+        <attribute name="username" attributeType="String"/>
+        <relationship name="feed" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="Feed" inverseName="user" inverseEntity="Feed"/>
+    </entity>
+    <elements>
+        <element name="Feed" positionX="199.7265625" positionY="-149.34765625" width="128" height="73"/>
+        <element name="Post" positionX="437.71875" positionY="-258.0703125" width="128" height="133"/>
+        <element name="User" positionX="-28.9765625" positionY="-273.95703125" width="128" height="118"/>
+    </elements>
+</model>

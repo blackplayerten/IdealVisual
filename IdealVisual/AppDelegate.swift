@@ -17,15 +17,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
-        if CoreDataUser.getUser() != nil {
-            print("user ne nill, show main")
-            let tabBar = TabBar()
-            window!.rootViewController = tabBar
-        } else {
-            print("user nil, show signin")
-            let signIn = SignIn()
-            window!.rootViewController = signIn
-        }
+        let userViewModel: UserViewModelProtocol? = UserViewModel()
+        userViewModel?.get(completion: { (_, error) in
+            DispatchQueue.main.async {
+                if let error = error {
+                    switch error {
+                    case ErrorsUserViewModel.noData:
+                        print("user nil, show signin")
+                        let signIn = SignIn()
+                        self.window!.rootViewController = signIn
+                    default:
+                        print("unknown error: \(error)")
+                        fatalError()
+                    }
+                } else {
+                    print("user ne nill, show main")
+                    let tabBar = TabBar()
+                    self.window!.rootViewController = tabBar
+                }
+            }
+        })
 
         window!.makeKeyAndVisible()
         return true
