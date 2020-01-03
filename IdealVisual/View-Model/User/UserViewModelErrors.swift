@@ -8,14 +8,21 @@
 
 import Foundation
 
-typealias ErrorViewModel  = String
+typealias ErrorViewModel = String
 
 struct ErrorsUserViewModel {
-    static let okay: String = "ok"
-    static let noData: String = "user has no data"
-    static let unauthorized: String = "user unauthorized"
-    static let notFound: String = "user not found"
-    static let alreadyExists: String = "user already exists"
+    static let ok: ErrorViewModel = "ok"
+    static let noData: ErrorViewModel = "user has no data"
+    static let unauthorized: ErrorViewModel = "user unauthorized"
+    static let notFound: ErrorViewModel = "user not found"
+    static let alreadyExists: ErrorViewModel = "user already exists"
 
-    static let filesystemSave: String = "can't save file"
+    static let filesystemSave: ErrorViewModel = "can't save file"
+}
+
+struct ErrorsPostViewModel {
+    static let ok: ErrorViewModel = "ok"
+    static let noData: ErrorViewModel = "post has no data"
+    static let noID: ErrorViewModel = "post has no id"
+    static let notFound: ErrorViewModel = "post not found"
 }

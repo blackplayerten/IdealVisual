@@ -33,14 +33,15 @@ final class BlockPost: UIView {
         self.iconImage = iconImage
         self.blockPostType = blockPostType
 
-        if textValue != nil && textValue != "" ||
+        if textValue != nil && textValue?.count != 0 ||
             datePicker != nil && datePicker?.date != Date(timeIntervalSince1970: 0) {
             icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.blue)
         } else {
             icon = SubstrateButton(image: self.iconImage, side: 45, substrateColor: Colors.darkGray)
-            addButton = AddComponentsButton(text: buttonIext)
-            addButton?.setColor(state: false)
         }
+        addButton = AddComponentsButton(text: buttonIext)
+        addButton?.setColor(state: false)
+        
         self.delegatePost = delegatePost
         self.datePicker = datePicker
         super.init(frame: .zero)
@@ -55,7 +56,7 @@ final class BlockPost: UIView {
                 return
             }
         case .textView:
-            if textValue == nil || textValue == "" {
+            if textValue == nil || textValue?.count == 0 {
                 renderAddButton()
                 return
             }

@@ -9,6 +9,6 @@
 import Foundation
 
 protocol PhotoNetworkManagerProtocol {
-    func getPhoto(path: String, completion: ((Data?, NetworkError?) -> Void)?)
+    func get(path: String, completion: ((Data?, NetworkError?) -> Void)?)
     func upload(data: Data, completion: ((String?, NetworkError?) -> Void)?)
 }

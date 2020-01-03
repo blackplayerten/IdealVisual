@@ -15,6 +15,7 @@ enum BlockPostType {
 }
 
 final class PostView: UIViewController {
+    private var viewModel: PostViewModelProtocol?
     var publication: Post?
     let photo = UIImageView()
     var scroll = UIScrollView()
@@ -30,6 +31,7 @@ final class PostView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        self.viewModel = PostViewModel()
         setInteraction()
         setupNavItems()
         setBlocks()
@@ -140,23 +142,46 @@ final class PostView: UIViewController {
         self.post?.setEditingBlock()
         self.place?.setEditingBlock()
     }
+
+    private func procError(error: ErrorViewModel?) {
+        if let error = error {
+            switch error {
+            case ErrorsUserViewModel.noData:
+                // TODO: ui
+                break
+            default:
+                print("undefined error: \(error)"); return
+            }
+        }
+    }
 }
 
-// TODO: view-model
 extension PostView: BlockProtocol {
     func updateBlock(from: BlockPost) {
         guard let publication = publication else { return }
-        if from == self.post {
-            print("FROM")
-            PostCoreData.update(post: publication, text: post?.textView?.text)
-        } else if from == self.place {
-            print("PLACE")
-            PostCoreData.update(post: publication, place: place?.textView?.text)
-        } else if from == self.date {
-            print("DATE")
-            PostCoreData.update(post: publication, date: date?.datePicker?.date)
-        } else {
-            print("UNKNOWN")
+        switch from {
+        case self.post:
+            viewModel?.update(post: publication, date: nil, place: nil, text: post?.textView?.text,
+                             completion: { (error) in
+                                DispatchQueue.main.async {
+                                    self.procError(error: error)
+                                }
+            })
+        case self.place:
+            viewModel?.update(post: publication, date: nil, place: place?.textView?.text, text: nil,
+                             completion: { (error) in
+                                DispatchQueue.main.async {
+                                    self.procError(error: error)
+                                }
+                            })
+        case self.date:
+            viewModel?.update(post: publication, date: date?.datePicker?.date, place: nil, text: nil,
+                             completion: { (error) in
+                                DispatchQueue.main.async {
+                                    self.procError(error: error)
+                                }
+                            })
+        default: break
         }
     }
 }

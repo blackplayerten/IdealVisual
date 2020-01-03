@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		1802AC0F234E13CB0007560A /* Asset.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1802AC0E234E13CB0007560A /* Asset.xcassets */; };
 		180C5C6423B63DC7003538DF /* PostCoreDataProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180C5C6323B63DC7003538DF /* PostCoreDataProtocol.swift */; };
-		180C5C6623B6840E003538DF /* PhotoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180C5C6523B6840E003538DF /* PhotoViewModel.swift */; };
-		180C5C6823B6844E003538DF /* PhotoViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180C5C6723B6844E003538DF /* PhotoViewModelProtocol.swift */; };
+		180C5C6623B6840E003538DF /* PostViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180C5C6523B6840E003538DF /* PostViewModel.swift */; };
+		180C5C6823B6844E003538DF /* PostViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180C5C6723B6844E003538DF /* PostViewModelProtocol.swift */; };
 		180D6C1E234BCD4700AB52F5 /* TabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180D6C1D234BCD4700AB52F5 /* TabBar.swift */; };
 		180E3CDD23A3B84A000B96D8 /* JsonModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180E3CDC23A3B84A000B96D8 /* JsonModels.swift */; };
 		181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1AB6231DA6930081B01C /* AppDelegate.swift */; };
@@ -20,12 +20,15 @@
 		181B1ADA231DA6940081B01C /* IdealVisualUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */; };
 		1830EB752385671200369CA4 /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1830EB742385671200369CA4 /* CoreDataManager.swift */; };
 		1838C7B823718358000A32A9 /* SignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1838C7B723718358000A32A9 /* SignIn.swift */; };
-		1838C7BA23748CF0000A32A9 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */; };
 		18457F2E23636E3300568D81 /* BlocksPub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18457F2D23636E3300568D81 /* BlocksPub.swift */; };
 		184EB37723971D3F00256255 /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184EB37623971D3F00256255 /* FileManager.swift */; };
 		1853FC4123B7AFB90015A31A /* Routing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1853FC4023B7AFB90015A31A /* Routing.swift */; };
-		1863C743236496F0001EB5F8 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */; };
+		1853FC4423BC836C0015A31A /* PostNetworkManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1853FC4323BC836C0015A31A /* PostNetworkManagerProtocol.swift */; };
+		1853FC4623BC8A9E0015A31A /* PostNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1853FC4523BC8A9E0015A31A /* PostNetworkManager.swift */; };
 		188B5FB02361E47E00EA3701 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PostView.swift */; };
+		188F4E3A23BE8BF100043E70 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */; };
+		188F4E3B23BE8BF100043E70 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */; };
+		188F4E3D23BE8D4200043E70 /* Start.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188F4E3C23BE8D4200043E70 /* Start.swift */; };
 		1893229E23466104004026FC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229D23466104004026FC /* ProfileView.swift */; };
 		189322B5234687CE004026FC /* CustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* CustomElements.swift */; };
 		18999E202398F8E6003C0F44 /* checkValid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18999E1F2398F8E6003C0F44 /* checkValid.swift */; };
@@ -71,8 +74,8 @@
 /* Begin PBXFileReference section */
 		1802AC0E234E13CB0007560A /* Asset.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Asset.xcassets; sourceTree = "<group>"; };
 		180C5C6323B63DC7003538DF /* PostCoreDataProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCoreDataProtocol.swift; sourceTree = "<group>"; };
-		180C5C6523B6840E003538DF /* PhotoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoViewModel.swift; sourceTree = "<group>"; };
-		180C5C6723B6844E003538DF /* PhotoViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoViewModelProtocol.swift; sourceTree = "<group>"; };
+		180C5C6523B6840E003538DF /* PostViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostViewModel.swift; sourceTree = "<group>"; };
+		180C5C6723B6844E003538DF /* PostViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostViewModelProtocol.swift; sourceTree = "<group>"; };
 		180D6C1D234BCD4700AB52F5 /* TabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBar.swift; sourceTree = "<group>"; };
 		180E3CDC23A3B84A000B96D8 /* JsonModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonModels.swift; sourceTree = "<group>"; };
 		181B1AB3231DA6930081B01C /* IdealVisual.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IdealVisual.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,12 +91,15 @@
 		181B1ADB231DA6940081B01C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1830EB742385671200369CA4 /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
 		1838C7B723718358000A32A9 /* SignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
-		1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "PingFang-SC-Regular.ttf"; path = "../../../../Desktop/fonts/PingFang/PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		18457F2D23636E3300568D81 /* BlocksPub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksPub.swift; sourceTree = "<group>"; };
 		184EB37623971D3F00256255 /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
 		1853FC4023B7AFB90015A31A /* Routing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routing.swift; sourceTree = "<group>"; };
-		1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
+		1853FC4323BC836C0015A31A /* PostNetworkManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostNetworkManagerProtocol.swift; sourceTree = "<group>"; };
+		1853FC4523BC8A9E0015A31A /* PostNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostNetworkManager.swift; sourceTree = "<group>"; };
 		188B5FAF2361E47E00EA3701 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
+		188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
+		188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
+		188F4E3C23BE8D4200043E70 /* Start.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Start.swift; sourceTree = "<group>"; };
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
 		18999E1F2398F8E6003C0F44 /* checkValid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = checkValid.swift; sourceTree = "<group>"; };
@@ -176,7 +182,7 @@
 				632195CA3321E1A5988D39D1 /* View */,
 				18999E1E2398F83C003C0F44 /* View-Model */,
 				18F8EA8B23B232D20085A9BD /* Easier */,
-				1893229F2346809B004026FC /* fonts */,
+				188F4E3723BE8BF100043E70 /* fonts */,
 			);
 			path = IdealVisual;
 			sourceTree = "<group>";
@@ -202,8 +208,8 @@
 		1853FC3623B7ACDF0015A31A /* User */ = {
 			isa = PBXGroup;
 			children = (
-				18F8EA8423B2246D0085A9BD /* UserViewModel.swift */,
 				18F8EA8623B228780085A9BD /* UserViewModelProtocol.swift */,
+				18F8EA8423B2246D0085A9BD /* UserViewModel.swift */,
 				18F8EA9323B296E20085A9BD /* UserViewModelErrors.swift */,
 			);
 			path = User;
@@ -212,8 +218,8 @@
 		1853FC3723B7ACF40015A31A /* Post */ = {
 			isa = PBXGroup;
 			children = (
-				180C5C6523B6840E003538DF /* PhotoViewModel.swift */,
-				180C5C6723B6844E003538DF /* PhotoViewModelProtocol.swift */,
+				180C5C6723B6844E003538DF /* PostViewModelProtocol.swift */,
+				180C5C6523B6840E003538DF /* PostViewModel.swift */,
 			);
 			path = Post;
 			sourceTree = "<group>";
@@ -230,8 +236,8 @@
 		1853FC3923B7AD270015A31A /* Post */ = {
 			isa = PBXGroup;
 			children = (
-				18E1555123B4EF580051D833 /* PhotoNetworkManager.swift */,
-				18E1555323B4EF9B0051D833 /* PhotoNetworkManagerProtocol.swift */,
+				1853FC4323BC836C0015A31A /* PostNetworkManagerProtocol.swift */,
+				1853FC4523BC8A9E0015A31A /* PostNetworkManager.swift */,
 			);
 			path = Post;
 			sourceTree = "<group>";
@@ -249,8 +255,8 @@
 		1853FC3B23B7AE3D0015A31A /* Post */ = {
 			isa = PBXGroup;
 			children = (
-				18ACE2A32391AB78008B05B8 /* PostCoreData.swift */,
 				180C5C6323B63DC7003538DF /* PostCoreDataProtocol.swift */,
+				18ACE2A32391AB78008B05B8 /* PostCoreData.swift */,
 			);
 			path = Post;
 			sourceTree = "<group>";
@@ -271,6 +277,7 @@
 				18E8C537237B47AB0064B4F0 /* DarkFontNavigationController.swift */,
 				632194B70D0AC636CB2B847F /* PhotoCell.swift */,
 				63219C5F3C3B40275C1AC524 /* MainView.swift */,
+				188F4E3C23BE8D4200043E70 /* Start.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -314,11 +321,11 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		1893229F2346809B004026FC /* fonts */ = {
+		188F4E3723BE8BF100043E70 /* fonts */ = {
 			isa = PBXGroup;
 			children = (
-				1863C7422364969B001EB5F8 /* Montserrat-Bold.ttf */,
-				1838C7B923748CF0000A32A9 /* PingFang-SC-Regular.ttf */,
+				188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */,
+				188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */,
 			);
 			path = fonts;
 			sourceTree = "<group>";
@@ -335,12 +342,14 @@
 		18AC168823A8D5BB00F83290 /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				180E3CDC23A3B84A000B96D8 /* JsonModels.swift */,
 				1853FC3823B7AD160015A31A /* User */,
+				18E1555323B4EF9B0051D833 /* PhotoNetworkManagerProtocol.swift */,
+				18E1555123B4EF580051D833 /* PhotoNetworkManager.swift */,
 				1853FC3923B7AD270015A31A /* Post */,
 				18FCDFF523B0BFF3007AA3F4 /* HttpEntity.swift */,
 				1853FC4023B7AFB90015A31A /* Routing.swift */,
 				18F8EA9123B294830085A9BD /* networkErrors.swift */,
-				180E3CDC23A3B84A000B96D8 /* JsonModels.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -474,8 +483,8 @@
 				18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */,
 				1802AC0F234E13CB0007560A /* Asset.xcassets in Resources */,
 				181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */,
-				1863C743236496F0001EB5F8 /* Montserrat-Bold.ttf in Resources */,
-				1838C7BA23748CF0000A32A9 /* PingFang-SC-Regular.ttf in Resources */,
+				188F4E3B23BE8BF100043E70 /* Montserrat-Bold.ttf in Resources */,
+				188F4E3A23BE8BF100043E70 /* PingFang-SC-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -524,6 +533,7 @@
 				18F8EA8523B2246D0085A9BD /* UserViewModel.swift in Sources */,
 				1830EB752385671200369CA4 /* CoreDataManager.swift in Sources */,
 				18E1555223B4EF580051D833 /* PhotoNetworkManager.swift in Sources */,
+				1853FC4423BC836C0015A31A /* PostNetworkManagerProtocol.swift in Sources */,
 				180C5C6423B63DC7003538DF /* PostCoreDataProtocol.swift in Sources */,
 				184EB37723971D3F00256255 /* FileManager.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
@@ -533,9 +543,10 @@
 				18E1554C23B40C5D0051D833 /* ProfileProtocol.swift in Sources */,
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
 				18E1555423B4EF9B0051D833 /* PhotoNetworkManagerProtocol.swift in Sources */,
+				1853FC4623BC8A9E0015A31A /* PostNetworkManager.swift in Sources */,
 				18F8EA9423B296E20085A9BD /* UserViewModelErrors.swift in Sources */,
 				18F8EA8723B228780085A9BD /* UserViewModelProtocol.swift in Sources */,
-				180C5C6823B6844E003538DF /* PhotoViewModelProtocol.swift in Sources */,
+				180C5C6823B6844E003538DF /* PostViewModelProtocol.swift in Sources */,
 				18FCDFF823B213AF007AA3F4 /* UserCoreDataProtocol.swift in Sources */,
 				18ACE2A42391AB78008B05B8 /* PostCoreData.swift in Sources */,
 				181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */,
@@ -544,10 +555,11 @@
 				63219A4A265F4D025E33856C /* MainView.swift in Sources */,
 				18E8C53A237B7EE60064B4F0 /* SignUp.swift in Sources */,
 				1838C7B823718358000A32A9 /* SignIn.swift in Sources */,
-				180C5C6623B6840E003538DF /* PhotoViewModel.swift in Sources */,
+				180C5C6623B6840E003538DF /* PostViewModel.swift in Sources */,
 				180D6C1E234BCD4700AB52F5 /* TabBar.swift in Sources */,
 				188B5FB02361E47E00EA3701 /* PostView.swift in Sources */,
 				18E8C538237B47AB0064B4F0 /* DarkFontNavigationController.swift in Sources */,
+				188F4E3D23BE8D4200043E70 /* Start.swift in Sources */,
 				18457F2E23636E3300568D81 /* BlocksPub.swift in Sources */,
 				18F8EA9223B294830085A9BD /* networkErrors.swift in Sources */,
 				1853FC4123B7AFB90015A31A /* Routing.swift in Sources */,

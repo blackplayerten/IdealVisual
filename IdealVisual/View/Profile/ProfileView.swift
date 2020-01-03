@@ -343,10 +343,9 @@ extension ProfileView {
                 }
 
                 guard let avatar = avatar else {
-                    // TODO: ui
+                    self.ava.image = UIImage(named: "default_profile")
                     return
                 }
-
                 self.ava.image = UIImage(contentsOfFile: avatar)
             }
         })
@@ -363,7 +362,7 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
                 ava.image = selected
 
                 avaName = url.lastPathComponent
-                avaContent = selected.cgImage?.dataProvider?.data as Data?
+                avaContent = selected.jpegData(compressionQuality: 1.0)
             }
         }
         delegateProfile?.dismissAlert()

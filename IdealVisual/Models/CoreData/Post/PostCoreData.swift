@@ -11,14 +11,13 @@ import Foundation
 import UIKit
 
 final class PostCoreData: PostCoreDataProtocol {
-    private var post: Post?
-
     func create(photo: String, date: Date, place: String, text: String, indexPhoto: Int) -> Post? {
         let entityDescriptionPost = NSEntityDescription.entity(forEntityName: "Post",
                                                                in: DataManager.instance.managedObjectContext)
         let managedObjectPost = NSManagedObject(entity: entityDescriptionPost!,
                                                 insertInto: DataManager.instance.managedObjectContext)
 
+        managedObjectPost.setValue(UUID(uuid: UUID_NULL), forKey: "id")
         managedObjectPost.setValue(photo, forKey: "photo")
         managedObjectPost.setValue(date, forKey: "date")
         managedObjectPost.setValue(place, forKey: "place")
@@ -27,13 +26,15 @@ final class PostCoreData: PostCoreDataProtocol {
 
         DataManager.instance.saveContext()
 
-        post = managedObjectPost as? Post
-        print("create post, index: \(indexPhoto)")
+        let post = managedObjectPost as? Post
         return post
     }
 
-    func update(post: Post, date: Date? = nil, place: String? = nil, text: String? = nil) {
+    func update(post: Post, id: UUID? = nil, date: Date? = nil, place: String? = nil, text: String? = nil) {
         do {
+            if let id = id {
+                post.setValue(id, forKey: "id")
+            }
             if let date = date {
                 post.setValue(date, forKey: "date")
             }
@@ -44,7 +45,6 @@ final class PostCoreData: PostCoreDataProtocol {
                 post.setValue(text, forKey: "text")
             }
             try DataManager.instance.managedObjectContext.save()
-            print(post)
         } catch {
             print(error)
         }
@@ -65,7 +65,7 @@ final class PostCoreData: PostCoreDataProtocol {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Post")
         do {
             let posts = try DataManager.instance.managedObjectContext.fetch(fetchRequest)
-            post = posts.last as? Post
+            let post = posts.last as? Post
             return post
         } catch {
             print(error)
@@ -75,6 +75,14 @@ final class PostCoreData: PostCoreDataProtocol {
 
     func delete(post: Post) {
         DataManager.instance.managedObjectContext.delete(post)
+        DataManager.instance.saveContext()
+    }
+
+    func reinitIndices(posts: [Post]) {
+        for (index, post) in posts.enumerated() {
+            post.indexPhoto = Int64(index)
+        }
+
         DataManager.instance.saveContext()
     }
 

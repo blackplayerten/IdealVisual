@@ -6,6 +6,7 @@
     </entity>
     <entity name="Post" representedClassName="Post" syncable="YES" codeGenerationType="class">
         <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="indexPhoto" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="photo" attributeType="String"/>
         <attribute name="place" attributeType="String"/>
@@ -21,7 +22,7 @@
     </entity>
     <elements>
         <element name="Feed" positionX="199.7265625" positionY="-149.34765625" width="128" height="73"/>
-        <element name="Post" positionX="437.71875" positionY="-258.0703125" width="128" height="133"/>
+        <element name="Post" positionX="437.71875" positionY="-258.0703125" width="128" height="148"/>
         <element name="User" positionX="-28.9765625" positionY="-273.95703125" width="128" height="118"/>
     </elements>
 </model>

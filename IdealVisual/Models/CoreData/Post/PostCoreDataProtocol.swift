@@ -11,9 +11,10 @@ import Foundation
 
 protocol PostCoreDataProtocol: class {
     func create(photo: String, date: Date, place: String, text: String, indexPhoto: Int) -> Post?
-    func update(post: Post, date: Date?, place: String?, text: String?)
+    func update(post: Post, id: UUID?, date: Date?, place: String?, text: String?)
     func getAll() -> NSFetchedResultsController<Post>
     func get() -> Post?
     func delete(post: Post)
+    func reinitIndices(posts: [Post])
     func swap(_ posts: [Post], source: Int, dest: Int)
 }

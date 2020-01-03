@@ -116,9 +116,6 @@ final class SignUp: UIViewController {
                     case ErrorsUserViewModel.alreadyExists:
                         // TODO: ui
                         break
-                    case ErrorsUserViewModel.notFound:
-                        // TODO: ui
-                        break
                         // TODO: more errors: server 5??
                     default:
                         print("undefined error: \(error)"); return

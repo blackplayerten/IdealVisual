@@ -103,7 +103,7 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
             print(HTTPCodes.notFound); return
         }
         var request = URLRequest(url: url)
-        request.httpMethod = HTTPMethods.post
+        request.httpMethod = HTTPMethods.put
 
         do {
             let jsonData = try JSONEncoder().encode(user)

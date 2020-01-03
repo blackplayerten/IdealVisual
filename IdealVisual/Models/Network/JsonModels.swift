@@ -17,6 +17,7 @@ struct JsonUserModel: Codable {
 }
 
 struct JsonPostModel: Codable {
+    var id: UUID = UUID()
     var photoStr: String = ""
     var photoIndex: Int64 = 0
     var dateStr: Date = Date(timeIntervalSince1970: 0)
@@ -26,4 +27,8 @@ struct JsonPostModel: Codable {
 
 struct JsonError: Codable {
     var field: [String: String] = ["": ""]
+}
+
+struct JsonUploadedPhotoTo: Decodable {
+    var path: String
 }

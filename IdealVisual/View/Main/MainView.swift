@@ -13,8 +13,8 @@ import CoreData
 
 final class MainView: UIViewController {
     private var profileV: ProfileView?
-    private var postFetcher: NSFetchedResultsController<Post>?
     private var userViewModel: UserViewModelProtocol?
+    private var postViewModel: PostViewModelProtocol?
 
     private var refreshControl = UIRefreshControl()
 
@@ -24,9 +24,6 @@ final class MainView: UIViewController {
     private var editMode: Bool = false
 
     fileprivate var choose = UIImagePickerController()
-
-    private var sectionChanges = [(type: NSFetchedResultsChangeType, sectionIndex: Int)]()
-    private var itemChanges = [(type: NSFetchedResultsChangeType, indexPath: IndexPath?, newIndexPath: IndexPath?)]()
 
     lazy fileprivate var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -49,6 +46,7 @@ final class MainView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.userViewModel = UserViewModel()
+        self.postViewModel = PostViewModel()
         view.backgroundColor = .white
         let back = UIImageView(frame: CGRect(x: 0, y: view.bounds.height/2, width: view.bounds.width, height: 250))
         back.image = UIImage(named: "fon")
@@ -59,19 +57,13 @@ final class MainView: UIViewController {
         choose.sourceType = .photoLibrary
         choose.allowsEditing = true
 
+        postViewModel?.subscribe(completion: { [weak self] (_) in
+            DispatchQueue.main.async {
+                self?.content.reloadData()
+            }
+        })
+
         profileV = ProfileView(profileDelegate: self)
-
-        // TODO: view-model
-        postFetcher = PostCoreData.getAll()
-        postFetcher?.delegate = self
-
-        do {
-            try postFetcher?.performFetch()
-        } catch {
-            let fetchError = error as NSError
-            print("Unable to Save Note")
-            print("\(fetchError), \(fetchError.localizedDescription)")
-        }
 
         setNavTitle()
         setNavItems()
@@ -110,10 +102,13 @@ final class MainView: UIViewController {
                 }
 
                 guard let avatar = avatar else {
-                    // TODO: ui
+                    profileV.setBackgroundImage(UIImage(named: "default_profile"), for: .normal)
                     return
                 }
-                profileV.setBackgroundImage(UIImage(contentsOfFile: avatar), for: .normal)
+
+                DispatchQueue.main.async {
+                    profileV.setBackgroundImage(UIImage(contentsOfFile: avatar), for: .normal)
+                }
             }
         })
 
@@ -123,7 +118,7 @@ final class MainView: UIViewController {
         profileV.addTarget(self, action: #selector(profile), for: .touchUpInside)
 
         initContent()
-        if postFetcher?.fetchedObjects?.count != 0 {
+        if postViewModel?.posts.count != 0 {
             guard let markEdit = UIImage(named: "edit_gray") else { return }
             navigationItem.leftBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: markEdit,
                                                                                            side: 35,
@@ -181,14 +176,25 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
             if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                let fileName = url.lastPathComponent
-                _ = savePhoto(photo: selected, typePhoto: .post, fileName: fileName)
-                guard var indexPhoto = postFetcher?.fetchedObjects?.count else { return }
-                indexPhoto += 1
-                _ = PostCoreData.createPost( photo: getFolderName(typePhoto: .post) + "/" + fileName,
-                                             date: Date(timeIntervalSince1970: 0), place: "", text: "",
-                                             indexPhoto: indexPhoto
-                )
+                let photoName = url.lastPathComponent
+//                Date(timeIntervalSince1970: 0)
+                _ = postViewModel?.create(photoName: photoName,
+                                          photoData: selected.jpegData(compressionQuality: 1.0),
+                                          date: Date(timeIntervalSince1970: 0),
+                                          place: "", text: "",
+                    completion: { (error) in
+                        DispatchQueue.main.async {
+                            if let error = error {
+                                switch error {
+                                case ErrorsUserViewModel.noData:
+                                    // TODO: ui
+                                    break
+                                default:
+                                    print("undefined error: \(error)"); return
+                                }
+                            }
+                        }
+                })
             }
             setNavItems()
             checkPhotos()
@@ -215,11 +221,19 @@ extension MainView: UICollectionViewDelegate {
             let cell = collectionView.cellForItem(at: indexPath)
             if let selectCell = cell as? PhotoCell { selectCell.selectedImage.isHidden = false }
         } else {
+            guard let postViewModel = postViewModel else { return }
+            let post = postViewModel.posts[indexPath.item]
+
+            guard let path = post.photo else { return }
+
             let detailPhoto = PostView()
-            guard let posts = postFetcher?.fetchedObjects else { return }
-            let post = posts[indexPath.item]
+
+            DispatchQueue.main.async {
+                detailPhoto.photo.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+            }
+
             detailPhoto.publication = post
-            detailPhoto.photo.image = getPhoto(namePhoto: post.photo!, typePhoto: .post)
+
             self.navigationController?.pushViewController(detailPhoto, animated: true)
         }
     }
@@ -235,32 +249,30 @@ extension MainView: UICollectionViewDelegate {
 // MARK: - data source
 extension MainView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let sections = postFetcher?.sections else {
-            return 0
-        }
-
-        let sectionInfo = sections[section]
-        return sectionInfo.numberOfObjects
+        return postViewModel?.posts.count ?? 0
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) ->
         UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
             if let unwrapCell = cell as? PhotoCell {
-                guard let post = postFetcher?.object(at: indexPath) else { fatalError() }
+                guard let postViewModel = postViewModel else { return cell }
 
-                unwrapCell.backgroundColor = .gray
+                guard let path = postViewModel.posts[indexPath.item].photo else { return cell }
 
-                unwrapCell.picture.image = getPhoto(namePhoto: post.photo!,
-                                                    typePhoto: .post)
+                DispatchQueue.main.async {
+                    unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+                }
                 unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
                                           height: view.bounds.width / 3 - 1)
+
+                unwrapCell.backgroundColor = .gray
             }
         return cell
     }
 
     private func checkPhotos() {
-        if postFetcher?.fetchedObjects?.count != 0 {
+        if postViewModel?.posts.count != 0 {
             content.isHidden = false
         } else {
             content.isHidden = true
@@ -293,8 +305,8 @@ extension MainView: UICollectionViewDataSource {
 extension MainView: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
                         at indexPath: IndexPath) -> [UIDragItem] {
-        guard let imageURL = postFetcher?.fetchedObjects?[indexPath.row].photo,
-              let image = getPhoto(namePhoto: imageURL, typePhoto: .post)
+        guard let cell = content.cellForItem(at: indexPath) as? PhotoCell,
+            let image = cell.picture.image
         else { fatalError() }
 
         let provider = NSItemProvider(object: image)
@@ -312,12 +324,12 @@ extension MainView: UICollectionViewDropDelegate {
                         performDropWith coordinator: UICollectionViewDropCoordinator) {
         let items = coordinator.items
         for item in items {
-            guard let sourceIndexPath = item.sourceIndexPath else { return }
-            guard let destinationIndexPath = coordinator.destinationIndexPath else { return }
+            guard let sourceIndexPath = item.sourceIndexPath,
+                let destinationIndexPath = coordinator.destinationIndexPath
+            else { return }
 
-            collectionView.moveItem(at: sourceIndexPath, to: destinationIndexPath) // kostyl
-            guard let posts = postFetcher?.fetchedObjects else { return }
-            PostCoreData.swap(posts, source: sourceIndexPath.item, dest: destinationIndexPath.item)
+            collectionView.moveItem(at: sourceIndexPath, to: destinationIndexPath)
+            postViewModel?.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item)
         }
     }
 
@@ -325,40 +337,6 @@ extension MainView: UICollectionViewDropDelegate {
                         withDestinationIndexPath destinationIndexPath: IndexPath?) ->
         UICollectionViewDropProposal {
            return UICollectionViewDropProposal(operation: .move, intent: .insertAtDestinationIndexPath)
-    }
-}
-
-// MARK: - fetchResultControllerDelegate
-extension MainView: NSFetchedResultsControllerDelegate {
-
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int,
-                    for type: NSFetchedResultsChangeType) {
-        sectionChanges.append((type, sectionIndex))
-    }
-
-    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
-                    didChange anObject: Any, at indexPath: IndexPath?,
-                    for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        itemChanges.append((type, indexPath, newIndexPath))
-    }
-
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        self.content.performBatchUpdates({
-            for change in self.itemChanges {
-                switch change.type {
-                case .insert: self.content.insertItems(at: [change.newIndexPath!])
-                case .delete: self.content.deleteItems(at: [change.indexPath!])
-                case .update: self.content.reloadItems(at: [change.indexPath!])
-                case .move:
-                    self.content.deleteItems(at: [change.indexPath!])
-                    self.content.insertItems(at: [change.newIndexPath!])
-                @unknown default:
-                    fatalError()
-                }
-            }
-            self.itemChanges.removeAll()
-        })
     }
 }
 
@@ -381,19 +359,25 @@ extension MainView {
         editMode = false
     }
 
-    // TODO: view-model
     @objc
     private func save() {
         if editMode {
             if let selectedCells = content.indexPathsForSelectedItems {
                 let items = selectedCells.map { $0.item }.sorted().reversed()
-                for item in items {
-                    guard let posts = postFetcher?.fetchedObjects else { fatalError() }
-                    let delPost = posts[item]
-                    let photoPath = delPost.photo ?? ""
-                    PostCoreData.delete(post: delPost)
-                    deleteFile(filePath: photoPath)
-                }
+                postViewModel?.delete(atIndices: [Int](items),
+                                      completion: { (error) in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            switch error {
+                            case ErrorsUserViewModel.noData:
+                                // TODO: ui
+                                break
+                            default:
+                                print("undefined error: \(error)"); return
+                            }
+                        }
+                    }
+                })
             }
             setNavItems()
             checkPhotos()

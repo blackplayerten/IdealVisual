@@ -9,7 +9,7 @@
 import Foundation
 
 final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
-    func getPhoto(path: String, completion: ((Data?, NetworkError?) -> Void)?) {
+    func get(path: String, completion: ((Data?, NetworkError?) -> Void)?) {
         guard let url = NetworkURLS.staticURL?.appendingPathComponent(path) else {
             print("invalid static url '\(String(describing: NetworkURLS.staticURL))' and append path '\(path)'"); return
         }
@@ -76,13 +76,9 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
                 completion?(nil, ErrorsNetwork.noData); return
             }
 
-            struct UploadedTo: Decodable {
-                var path: String
-            }
-
             var uploadedPath: String?
             do {
-                let tmp = try JSONDecoder().decode(UploadedTo.self, from: data)
+                let tmp = try JSONDecoder().decode(JsonUploadedPhotoTo.self, from: data)
                 if tmp.path != "" {
                     uploadedPath = tmp.path
                 }

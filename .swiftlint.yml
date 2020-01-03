@@ -2,4 +2,5 @@ disabled_rules:
     - todo
     - function_body_length
     - type_body_length
+    - identifier_name
     - file_length

@@ -69,7 +69,7 @@ final class UserViewModel: UserViewModelProtocol {
             }
 
             if user.ava != "" {
-                self.photoNetworkManager.getPhoto(path: user.ava, completion: { (data, error) in
+                self.photoNetworkManager.get(path: user.ava, completion: { (data, error) in
                     DispatchQueue.main.async {
                         if let error = error {
                             switch error {
@@ -114,22 +114,32 @@ final class UserViewModel: UserViewModelProtocol {
 
     // MARK: - get avatar from core data
     func getAvatar(completion: ((String?, ErrorViewModel?) -> Void)?) {
-        if let avaUsr = user?.ava {
-            completion?(avaUsr, nil)
-        } else {
-            get(completion: { (_, error) in
+        if user == nil {
+            get(completion: { (user, error) in
                 if let error = error {
                     switch error {
                     case ErrorsNetwork.notFound:
-                        completion?(nil, ErrorsUserViewModel.notFound); return
+                        completion?(nil, ErrorsUserViewModel.notFound)
                     default:
-                        print("undefined user error: \(error)"); return
+                        let undef = "undefined user error: \(error)"
+                        print(undef)
+                        completion?(nil, ErrorViewModel(undef))
                     }
+                    return
                 }
-                completion?(nil, nil); return
+
+                self.user = user
             })
         }
 
+        if var avaUsr = user!.ava {
+            if avaUsr != "" {
+                avaUsr = resolveAbsoluteFilePath(filePath: avaUsr).path
+                completion?(avaUsr, nil)
+                return
+            }
+        }
+        completion?(nil, nil)
     }
 
     // MARK: - update
