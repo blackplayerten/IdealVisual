@@ -28,7 +28,7 @@
 		188B5FB02361E47E00EA3701 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PostView.swift */; };
 		188F4E3A23BE8BF100043E70 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */; };
 		188F4E3B23BE8BF100043E70 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */; };
-		188F4E3D23BE8D4200043E70 /* Start.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188F4E3C23BE8D4200043E70 /* Start.swift */; };
+		188F4E3D23BE8D4200043E70 /* AppLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188F4E3C23BE8D4200043E70 /* AppLoader.swift */; };
 		1893229E23466104004026FC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229D23466104004026FC /* ProfileView.swift */; };
 		189322B5234687CE004026FC /* CustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* CustomElements.swift */; };
 		18999E202398F8E6003C0F44 /* checkValid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18999E1F2398F8E6003C0F44 /* checkValid.swift */; };
@@ -99,7 +99,7 @@
 		188B5FAF2361E47E00EA3701 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
-		188F4E3C23BE8D4200043E70 /* Start.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Start.swift; sourceTree = "<group>"; };
+		188F4E3C23BE8D4200043E70 /* AppLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLoader.swift; sourceTree = "<group>"; };
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
 		18999E1F2398F8E6003C0F44 /* checkValid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = checkValid.swift; sourceTree = "<group>"; };
@@ -277,7 +277,7 @@
 				18E8C537237B47AB0064B4F0 /* DarkFontNavigationController.swift */,
 				632194B70D0AC636CB2B847F /* PhotoCell.swift */,
 				63219C5F3C3B40275C1AC524 /* MainView.swift */,
-				188F4E3C23BE8D4200043E70 /* Start.swift */,
+				188F4E3C23BE8D4200043E70 /* AppLoader.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -559,7 +559,7 @@
 				180D6C1E234BCD4700AB52F5 /* TabBar.swift in Sources */,
 				188B5FB02361E47E00EA3701 /* PostView.swift in Sources */,
 				18E8C538237B47AB0064B4F0 /* DarkFontNavigationController.swift in Sources */,
-				188F4E3D23BE8D4200043E70 /* Start.swift in Sources */,
+				188F4E3D23BE8D4200043E70 /* AppLoader.swift in Sources */,
 				18457F2E23636E3300568D81 /* BlocksPub.swift in Sources */,
 				18F8EA9223B294830085A9BD /* networkErrors.swift in Sources */,
 				1853FC4123B7AFB90015A31A /* Routing.swift in Sources */,
@@ -744,7 +744,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = a.kurganova.IdealVisual;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -763,7 +763,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = a.kurganova.IdealVisual;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

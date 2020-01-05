@@ -122,9 +122,14 @@ final class DatePickerComponent: UIDatePicker {
 // MARK: - text view
 final class TextViewComponent: UITextView, UITextViewDelegate {
     private let countCB: (Int) -> Void
+    private let beginEditing: () -> Void
+    private let endEditing: () -> Void
 
-    init(text: String? = nil, countCB: @escaping (Int) -> Void) {
+    init(text: String? = nil, countCB: @escaping (Int) -> Void,
+         beginEditing: @escaping () -> Void, endEditing: @escaping () -> Void) {
         self.countCB = countCB
+        self.beginEditing = beginEditing
+        self.endEditing = endEditing
         super.init(frame: .zero, textContainer: nil)
         self.delegate = self
         isScrollEnabled = false
@@ -133,6 +138,16 @@ final class TextViewComponent: UITextView, UITextViewDelegate {
         self.text = text
         textAlignment = .left
         allowsEditingTextAttributes = true
+    }
+
+    func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
+        beginEditing()
+        return true
+    }
+
+    func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
+        endEditing()
+        return true
     }
 
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {

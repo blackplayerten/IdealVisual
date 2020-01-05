@@ -41,7 +41,7 @@ final class BlockPost: UIView {
         }
         addButton = AddComponentsButton(text: buttonIext)
         addButton?.setColor(state: false)
-        
+
         self.delegatePost = delegatePost
         self.datePicker = datePicker
         super.init(frame: .zero)
@@ -92,7 +92,13 @@ final class BlockPost: UIView {
         switch blockPostType {
         case .textView:
             if textView == nil {
-                textView = TextViewComponent(text: value, countCB: getCount(count:))
+                textView = TextViewComponent(text: value, countCB: getCount(count:), beginEditing: { [weak self]
+                    () -> Void in
+                    self?.delegatePost?.textViewShouldBeginEditing(block: self!)
+                }, endEditing: { [weak self]
+                    () -> Void in
+                    self?.delegatePost?.textViewShouldEndEditing(block: self!)
+                })
             }
             textView?.changeTextViewColorWhileEditing(editingMode: editingMode)
             guard let textView = textView else { return }

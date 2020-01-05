@@ -78,6 +78,7 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                 switch status {
                 case HTTPCodes.okay:
                     break
+                    // FIXME: 403, not 404
                 case HTTPCodes.notFound:
                     completion?(nil, ErrorsNetwork.notFound); return
                 default:

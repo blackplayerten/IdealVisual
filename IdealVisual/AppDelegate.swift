@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let loading = AppLoader()
         window!.rootViewController = loading
-        
+
         window!.makeKeyAndVisible()
         return true
     }

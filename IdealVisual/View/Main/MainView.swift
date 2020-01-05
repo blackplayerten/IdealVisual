@@ -65,6 +65,7 @@ final class MainView: UIViewController {
 
         profileV = ProfileView(profileDelegate: self)
 
+        initContent()
         setNavTitle()
         setNavItems()
         checkPhotos()
@@ -117,11 +118,9 @@ final class MainView: UIViewController {
         profileV.layer.cornerRadius = 10
         profileV.addTarget(self, action: #selector(profile), for: .touchUpInside)
 
-        initContent()
         if postViewModel?.posts.count != 0 {
             guard let markEdit = UIImage(named: "edit_gray") else { return }
-            navigationItem.leftBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: markEdit,
-                                                                                           side: 35,
+            navigationItem.leftBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: markEdit, side: 35,
                                                                                            target: self,
                                                                                            action: #selector(edit)
             ))
@@ -152,9 +151,7 @@ final class MainView: UIViewController {
         content.dragInteractionEnabled = true
         content.dragDelegate = self
         content.dropDelegate = self
-        content.prefetchDataSource = self
         content.register(PhotoCell.self, forCellWithReuseIdentifier: "cell")
-        content.reloadData()
         view.addSubview(content)
         content.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
         content.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
@@ -163,6 +160,16 @@ final class MainView: UIViewController {
 
         content.refreshControl = refreshControl
         refreshControl.tintColor = Colors.lightBlue
+        refreshControl.addTarget(self, action: #selector(startLoading), for: .valueChanged)
+    }
+
+    @objc private func startLoading() {
+        _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(tick),
+                                 userInfo: nil, repeats: false)
+    }
+
+    @objc private func tick() {
+        refreshControl.endRefreshing()
     }
 }
 
@@ -177,11 +184,10 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
         if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
             if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 let photoName = url.lastPathComponent
-//                Date(timeIntervalSince1970: 0)
-                _ = postViewModel?.create(photoName: photoName,
-                                          photoData: selected.jpegData(compressionQuality: 1.0),
-                                          date: Date(timeIntervalSince1970: 0),
-                                          place: "", text: "",
+                postViewModel?.create(photoName: photoName,
+                                      photoData: selected.jpegData(compressionQuality: 1.0),
+                                      date: Date(timeIntervalSince1970: 0),
+                                      place: "", text: "",
                     completion: { (error) in
                         DispatchQueue.main.async {
                             if let error = error {
@@ -190,14 +196,14 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
                                     // TODO: ui
                                     break
                                 default:
-                                    print("undefined error: \(error)"); return
+                                    print("undefined error: \(error)")
                                 }
                             }
+                            self.setNavItems()
+                            self.checkPhotos()
                         }
                 })
             }
-            setNavItems()
-            checkPhotos()
         }
         dismissAlert()
     }
@@ -238,11 +244,13 @@ extension MainView: UICollectionViewDelegate {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, shouldDeselectItemAt indexPath: IndexPath) -> Bool {
         if editMode == true {
             let cell = collectionView.cellForItem(at: indexPath)
             if let selectCell = cell as? PhotoCell { selectCell.selectedImage.isHidden = true }
+            return true
         }
+        return false
     }
 }
 
@@ -255,25 +263,27 @@ extension MainView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) ->
         UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
-            if let unwrapCell = cell as? PhotoCell {
-                guard let postViewModel = postViewModel else { return cell }
+        if let unwrapCell = cell as? PhotoCell {
+            guard let postViewModel = postViewModel else { return cell }
 
-                guard let path = postViewModel.posts[indexPath.item].photo else { return cell }
+            guard let path = postViewModel.posts[indexPath.item].photo else { return cell }
 
-                DispatchQueue.main.async {
-                    unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
-                }
-                unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
-                                          height: view.bounds.width / 3 - 1)
+            // FIXME: что-то тут не так
+//            DispatchQueue.main.async {
+                unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+//            }
+            unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
+                                      height: view.bounds.width / 3 - 1)
 
-                unwrapCell.backgroundColor = .gray
-            }
+            unwrapCell.backgroundColor = .gray
+        }
         return cell
     }
 
     private func checkPhotos() {
         if postViewModel?.posts.count != 0 {
             content.isHidden = false
+            helpText.removeFromSuperview()
         } else {
             content.isHidden = true
             setHelp()
@@ -346,7 +356,6 @@ extension MainView {
     private func edit() {
         editMode = true
         setNavEditItems()
-        initContent()
         content.allowsMultipleSelection = true
         content.dragInteractionEnabled = false
     }
@@ -355,6 +364,14 @@ extension MainView {
     private func no() {
         setNavItems()
         checkPhotos()
+        content.allowsMultipleSelection = false
+        content.dragInteractionEnabled = true
+
+        content.indexPathsForSelectedItems?.forEach {
+            guard let cell = content.cellForItem(at: $0) as? PhotoCell else { fatalError() }
+            cell.selectedImage.isHidden = true
+            content.deselectItem(at: $0, animated: true)
+        }
 
         editMode = false
     }
@@ -373,31 +390,16 @@ extension MainView {
                                 // TODO: ui
                                 break
                             default:
-                                print("undefined error: \(error)"); return
+                                print("undefined error: \(error)")
                             }
                         }
+                        self.setNavItems()
+                        self.checkPhotos()
+                        self.editMode = false
                     }
                 })
             }
-            setNavItems()
-            checkPhotos()
-            editMode = false
         }
-    }
-}
-
-// MARK: - refresh control
-extension MainView: UICollectionViewDataSourcePrefetching {
-    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
-        _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(tick),
-                                 userInfo: nil, repeats: true)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
-    }
-
-    @objc private func tick() {
-        refreshControl.endRefreshing()
     }
 }
 

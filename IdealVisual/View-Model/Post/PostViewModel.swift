@@ -10,10 +10,6 @@ import Foundation
 import CoreData
 
 final class PostViewModel: NSObject, PostViewModelProtocol {
-    func getPhoto(path: String) -> String {
-        return resolveAbsoluteFilePath(filePath: path).path
-    }
-
     private var postCoreData: PostCoreDataProtocol
     private var postNetworkManager: PostNetworkManagerProtocol
     private var notif_posts = [(PostViewModelProtocol) -> Void]()
@@ -51,14 +47,20 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
         photoPath = "posts/" + photoName
         _ = saveFile(data: photoData!, filePath: photoPath)
 
+        // TODO: нормальные ерроры на посты
         guard let date = date, let place = place, let text = text
-        else { return }
+            else { completion?(ErrorsPostViewModel.noData); return }
 
         // for core data
-        let indexPhoto = self.fetcher.fetchedObjects!.count
+        let indexPhoto = posts.count
 
         _ = postCoreData.create(photo: photoPath, date: date, place: place, text: text,
                                 indexPhoto: indexPhoto)
+        completion?(nil)
+    }
+
+    func getPhoto(path: String) -> String {
+        return resolveAbsoluteFilePath(filePath: path).path
     }
 
     func update(post: Post, date: Date? = nil, place: String? = nil, text: String? = nil,
@@ -106,9 +108,10 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
             if let error = error {
                 switch error {
                 case ErrorsNetwork.notFound:
-                    completion?(ErrorsPostViewModel.notFound); return
+                    completion?(ErrorsPostViewModel.notFound)
                 default:
-                    print("undefined user error: \(error)"); return
+                    print("undefined user error: \(error)")
+                    completion?(ErrorViewModel("undef"))
                 }
             }
         })
@@ -136,8 +139,9 @@ extension PostViewModel: NSFetchedResultsControllerDelegate {
         guard let fetched = fetcher.fetchedObjects else { return }
         posts = fetched // non-optimal way
 
+        print("content changed \(fetched)")
         // TODO: better to crud with itemChanges
-//        for change in viewModel.itemChanges {
+//        for change in self.itemChanges {
 //            switch change.type {
 //            case .insert: self.content.insertItems(at: [change.newIndexPath!])
 //            case .delete: self.content.deleteItems(at: [change.indexPath!])

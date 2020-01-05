@@ -7,7 +7,11 @@
 //
 
 import Foundation
+import UIKit
 
 protocol BlockProtocol: class {
     func updateBlock(from: BlockPost)
+
+    func textViewShouldBeginEditing(block: BlockPost)
+    func textViewShouldEndEditing(block: BlockPost)
 }

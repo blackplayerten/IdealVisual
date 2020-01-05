@@ -16,12 +16,14 @@ enum BlockPostType {
 
 final class PostView: UIViewController {
     private var viewModel: PostViewModelProtocol?
+    private var hideKeyboard = UITapGestureRecognizer()
     var publication: Post?
     let photo = UIImageView()
     var scroll = UIScrollView()
     let margin: CGFloat = 30.0
     var date: BlockPost? = nil, post: BlockPost? = nil, place: BlockPost? = nil
 
+    // MARK: - methods lifecycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.tabBarController?.tabBar.isHidden = true
@@ -30,13 +32,57 @@ final class PostView: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+
         self.viewModel = PostViewModel()
+        view.backgroundColor = .white
         setInteraction()
         setupNavItems()
         setBlocks()
+
+        // MARK: - keyboard
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        // MARK: kostyl при переходе на новый пост почему-то не удалялся старый пост и
+        // он принимал события клавиатуры, деинит не помог, где-то сохранилась ссылка?
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    private var activeField: BlockPost?
+    @objc
+    func keyboardWillShow(_ notification: Notification) {
+        let info = notification.userInfo!
+        guard let rect: CGRect = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+            fatalError()
+        }
+        let kbSize = rect.size
+
+        let insets = UIEdgeInsets(top: 0, left: 0, bottom: kbSize.height, right: 0)
+        scroll.contentInset = insets
+        scroll.scrollIndicatorInsets = insets
+
+        guard let activeField = activeField else {
+            fatalError()
+        }
+        let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y-kbSize.height)
+        scroll.setContentOffset(scrollPoint, animated: true)
+    }
+
+    @objc
+    func keyboardWillHide(_ notification: Notification) {
+        scroll.contentInset = .zero
+        scroll.scrollIndicatorInsets = .zero
+    }
+
+    // MARK: - swipe and scroll
     private func setInteraction() {
         let swipeBack = UISwipeGestureRecognizer(target: self, action: #selector(back))
         swipeBack.direction = .right
@@ -49,8 +95,15 @@ final class PostView: UIViewController {
         scroll.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
 
+        scroll.addGestureRecognizer(hideKeyboard)
     }
 
+    @objc
+    private func back() {
+        navigationController?.popViewController(animated: true)
+    }
+
+    // MARK: - navbar
     private func setupNavItems() {
         navigationController?.navigationBar.isTranslucent = true
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
@@ -66,15 +119,14 @@ final class PostView: UIViewController {
         setupPhoto()
     }
 
+    // MARK: - photo
     private func setupPhoto() {
-        let marginTop = (navigationController?.navigationBar.frame.height)! + UIApplication.shared.statusBarFrame.height
-
         scroll.addSubview(photo)
         photo.translatesAutoresizingMaskIntoConstraints = false
         photo.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         photo.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         photo.heightAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
-        photo.topAnchor.constraint(equalTo: scroll.topAnchor, constant: -marginTop).isActive = true
+        photo.topAnchor.constraint(equalTo: scroll.topAnchor).isActive = true
         photo.contentMode = .scaleAspectFit
 
         guard let markEdit = UIImage(named: "edit")?.withRenderingMode(.alwaysOriginal) else { return }
@@ -86,6 +138,7 @@ final class PostView: UIViewController {
         edit.rightAnchor.constraint(equalTo: photo.rightAnchor, constant: -10).isActive = true
     }
 
+    // MARK: - block
     private func setBlocks() {
         let blockPostType = BlockPostType.self
 
@@ -127,13 +180,8 @@ final class PostView: UIViewController {
 
             prev = value
         }
-        // Allows scroll view to resize dynamically
+        // allows scroll view to resize dynamically
         prev.bottomAnchor.constraint(equalTo: scroll.bottomAnchor, constant: -margin).isActive = true
-    }
-
-    @objc
-    private func back() {
-        navigationController?.popViewController(animated: true)
     }
 
     @objc
@@ -143,6 +191,7 @@ final class PostView: UIViewController {
         self.place?.setEditingBlock()
     }
 
+    // MARK: - processing errors
     private func procError(error: ErrorViewModel?) {
         if let error = error {
             switch error {
@@ -183,5 +232,15 @@ extension PostView: BlockProtocol {
                             })
         default: break
         }
+    }
+
+    func textViewShouldBeginEditing(block: BlockPost) {
+        activeField = block
+    }
+
+    func textViewShouldEndEditing(block: BlockPost) {
+        // FIXME: при фокусе на новый текст филд сначала отрабатывает ShouldBegin нового,
+        // а потом ShouldEnd старого, валится на guard'e activeField'а
+//        activeField = nil
     }
 }

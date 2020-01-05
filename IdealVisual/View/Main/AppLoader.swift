@@ -1,5 +1,5 @@
 //
-//  Start.swift
+//  AppLoader.swift
 //  IdealVisual
 //
 //  Created by a.kurganova on 02.01.2020.
@@ -24,9 +24,9 @@ class AppLoader: UIViewController {
         view.backgroundColor = .white
 
         present(alert, animated: true, completion: {
-            let userViewModel: UserViewModelProtocol? = UserViewModel()
-            userViewModel?.get(completion: { (_, error) in
-                DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                let userViewModel: UserViewModelProtocol? = UserViewModel()
+                userViewModel?.get(completion: { (_, error) in
                     if let error = error {
                         switch error {
                         case ErrorsUserViewModel.noData:
@@ -43,8 +43,8 @@ class AppLoader: UIViewController {
                         self.view.window!.rootViewController = tabBar
                     }
                     self.dismiss(animated: false, completion: nil)
-                }
             })
+            }
         })
     }
 }
