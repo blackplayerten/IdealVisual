@@ -16,10 +16,10 @@ enum BlockPostType {
 
 final class PostView: UIViewController {
     private var viewModel: PostViewModelProtocol?
-    private var hideKeyboard = UITapGestureRecognizer()
+    private var hideKeyboard = UITapGestureRecognizer() // FIXME: hide keyboard on tap
     var publication: Post?
     let photo = UIImageView()
-    var scroll = UIScrollView()
+    private var scroll = UIScrollView()
     let margin: CGFloat = 30.0
     var date: BlockPost? = nil, post: BlockPost? = nil, place: BlockPost? = nil
 
@@ -57,21 +57,19 @@ final class PostView: UIViewController {
     }
 
     private var activeField: BlockPost?
+
     @objc
     func keyboardWillShow(_ notification: Notification) {
         let info = notification.userInfo!
-        guard let rect: CGRect = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
-            fatalError()
-        }
+        guard let rect: CGRect = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
         let kbSize = rect.size
 
         let insets = UIEdgeInsets(top: 0, left: 0, bottom: kbSize.height, right: 0)
         scroll.contentInset = insets
         scroll.scrollIndicatorInsets = insets
 
-        guard let activeField = activeField else {
-            fatalError()
-        }
+        guard let activeField = activeField else { return }
+
         let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y-kbSize.height)
         scroll.setContentOffset(scrollPoint, animated: true)
     }

@@ -9,8 +9,8 @@
 import Foundation
 
 protocol PostNetworkManagerProtocol {
-    func create(post: JsonPostModel, completion: ((NetworkError?) -> Void)?)
-    func get(completion: (([JsonPostModel]?, NetworkError?) -> Void)?)
-    func update(post: JsonPostModel, completion: ((NetworkError?) -> Void)?)
-    func delete(ids: [UUID], completion: ((NetworkError?) -> Void)?)
+    func create(token: String, post: JsonPostModel, completion: ((JsonPostModel?, NetworkError?) -> Void)?)
+    func get(token: String, completion: (([JsonPostModel]?, NetworkError?) -> Void)?)
+    func update(token: String, post: JsonPostModel, completion: ((JsonPostModel?, NetworkError?) -> Void)?)
+    func delete(token: String, ids: [UUID], completion: ((NetworkError?) -> Void)?)
 }

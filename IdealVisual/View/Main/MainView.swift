@@ -368,7 +368,7 @@ extension MainView {
         content.dragInteractionEnabled = true
 
         content.indexPathsForSelectedItems?.forEach {
-            guard let cell = content.cellForItem(at: $0) as? PhotoCell else { fatalError() }
+            guard let cell = content.cellForItem(at: $0) as? PhotoCell else { return }
             cell.selectedImage.isHidden = true
             content.deselectItem(at: $0, animated: true)
         }
@@ -389,6 +389,8 @@ extension MainView {
                             case ErrorsUserViewModel.noData:
                                 // TODO: ui
                                 break
+                            case ErrorsUserViewModel.notFound:
+                                Logger.log("not found")
                             default:
                                 print("undefined error: \(error)")
                             }
@@ -436,18 +438,14 @@ extension MainView: ProfileDelegate {
         userViewModel?.logout(completion: { (error) in
             DispatchQueue.main.async {
                 if let error = error {
-                    switch error {
-                    case ErrorsUserViewModel.notFound:
-                        // TODO: ui
-                        break
-                    default:
-                        print("undefined error: \(error)"); return
-                    }
+                    Logger.log("unknown error: \(error)")
+                    // TODO: ui
+                    return
                 }
+                self.auth()
             }
         })
-    auth()
-}
+    }
 
     private func auth() {
         let authVC = SignIn()

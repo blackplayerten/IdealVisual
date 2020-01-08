@@ -10,5 +10,5 @@ import Foundation
 
 protocol PhotoNetworkManagerProtocol {
     func get(path: String, completion: ((Data?, NetworkError?) -> Void)?)
-    func upload(data: Data, completion: ((String?, NetworkError?) -> Void)?)
+    func upload(token: String, data: Data, name: String, completion: ((String?, NetworkError?) -> Void)?)
 }

@@ -43,10 +43,7 @@ final class ProfileView: UIView {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.alreadyExists:
-                        // TODO: ui
-                        break
-                    case ErrorsUserViewModel.notFound:
+                    case ErrorsUserViewModel.noData:
                         // TODO: ui
                         break
                     default:
@@ -103,6 +100,7 @@ final class ProfileView: UIView {
     private func setEdit() {
         dataState.username = username.textField.text ?? ""
         dataState.email = email.textField.text ?? ""
+        dataState.oldAva = ava.image
 
         height?.isActive = false
         setNavEditButtons()
@@ -141,6 +139,23 @@ final class ProfileView: UIView {
 // MARK: - save/not save settings
     @objc
     private func save_settings() {
+        if dataState.email == email.textField.text &&
+            dataState.username == username.textField.text &&
+            dataState.oldAva == ava.image &&
+            password.textField.text?.count == 0 &&
+            repeatPassword.textField.text?.count == 0 {
+            Logger.log("no changes")
+
+            password.textField.text = ""
+            password.clearState()
+            repeatPassword.textField.text = ""
+            repeatPassword.clearState()
+
+            setupView()
+
+            return
+        }
+
         let usernameIsValid = username.isValid()
         let emailIsValid = email.isValid()
         var pairIsValid = true
@@ -166,9 +181,9 @@ final class ProfileView: UIView {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.alreadyExists:
+//                    case ErrorsUserViewModel.alreadyExists:
                         // TODO: ui
-                        break
+//                        break
                     case ErrorsUserViewModel.notFound:
                         // TODO: ui
                         break

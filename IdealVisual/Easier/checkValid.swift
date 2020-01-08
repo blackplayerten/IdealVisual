@@ -59,25 +59,22 @@ func checkValidPasswordPair(field: InputFields, fieldRepeat: InputFields) -> Boo
     if field.textField.text != fieldRepeat.textField.text {
         passwordsAreValid = false
 
-        if let mistakeLabel = field.mistakeLabel, let repeatMistakeLabel = fieldRepeat.mistakeLabel {
-            if field.textField.text!.count < 8 {
-                mistakeLabel.text = "Слабый пароль, пароли не совпадают"
-            } else {
-                mistakeLabel.text = "Пароли не совпадают"
-            }
-            if fieldRepeat.textField.text!.count < 8 {
-                repeatMistakeLabel.text = "Слабый пароль, пароли не совпадают"
-            } else {
-                repeatMistakeLabel.text = "Пароли не совпадают"
-            }
+        if field.textField.text!.count < 8 {
+            field.mistakeLabel.text = "Слабый пароль, пароли не совпадают"
+        } else {
+            field.mistakeLabel.text = "Пароли не совпадают"
         }
+        if fieldRepeat.textField.text!.count < 8 {
+            fieldRepeat.mistakeLabel.text = "Слабый пароль, пароли не совпадают"
+        } else {
+            fieldRepeat.mistakeLabel.text = "Пароли не совпадают"
+        }
+
     } else if field.textField.text!.count < 8 && fieldRepeat.textField.text!.count < 8 {
         passwordsAreValid = false
 
-        if let mistakeLabel = field.mistakeLabel, let repeatMistakeLabel = fieldRepeat.mistakeLabel {
-            mistakeLabel.text = "Слабый пароль"
-            repeatMistakeLabel.text = "Слабый пароль"
-        }
+        field.mistakeLabel.text = "Слабый пароль"
+        fieldRepeat.mistakeLabel.text = "Слабый пароль"
     }
 
     [field, fieldRepeat].forEach {
@@ -87,13 +84,11 @@ func checkValidPasswordPair(field: InputFields, fieldRepeat: InputFields) -> Boo
             $0.setValidationState(isValid: false)
         }
     }
-    if let mistakeLabel = field.mistakeLabel, let repeatMistakeLabel = fieldRepeat.mistakeLabel {
-        [mistakeLabel, repeatMistakeLabel].forEach {
-            if passwordsAreValid {
-                $0.isHidden = true
-            } else {
-                $0.isHidden = false
-            }
+    [field.mistakeLabel, fieldRepeat.mistakeLabel].forEach {
+        if passwordsAreValid {
+            $0.isHidden = true
+        } else {
+            $0.isHidden = false
         }
     }
 

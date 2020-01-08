@@ -21,9 +21,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>фотку хочу</string>
+	<string>Для возможности добавления аватарки</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>галерею хочу</string>
+	<string>Для возможности добавления фотографий в ленту</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>PingFang-SC-Regular.ttf</string>

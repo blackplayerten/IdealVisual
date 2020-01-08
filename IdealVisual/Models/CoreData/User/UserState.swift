@@ -10,8 +10,8 @@ import Foundation
 import UIKit
 
 struct State {
-    var username = ""
-    var email = ""
+    var username: String = ""
+    var email: String = ""
 
     var oldAva: UIImage?
 }

@@ -8,12 +8,21 @@
 
 import Foundation
 
-typealias NetworkError = String
+struct NetworkError {
+    let name: String
+    let description: Any?
+
+    init(name: String, description: Any? = nil) {
+        self.name = name
+        self.description = description
+    }
+}
 
 struct ErrorsNetwork {
     static let okay: String = "ok"
     static let noData: String = "noData"
     static let unauthorized: String = "unauthorized"
     static let notFound: String = "not found"
-    static let alreadyExists: String = "already exists"
+    static let wrongFields: String = "wrong fields"
+    static let forbidden: String = "forbidden"
 }

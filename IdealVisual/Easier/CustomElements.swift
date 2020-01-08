@@ -207,18 +207,18 @@ final class InputFields: UIView, UITextFieldDelegate {
     let labelMode = UILabel()
     let labelImage = UIImage()
 
-    let mistakeLabel: CheckMistakeLabel?
+    let mistakeLabel = CheckMistakeLabel()
     private let validator: Validator?
+
+    private weak var inputDelegate: InputFieldDelegate?
 
     init(labelImage: UIImage? = nil, text: String? = nil, placeholder: String? = nil,
          textContentType: UITextContentType? = nil, keyboardType: UIKeyboardType = .default,
-         validator: Validator? = nil) {
+         validator: Validator? = nil,
+         inputDelegate: InputFieldDelegate? = nil) {
+
         self.validator = validator
-        if validator != nil {
-            self.mistakeLabel = CheckMistakeLabel()
-        } else {
-            self.mistakeLabel = nil
-        }
+        self.inputDelegate = inputDelegate
 
         super.init(frame: .zero)
         addSubview(blockView)
@@ -273,13 +273,11 @@ final class InputFields: UIView, UITextFieldDelegate {
         labelMode.font = font2
         labelMode.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 2000), for: .horizontal)
 
-        if let mistakeLabel = mistakeLabel {
-            addSubview(mistakeLabel)
-            mistakeLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(mistakeLabel)
+        mistakeLabel.translatesAutoresizingMaskIntoConstraints = false
 
-            mistakeLabel.topAnchor.constraint(equalTo: bottomAnchor).isActive = true
-            mistakeLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
-        }
+        mistakeLabel.topAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        mistakeLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
 
         let labelIV = UIImageView()
         addSubview(labelIV)
@@ -292,6 +290,16 @@ final class InputFields: UIView, UITextFieldDelegate {
         labelIV.heightAnchor.constraint(equalToConstant: 20).isActive = true
         labelIV.widthAnchor.constraint(equalToConstant: 20).isActive = true
         labelIV.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 2000), for: .horizontal)
+    }
+
+    func setError(text: String) {
+        mistakeLabel.text = text
+        mistakeLabel.isHidden = false
+    }
+
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        inputDelegate?.setActiveField(inputField: self)
+        return true
     }
 
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange,
@@ -319,7 +327,6 @@ final class InputFields: UIView, UITextFieldDelegate {
     func isValid() -> Bool {
         var success = true
         if let validator = validator {
-            guard let mistakeLabel = mistakeLabel else { return true }
             success = validator(self, mistakeLabel)
         }
 
@@ -350,7 +357,7 @@ final class InputFields: UIView, UITextFieldDelegate {
         } else {
             self.labelMode.text = String(50)
         }
-        mistakeLabel?.isHidden = true
+        mistakeLabel.isHidden = true
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }

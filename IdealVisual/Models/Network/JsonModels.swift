@@ -8,25 +8,35 @@
 
 import Foundation
 
-struct JsonUserModel: Codable {
+struct JsonToken: Decodable {
     var token: String = ""
-    var usernameStr: String = ""
-    var emailStr: String = ""
-    var password: String = ""
-    var ava: String = ""
+}
+
+struct JsonUserModel: Codable {
+    var token: String?
+    var id: Int?
+    var username: String = ""
+    var email: String = ""
+    var password: String?
+    var avatar: String?
 }
 
 struct JsonPostModel: Codable {
     var id: UUID = UUID()
-    var photoStr: String = ""
-    var photoIndex: Int64 = 0
-    var dateStr: Date = Date(timeIntervalSince1970: 0)
-    var placeStr: String = ""
-    var textStr: String = ""
+    var photo: String = ""
+    var photoIndex: Int64?
+    var date: Date = Date(timeIntervalSince1970: 0)
+    var place: String = ""
+    var text: String = ""
 }
 
-struct JsonError: Codable {
-    var field: [String: String] = ["": ""]
+struct JsonError: Decodable {
+    var errors: [JsonFieldError]
+}
+
+struct JsonFieldError: Decodable {
+    var field: String
+    var reasons: [String]
 }
 
 struct JsonUploadedPhotoTo: Decodable {

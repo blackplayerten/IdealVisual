@@ -11,36 +11,95 @@ import UIKit
 import CoreData
 
 final class SignUp: UIViewController {
+    private var scroll = UIScrollView()
     private var userViewModel: UserViewModelProtocol?
-    private let usernameField = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
-                                            textContentType: .username, validator: checkValidUsername)
-    private let emailField = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
-                                         textContentType: .emailAddress, keyboardType: .emailAddress,
-                                         validator: checkValidEmail)
-    private let passwordField = InputFields(labelImage: UIImage(named: "password"), text: nil,
-                                            placeholder: "Пароль", textContentType: .newPassword,
-                                            validator: checkValidPassword)
-    private let repeatPasswordField = InputFields(labelImage: UIImage(named: "password"), text: nil,
-                                             placeholder: "Повторите пароль",
-                                             textContentType: .newPassword, validator: checkValidPassword)
+    private var username: InputFields?
+    private var email: InputFields?
+    private var password: InputFields?
+    private var repeatPassword: InputFields?
 
+    private var titleV = UILabel()
+
+    // MARK: - lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.userViewModel = UserViewModel()
         view.backgroundColor = .white
         setNav()
+        setScroll()
+        self.userViewModel = UserViewModel()
+
+        self.username = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
+                                    textContentType: .username, validator: checkValidUsername,
+                                    inputDelegate: self)
+        self.email = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
+                                 textContentType: .emailAddress, keyboardType: .emailAddress,
+                                 validator: checkValidEmail, inputDelegate: self)
+        self.password = InputFields(labelImage: UIImage(named: "password"), text: nil,
+                                    placeholder: "Пароль", textContentType: .newPassword,
+                                    validator: checkValidPassword, inputDelegate: self)
+        self.repeatPassword = InputFields(labelImage: UIImage(named: "password"), text: nil,
+                                          placeholder: "Повторите пароль",
+                                          textContentType: .newPassword, validator: checkValidPassword,
+                                          inputDelegate: self)
+        setAuthFields()
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    private var activeField: InputFields?
+
+    // MARK: - scroll and keyboard
+    @objc
+    func keyboardWillShow(_ notification: Notification) {
+        let info = notification.userInfo!
+        guard let rect: CGRect = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        let kbSize = rect.size
+
+        let insets = UIEdgeInsets(top: 0, left: 0, bottom: kbSize.height, right: 0)
+        scroll.contentInset = insets
+        scroll.scrollIndicatorInsets = insets
+
+        guard let activeField = activeField else { return }
+        
+        let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y-kbSize.height)
+        scroll.setContentOffset(scrollPoint, animated: true)
+    }
+
+    @objc
+    func keyboardWillHide(_ notification: Notification) {
+        scroll.contentInset = .zero
+        scroll.scrollIndicatorInsets = .zero
+    }
+
+    private func setScroll() {
+        view.addSubview(scroll)
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.topAnchor.constraint(equalTo: titleV.bottomAnchor, constant: 20).isActive = true
+        scroll.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        scroll.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+    }
+
+    // MARK: - navigation
     private func setNav() {
-        let titleV = UILabel()
         view.addSubview(titleV)
         titleV.text = "IdealVisual"
         titleV.translatesAutoresizingMaskIntoConstraints = false
-        titleV.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: -30).isActive = true
-        titleV.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
+        titleV.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -30).isActive = true
+        titleV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
         titleV.font = UIFont(name: "Montserrat-Bold", size: 35)
         titleV.adjustsFontSizeToFitWidth = true
-        navigationController?.navigationItem.titleView = titleV
 
         let logo = UIImageView()
         view.addSubview(logo)
@@ -48,42 +107,57 @@ final class SignUp: UIViewController {
         logo.image = UIImage(named: "app")?.withRenderingMode(.alwaysOriginal)
         logo.widthAnchor.constraint(equalToConstant: 35).isActive = true
         logo.heightAnchor.constraint(equalToConstant: 35).isActive = true
-        logo.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 25).isActive = true
+        logo.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
         logo.rightAnchor.constraint(equalTo: titleV.leftAnchor, constant: -20).isActive = true
         logo.layer.masksToBounds = true
         logo.layer.cornerRadius = 10
-        setAuthFields()
     }
 
+    // MARK: set fields
     private func setAuthFields() {
-        [usernameField, emailField, passwordField, repeatPasswordField].forEach {
-            view.addSubview($0)
+        guard
+            let username = username,
+            let email = email,
+            let password = password,
+            let repeatPassword = repeatPassword
+        else {
+            return
+        }
+
+        [username, email, password, repeatPassword].forEach {
+            scroll.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            $0.centerXAnchor.constraint(equalTo: scroll.centerXAnchor).isActive = true
             $0.heightAnchor.constraint(equalToConstant: 40).isActive = true
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.setEditFields(state: true)
         }
-        usernameField.topAnchor.constraint(equalTo: view.topAnchor,
-                                      constant: 200).isActive = true
-        emailField.topAnchor.constraint(equalTo: usernameField.bottomAnchor, constant: 40).isActive = true
-        passwordField.topAnchor.constraint(equalTo: emailField.bottomAnchor, constant: 40).isActive = true
-        repeatPasswordField.topAnchor.constraint(equalTo: passwordField.bottomAnchor, constant: 40).isActive = true
+        username.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -200).isActive = true
+        email.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 40).isActive = true
+        password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 40).isActive = true
+        repeatPassword.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 40).isActive = true
         setAuthButtons()
     }
 
+    // MARK: - auth buttons
     private func setAuthButtons() {
         let createAccountButton = AddComponentsButton(text: "Зарегистрироваться")
         let signInButton =  AddComponentsButton(text: "Войти")
         [createAccountButton, signInButton].forEach {
-            view.addSubview($0)
+            scroll.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            $0.centerXAnchor.constraint(equalTo: scroll.centerXAnchor).isActive = true
             $0.heightAnchor.constraint(equalToConstant: 50).isActive = true
             $0.layer.cornerRadius = 10
         }
 
-        createAccountButton.topAnchor.constraint(equalTo: repeatPasswordField.bottomAnchor,
+        guard
+            let repeatPassword = repeatPassword
+        else {
+            return
+        }
+
+        createAccountButton.topAnchor.constraint(equalTo: repeatPassword.bottomAnchor,
                                                  constant: 50).isActive = true
         createAccountButton.widthAnchor.constraint(equalToConstant: 210).isActive = true
         createAccountButton.setTitleColor(.white, for: .normal)
@@ -92,10 +166,12 @@ final class SignUp: UIViewController {
 
         signInButton.topAnchor.constraint(equalTo: createAccountButton.bottomAnchor, constant: 20).isActive = true
         signInButton.widthAnchor.constraint(equalToConstant: 150).isActive = true
+        signInButton.bottomAnchor.constraint(equalTo: scroll.bottomAnchor).isActive = true
         signInButton.setColor(state: false)
         signInButton.addTarget(self, action: #selector(goToSignIn), for: .touchUpInside)
     }
 
+    // MARK: - func create account
     @objc
     private func createAccount() {
         if !checkValidInputs() {
@@ -103,9 +179,9 @@ final class SignUp: UIViewController {
         }
 
         guard
-            let username = usernameField.textField.text,
-            let email = emailField.textField.text,
-            let password = passwordField.textField.text
+            let username = username?.textField.text,
+            let email = email?.textField.text,
+            let password = password?.textField.text
         else { return }
 
         userViewModel?.create(username: username, email: email, password: password,
@@ -113,12 +189,18 @@ final class SignUp: UIViewController {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.alreadyExists:
-                        // TODO: ui
-                        break
-                        // TODO: more errors: server 5??
+                    case ErrorsUserViewModel.usernameAlreadyExists:
+                        self.username?.setError(text: "Такое имя пользователя уже занято")
+                    case ErrorsUserViewModel.usernameLengthIsWrong:
+                        self.username?.setError(text: "Неверная длина имени пользователя")
+                    case ErrorsUserViewModel.emailFormatIsWrong:
+                        self.email?.setError(text: "Неверный формат почты")
+                    case ErrorsUserViewModel.emailAlreadyExists:
+                        self.email?.setError(text: "Такая почта уже занята")
+                    case ErrorsUserViewModel.passwordLengthIsWrong:
+                        self.password?.setError(text: "Неверная длина пароля")
                     default:
-                        print("undefined error: \(error)"); return
+                        Logger.log("unknown error: \(error)")
                     }
                 } else {
                     self.autoLogin()
@@ -127,10 +209,20 @@ final class SignUp: UIViewController {
         })
     }
 
+    // MARK: - func check validation
     private func checkValidInputs() -> Bool {
-        let usernameIsValid = usernameField.isValid()
-        let emailIsValid = emailField.isValid()
-        let pairIsValid = checkValidPasswordPair(field: passwordField, fieldRepeat: repeatPasswordField)
+        guard
+            let username = username,
+            let email = email,
+            let password = password,
+            let repeatPassword = repeatPassword
+        else {
+            return false
+        }
+
+        let usernameIsValid = username.isValid()
+        let emailIsValid = email.isValid()
+        let pairIsValid = checkValidPasswordPair(field: password, fieldRepeat: repeatPassword)
         return usernameIsValid && emailIsValid && pairIsValid
     }
 
@@ -145,5 +237,12 @@ final class SignUp: UIViewController {
         let signIn = SignIn()
         signIn.modalPresentationStyle = .fullScreen
         present(signIn, animated: true, completion: nil)
+    }
+}
+
+// MARK: inputs delegate for keyboard
+extension SignUp: InputFieldDelegate {
+    func setActiveField(inputField: InputFields) {
+        activeField = inputField
     }
 }

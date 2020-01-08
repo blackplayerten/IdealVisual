@@ -30,15 +30,13 @@ class AppLoader: UIViewController {
                     if let error = error {
                         switch error {
                         case ErrorsUserViewModel.noData:
-                            print("user nil, show signin")
                             let signIn = SignIn()
                             self.view.window!.rootViewController = signIn
                         default:
-                            print("unknown error: \(error)")
+                            Logger.log("unknown error: \(error)")
                             fatalError()
                         }
                     } else {
-                        print("user ne nill, show main")
                         let tabBar = TabBar()
                         self.view.window!.rootViewController = tabBar
                     }

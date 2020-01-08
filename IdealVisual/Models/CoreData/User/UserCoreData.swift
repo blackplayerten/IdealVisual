@@ -22,7 +22,7 @@ class UserCoreData: UserCoreDataProtocol {
         managedObjectUser.setValue(token, forKey: "token")
         managedObjectUser.setValue(username, forKey: "username")
         managedObjectUser.setValue(email, forKey: "email")
-        managedObjectUser.setValue("", forKey: "ava")
+        managedObjectUser.setValue(ava ?? "", forKey: "ava")
 
         cacheUser = managedObjectUser.managedObjectContext?.registeredObjects.first as? User
 
@@ -52,7 +52,7 @@ class UserCoreData: UserCoreDataProtocol {
             }
             DataManager.instance.saveContext()
         } catch {
-            print(error)
+            Logger.log(error)
         }
     }
 
@@ -67,7 +67,7 @@ class UserCoreData: UserCoreDataProtocol {
             cacheUser = users.last as? User
             return cacheUser
         } catch {
-            print(error)
+            Logger.log(error)
         }
         return nil
     }

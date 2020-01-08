@@ -10,29 +10,87 @@ import Foundation
 import UIKit
 
 final class SignIn: UIViewController {
-    private var userViewModel: UserViewModelProtocol?
-    private let username = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
-                                       textContentType: .username, validator: checkValidUsername)
-    private let password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль",
-                                       textContentType: .password, validator: checkValidPassword)
+    private var scroll = UIScrollView()
+    private var titleV = UILabel()
 
+    private var userViewModel: UserViewModelProtocol?
+    private var email: InputFields?
+    private var password: InputFields?
+    private var activeField: InputFields?
+
+    // MARK: lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.userViewModel = UserViewModel()
         view.backgroundColor = .white
         setNav()
+        setScroll()
+
+        self.userViewModel = UserViewModel()
+
+        self.email = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
+                                 textContentType: .emailAddress, keyboardType: .emailAddress,
+                                 validator: checkValidEmail, inputDelegate: self)
+        self.password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль",
+                                    textContentType: .password, validator: checkValidPassword,
+                                    inputDelegate: self)
+        setAuthFields()
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    // MARK: - scroll and keyboard
+    @objc
+    func keyboardWillShow(_ notification: Notification) {
+        let info = notification.userInfo!
+        guard let rect: CGRect = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        let kbSize = rect.size
+
+        let insets = UIEdgeInsets(top: 0, left: 0, bottom: kbSize.height, right: 0)
+        scroll.contentInset = insets
+        scroll.scrollIndicatorInsets = insets
+
+        guard let activeField = activeField else { return }
+
+        let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y-kbSize.height)
+        scroll.setContentOffset(scrollPoint, animated: true)
+    }
+
+    @objc
+    func keyboardWillHide(_ notification: Notification) {
+        scroll.contentInset = .zero
+        scroll.scrollIndicatorInsets = .zero
+    }
+
+    private func setScroll() {
+        view.addSubview(scroll)
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.topAnchor.constraint(equalTo: titleV.bottomAnchor, constant: 20).isActive = true
+        scroll.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        scroll.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+    }
+
+    // MARK: - navigation
     private func setNav() {
-        let titleV = UILabel()
+        titleV.backgroundColor = .white
         view.addSubview(titleV)
         titleV.text = "IdealVisual"
         titleV.translatesAutoresizingMaskIntoConstraints = false
-        titleV.rightAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.rightAnchor, constant: -30).isActive = true
-        titleV.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
+        titleV.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -30).isActive = true
+        titleV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
         titleV.font = UIFont(name: "Montserrat-Bold", size: 35)
         titleV.adjustsFontSizeToFitWidth = true
-        navigationController?.navigationItem.titleView = titleV
 
         let logo = UIImageView()
         view.addSubview(logo)
@@ -40,39 +98,48 @@ final class SignIn: UIViewController {
         logo.image = UIImage(named: "app")?.withRenderingMode(.alwaysOriginal)
         logo.widthAnchor.constraint(equalToConstant: 35).isActive = true
         logo.heightAnchor.constraint(equalToConstant: 35).isActive = true
-        logo.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 25).isActive = true
+        logo.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 25).isActive = true
         logo.rightAnchor.constraint(equalTo: titleV.leftAnchor, constant: -20).isActive = true
         logo.layer.masksToBounds = true
         logo.layer.cornerRadius = 10
-        setAuthFields()
     }
 
+    // MARK: - set fields
     private func setAuthFields() {
-        [username, password].forEach {
-            view.addSubview($0)
+        guard
+            let email = email,
+            let password = password
+        else {
+            return
+        }
+
+        [email, password].forEach {
+            scroll.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            $0.centerXAnchor.constraint(equalTo: scroll.centerXAnchor).isActive = true
             $0.heightAnchor.constraint(equalToConstant: 40).isActive = true
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.setEditFields(state: true)
         }
-        username.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor,
-                                      constant: 300).isActive = true
-        password.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 30).isActive = true
+        email.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -100).isActive = true
+        password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 30).isActive = true
 
         setAuthButtons()
     }
 
+    // MARK: - auth buttons
     private func setAuthButtons() {
         let signInButton = AddComponentsButton(text: "Войти")
         let signUpButton = AddComponentsButton(text: "Еще нет аккаунта")
         [signInButton, signUpButton].forEach {
-            view.addSubview($0)
+            scroll.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            $0.centerXAnchor.constraint(equalTo: scroll.centerXAnchor).isActive = true
             $0.heightAnchor.constraint(equalToConstant: 50).isActive = true
             $0.layer.cornerRadius = 10
         }
+
+        guard let password = password else { return }
 
         signInButton.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 50).isActive = true
         signInButton.widthAnchor.constraint(equalToConstant: 120).isActive = true
@@ -81,36 +148,43 @@ final class SignIn: UIViewController {
 
         signUpButton.topAnchor.constraint(equalTo: signInButton.bottomAnchor, constant: 20).isActive = true
         signUpButton.widthAnchor.constraint(equalToConstant: 150).isActive = true
+        signUpButton.bottomAnchor.constraint(equalTo: scroll.bottomAnchor).isActive = true
         signUpButton.setColor(state: false)
         signUpButton.addTarget(self, action: #selector(goTosignUp), for: .touchUpInside)
     }
 
+    // MARK: - func check authentification
     @objc
     private func checkAuth() {
-        let usernameIsValid = username.isValid()
-        let passwordIsValid = password.isValid()
-        if !usernameIsValid && !passwordIsValid {
-            return
-        }
-
-        guard let username = username.textField.text,
-            let password = password.textField.text
+        guard
+            let emailField = email,
+            let passwordField = password
         else {
             return
         }
 
-        userViewModel?.login(username: username, password: password, completion: { (error) in
+        let emailIsValid = emailField.isValid()
+        let passwordIsValid = passwordField.isValid()
+        if !emailIsValid && !passwordIsValid {
+            return
+        }
+
+        guard let email = email?.textField.text,
+            let password = password?.textField.text
+        else {
+            return
+        }
+
+        userViewModel?.login(email: email, password: password, completion: { (error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.alreadyExists:
                         // TODO: ui
-                        break
-                    case ErrorsUserViewModel.notFound:
-                        // TODO: ui
-                        break
+                    case ErrorsUserViewModel.wrongCredentials:
+                        self.password?.setError(text: "Неправильная почта или пароль")
                     default:
-                        print("undefined error: \(error)"); return
+                        Logger.log("undefined error: \(error)")
+                        return
                     }
                 } else {
                     self.autoLogin()
@@ -130,5 +204,12 @@ final class SignIn: UIViewController {
         let signUpVc = SignUp()
         signUpVc.modalPresentationStyle = .fullScreen
         present(signUpVc, animated: true, completion: nil)
+    }
+}
+
+// MARK: inputs delegate for keyboard
+extension SignIn: InputFieldDelegate {
+    func setActiveField(inputField: InputFields) {
+        activeField = inputField
     }
 }

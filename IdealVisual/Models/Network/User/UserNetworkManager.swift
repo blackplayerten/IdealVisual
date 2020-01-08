@@ -10,17 +10,21 @@ import Foundation
 
 final class UserNetworkManager: UserNetworkManagerProtocol {
     func create(newUser: JsonUserModel, completion: ((JsonUserModel?, NetworkError?) -> Void)?) {
-        guard let url = NetworkURLS.createUserURL else {
-            print("invalid create user url '\(String(describing: NetworkURLS.createUserURL))'"); return
+        guard let url = NetworkURLS.accountURL else {
+            Logger.log("invalid create url: '\(String(describing: NetworkURLS.accountURL))'")
+            return
         }
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethods.post
+        request.addValue(MimeTypes.appJSON, forHTTPHeaderField: HTTPHeaders.contentType)
 
         let jsonData: Data
         do {
             jsonData = try JSONEncoder().encode(newUser)
         } catch {
-            fatalError()
+            Logger.log("can't encode data")
+            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+            return
         }
 
         request.httpBody = jsonData
@@ -28,7 +32,9 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
 
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
-                completion?(nil, NetworkError(error.localizedDescription)); return
+                Logger.log("unknown error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
+                return
             }
 
             if let response = response as? HTTPURLResponse {
@@ -36,32 +42,49 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                 switch status {
                 case HTTPCodes.okay:
                     break
-                case HTTPCodes.alreadyExists:
-                    completion?(nil, ErrorsNetwork.alreadyExists); return
+                case HTTPCodes.unprocessableEntity:
+                    guard let data = data else {
+                        completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                        return
+                    }
+                    do {
+                        let errors = try JSONDecoder().decode(JsonError.self, from: data)
+                        completion?(nil, NetworkError(name: ErrorsNetwork.wrongFields, description: errors.errors))
+                    } catch let error {
+                        Logger.log("unknown network error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError(name: error.localizedDescription))
+                    }
+                    return
                 default:
-                    completion?(nil, "unknown error: \(response.statusCode)"); return
+                    Logger.log("unknown staus code: \(status))")
+                    completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                    return
                 }
             }
 
             guard let data = data else {
-                completion?(nil, ErrorsNetwork.noData); return
+                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                return
             }
 
             do {
                 let user = try JSONDecoder().decode(JsonUserModel.self, from: data)
                 completion?(user, nil)
             } catch let error {
-                completion?(nil, NetworkError(error.localizedDescription))
+                Logger.log("unknown network error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
             }
         }.resume()
     }
 
     func login(user: JsonUserModel, completion: ((JsonUserModel?, NetworkError?) -> Void)?) {
-        guard let url = NetworkURLS.loginUserURL else {
-            print("invalid login url: '\(String(describing: NetworkURLS.loginUserURL))'"); return
+        guard let url = NetworkURLS.sessionURL else {
+            Logger.log("invalid login url: '\(String(describing: NetworkURLS.sessionURL))'")
+            return
         }
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethods.post
+        request.addValue(MimeTypes.appJSON, forHTTPHeaderField: HTTPHeaders.contentType)
 
         let jsonData = try? JSONEncoder().encode(user)
 
@@ -70,7 +93,9 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
 
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
-                completion?(nil, NetworkError(error.localizedDescription)); return
+                Logger.log("unknown network error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
+                return
             }
 
             if let response = response as? HTTPURLResponse {
@@ -78,33 +103,41 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                 switch status {
                 case HTTPCodes.okay:
                     break
-                    // FIXME: 403, not 404
-                case HTTPCodes.notFound:
-                    completion?(nil, ErrorsNetwork.notFound); return
+                case HTTPCodes.forbidden:
+                    completion?(nil, NetworkError(name: ErrorsNetwork.forbidden))
+                    return
                 default:
-                    completion?(nil, "unknown status code: \(status)"); return
+                    Logger.log("unknown staus code: \(status))")
+                    completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                    return
                 }
             }
 
             guard let data = data else {
-                completion?(nil, ErrorsNetwork.noData); return
+                Logger.log("data error: \(ErrorsNetwork.noData)")
+                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                return
             }
 
             do {
                 let user = try JSONDecoder().decode(JsonUserModel.self, from: data)
                 completion?(user, nil)
             } catch let error {
-                completion?(nil, NetworkError(error.localizedDescription))
+                Logger.log("unknown network error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
             }
         }.resume()
     }
 
-    func update(user: JsonUserModel, completion: ((JsonError?, NetworkError?) -> Void)?) {
-        guard let url = NetworkURLS.updateUserURL else {
-            print(HTTPCodes.notFound); return
+    func update(token: String, user: JsonUserModel, completion: ((JsonUserModel?, NetworkError?) -> Void)?) {
+        guard let url = NetworkURLS.accountURL else {
+            Logger.log("invalid update url: '\(String(describing: NetworkURLS.accountURL))'")
+            return
         }
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethods.put
+        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
+        request.addValue(MimeTypes.appJSON, forHTTPHeaderField: HTTPHeaders.contentType)
 
         do {
             let jsonData = try JSONEncoder().encode(user)
@@ -114,76 +147,100 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
 
             URLSession.shared.dataTask(with: request) { (data, response, error) in
                 if let error = error {
-                    completion?(nil, NetworkError(error.localizedDescription)); return
+                    Logger.log("unknown network error: \(error.localizedDescription)")
+                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    return
                 }
 
                 if let response = response as? HTTPURLResponse {
                     let status = response.statusCode
                     switch status {
                     case HTTPCodes.okay:
-                        completion?(nil, nil); return
-                    case HTTPCodes.unauthorized: completion?(nil, nil); return
-                    case 404:
-                        completion?(nil, ErrorsNetwork.notFound); return
+                        break
+                    case HTTPCodes.unauthorized:
+                        completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                        return
+                    case HTTPCodes.notFound:
+                        completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                        return
+                    case HTTPCodes.unprocessableEntity:
+                        guard let data = data else {
+                            Logger.log("data error: \(ErrorsNetwork.noData)")
+                            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                            return
+                        }
+                        do {
+                            let errors = try JSONDecoder().decode(JsonError.self, from: data)
+                            completion?(nil, NetworkError(name: ErrorsNetwork.wrongFields,
+                                                          description: errors.errors))
+                        } catch let error {
+                            Logger.log("unknown network error: \(error.localizedDescription)")
+                            completion?(nil, NetworkError(name: error.localizedDescription))
+                        }
+                        return
                     default:
-                        completion?(nil, "unknown status code: \(status)"); return
+                        Logger.log("unknown staus code: \(response.statusCode))")
+                        completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                        return
                     }
                 }
 
                 guard let data = data else {
-                    completion?(nil, ErrorsNetwork.noData); return
+                    Logger.log("data error: \(ErrorsNetwork.noData)")
+                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    return
                 }
 
                 do {
-                    let errorJson = try JSONDecoder().decode(JsonError.self, from: data)
-                    completion?(errorJson, nil)
+                    let user = try JSONDecoder().decode(JsonUserModel.self, from: data)
+                    completion?(user, nil)
                 } catch let error {
-                    completion?(nil, NetworkError(error.localizedDescription))
+                    Logger.log("unknown network error: \(error.localizedDescription)")
+                    completion?(nil, NetworkError(name: error.localizedDescription))
                 }
             }.resume()
         } catch let error {
-            print("error: \(error.localizedDescription)")
+            Logger.log("unknown network error: \(error.localizedDescription)")
+            completion?(nil, NetworkError(name: error.localizedDescription))
         }
     }
 
-    func logout(user: JsonUserModel, completion: ((NetworkError?) -> Void)?) {
-        guard let url = NetworkURLS.deleteUserURL else {
-            print(HTTPCodes.notFound); return
+    func logout(token: String, completion: ((NetworkError?) -> Void)?) {
+        guard let url = NetworkURLS.sessionURL else {
+            Logger.log("invalid login url: '\(String(describing: NetworkURLS.sessionURL))'")
+            return
         }
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethods.delete
+        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
 
-        do {
-            let jsonData = try JSONEncoder().encode(user)
+        request.timeoutInterval = 5
 
-            request.httpBody = jsonData
-            request.timeoutInterval = 5
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            if let error = error {
+                Logger.log("unknown network error: \(error.localizedDescription)")
+                completion?(NetworkError(name: error.localizedDescription))
+                return
+            }
 
-            URLSession.shared.dataTask(with: request) { (data, response, error) in
-                if let error = error {
-                    completion?(NetworkError(error.localizedDescription)); return
+            if let response = response as? HTTPURLResponse {
+                let status = response.statusCode
+                switch status {
+                case HTTPCodes.okay:
+                    completion?(nil)
+                default:
+                    Logger.log("unknown status code: \(status)")
+                    completion?(NetworkError(name: "unknown status code: \(status)"))
                 }
+                return
+            }
 
-                if let response = response as? HTTPURLResponse {
-                    let status = response.statusCode
-                    switch status {
-                    case HTTPCodes.okay:
-                        completion?(nil); return
-                    case 404:
-                        completion?(ErrorsNetwork.notFound); return
-                    default:
-                        completion?("unknown status code: \(status)"); return
-                    }
-                }
-
-                if data != nil {
-                    completion?(nil); return
-                } else {
-                    completion?(ErrorsNetwork.noData); return
-                }
-            }.resume()
-        } catch let error {
-            print("error: \(error.localizedDescription)")
-        }
+            if data != nil {
+                completion?(nil)
+            } else {
+                Logger.log("data error: \(ErrorsNetwork.noData)")
+                completion?(NetworkError(name: ErrorsNetwork.noData))
+            }
+        }.resume()
     }
 }

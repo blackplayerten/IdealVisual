@@ -11,7 +11,7 @@ import Foundation
 import UIKit
 
 final class PostCoreData: PostCoreDataProtocol {
-    func create(photo: String, date: Date, place: String, text: String, indexPhoto: Int) -> Post? {
+    func create(user: User, photo: String, date: Date, place: String, text: String, indexPhoto: Int) -> Post? {
         let entityDescriptionPost = NSEntityDescription.entity(forEntityName: "Post",
                                                                in: DataManager.instance.managedObjectContext)
         let managedObjectPost = NSManagedObject(entity: entityDescriptionPost!,
@@ -24,9 +24,10 @@ final class PostCoreData: PostCoreDataProtocol {
         managedObjectPost.setValue(text, forKey: "text")
         managedObjectPost.setValue(Int64(indexPhoto), forKey: "indexPhoto")
 
-        DataManager.instance.saveContext()
+        guard let post = managedObjectPost as? Post else { return nil }
+        user.addToPosts(post)
 
-        let post = managedObjectPost as? Post
+        DataManager.instance.saveContext()
         return post
     }
 
@@ -46,7 +47,7 @@ final class PostCoreData: PostCoreDataProtocol {
             }
             try DataManager.instance.managedObjectContext.save()
         } catch {
-            print(error)
+            Logger.log(error)
         }
     }
 
@@ -68,7 +69,7 @@ final class PostCoreData: PostCoreDataProtocol {
             let post = posts.last as? Post
             return post
         } catch {
-            print(error)
+            Logger.log(error)
         }
         return nil
     }

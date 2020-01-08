@@ -9,18 +9,25 @@
 import Foundation
 
 final class PostNetworkManager: PostNetworkManagerProtocol {
-    func create(post: JsonPostModel, completion: ((NetworkError?) -> Void)?) {
+    func create(token: String, post: JsonPostModel, completion: ((JsonPostModel?, NetworkError?) -> Void)?) {
         guard let url = NetworkURLS.postsURL else {
-            print("invalid posts url '\(String(describing: NetworkURLS.postsURL))'"); return
+            Logger.log("invalid posts url: \(String(describing: NetworkURLS.postsURL))")
+            return
         }
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethods.post
+        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
+        request.addValue(MimeTypes.appJSON, forHTTPHeaderField: HTTPHeaders.contentType)
 
         let jsonData: Data
         do {
-            jsonData = try JSONEncoder().encode(post)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            jsonData = try encoder.encode(post)
         } catch {
-            fatalError()
+            Logger.log("can't encode data")
+            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+            return
         }
 
         request.httpBody = jsonData
@@ -28,7 +35,9 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
 
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
-                completion?(NetworkError(error.localizedDescription)); return
+                Logger.log("unknown error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
+                return
             }
 
             if let response = response as? HTTPURLResponse {
@@ -36,36 +45,52 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                 switch status {
                 case HTTPCodes.okay:
                     break
+                    // TODO: (on view model – user 404)
                 case HTTPCodes.unauthorized:
-                    completion?(ErrorsNetwork.unauthorized); return
+                    completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                    return
+                case HTTPCodes.notFound:
+                    completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                    return
                 default:
-                    completion?("unknown error: \(response.statusCode)"); return
+                    Logger.log("unknown status: \(status)")
+                    completion?(nil, NetworkError(name: "unknown status: \(status)"))
+                    return
                 }
             }
 
             guard let data = data else {
-                completion?(ErrorsNetwork.noData); return
+                Logger.log("error data: \(ErrorsNetwork.noData)")
+                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                return
             }
 
             do {
-                _ = try JSONDecoder().decode(JsonPostModel.self, from: data)
-                completion?(nil)
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let post  = try decoder.decode(JsonPostModel.self, from: data)
+                completion?(post, nil)
             } catch let error {
-                completion?(NetworkError(error.localizedDescription))
+                Logger.log("unknown error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
             }
         }.resume()
     }
 
-    func get(completion: (([JsonPostModel]?, NetworkError?) -> Void)?) {
+    func get(token: String, completion: (([JsonPostModel]?, NetworkError?) -> Void)?) {
         guard let url = NetworkURLS.postsURL else {
-            print("invalid posts url '\(String(describing: NetworkURLS.postsURL))'"); return
+            Logger.log("invalid posts url: \(String(describing: NetworkURLS.postsURL))")
+            return
         }
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethods.get
+        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
 
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
-                completion?(nil, NetworkError(error.localizedDescription)); return
+                Logger.log("unknown error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
+                return
             }
 
             if let response = response as? HTTPURLResponse {
@@ -74,37 +99,52 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                 case HTTPCodes.okay:
                     break
                 case HTTPCodes.unauthorized:
-                    completion?(nil, ErrorsNetwork.unauthorized); return
+                    completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                    return
                 default:
-                    completion?(nil, "unknown error: \(response.statusCode)"); return
+                    Logger.log("unknown status code: \(status)")
+                    completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                    return
                 }
             }
 
             guard let data = data else {
-                completion?(nil, ErrorsNetwork.noData); return
+                Logger.log("error data: \(ErrorsNetwork.noData)")
+                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                return
             }
 
             do {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
                 let posts = try JSONDecoder().decode([JsonPostModel].self, from: data)
                 completion?(posts, nil)
             } catch let error {
-                completion?(nil, NetworkError(error.localizedDescription))
+                Logger.log("unknown error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
             }
         }.resume()
     }
 
-    func update(post: JsonPostModel, completion: ((NetworkError?) -> Void)?) {
+    func update(token: String, post: JsonPostModel, completion: ((JsonPostModel?, NetworkError?) -> Void)?) {
         guard let url = NetworkURLS.postsURL else {
-            print("invalid posts url '\(String(describing: NetworkURLS.postsURL))'"); return
+            Logger.log("invalid posts url: \(String(describing: NetworkURLS.postsURL))")
+            return
         }
         var request = URLRequest(url: url)
         request.httpMethod = HTTPMethods.put
+        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
+        request.addValue(MimeTypes.appJSON, forHTTPHeaderField: HTTPHeaders.contentType)
 
         let jsonData: Data
         do {
-            jsonData = try JSONEncoder().encode(post)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            jsonData = try encoder.encode(post)
         } catch {
-            fatalError()
+            Logger.log("can't encode data")
+            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+            return
         }
 
         request.httpBody = jsonData
@@ -112,7 +152,9 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
 
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
-                completion?(NetworkError(error.localizedDescription)); return
+                Logger.log("unknown error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
+                return
             }
 
             if let response = response as? HTTPURLResponse {
@@ -121,53 +163,68 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                 case HTTPCodes.okay:
                     break
                 case HTTPCodes.unauthorized:
-                    completion?(ErrorsNetwork.unauthorized); return
+                    completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                    return
+                case HTTPCodes.notFound:
+                    completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                    return
                 default:
-                    completion?("unknown error: \(response.statusCode)"); return
+                    Logger.log("unknown status code: \(status)")
+                    completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                    return
                 }
             }
 
-            if data != nil {
-                completion?(nil)
-            } else {
-                completion?(ErrorsNetwork.noData); return
+            guard let data = data else {
+                Logger.log("error data: \(ErrorsNetwork.noData)")
+                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                return
+            }
+
+            do {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let post  = try decoder.decode(JsonPostModel.self, from: data)
+                completion?(post, nil)
+            } catch let error {
+                Logger.log("unknown error: \(error.localizedDescription)")
+                completion?(nil, NetworkError(name: error.localizedDescription))
             }
         }.resume()
     }
 
-    func delete(ids: [UUID], completion: ((NetworkError?) -> Void)?) {
+    func delete(token: String, ids: [UUID], completion: ((NetworkError?) -> Void)?) {
         guard let url = NetworkURLS.postsURL else {
-            print(HTTPCodes.notFound); return
+            Logger.log("invalid post url: \(String(describing: NetworkURLS.postsURL))")
+            return
         }
         var c = URLComponents(url: url, resolvingAgainstBaseURL: true)
+        var queryids = [URLQueryItem]()
         for id in ids {
-            c?.queryItems = [URLQueryItem(name: "id", value: id.uuidString)]
+            queryids.append(URLQueryItem(name: "id", value: id.uuidString))
         }
+        c?.queryItems = queryids
         var request = URLRequest(url: c!.url!)
         request.httpMethod = HTTPMethods.delete
+        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
         request.timeoutInterval = 5
 
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
+        URLSession.shared.dataTask(with: request) { (_, response, error) in
             if let error = error {
-                completion?(NetworkError(error.localizedDescription)); return
+                Logger.log("unknown error: \(error.localizedDescription)")
+                completion?(NetworkError(name: error.localizedDescription))
+                return
             }
 
             if let response = response as? HTTPURLResponse {
                 let status = response.statusCode
                 switch status {
                 case HTTPCodes.okay:
-                    completion?(nil); return
-                case HTTPCodes.notFound:
-                    completion?(ErrorsNetwork.notFound); return
+                    completion?(nil)
                 default:
-                    completion?("unknown status code: \(status)"); return
+                    Logger.log("unknown status code: \(status)")
+                    completion?(NetworkError(name: "unknown status code: \(status)"))
                 }
-            }
-
-            if data != nil {
-                completion?(nil); return
-            } else {
-                completion?(ErrorsNetwork.noData); return
             }
         }.resume()
     }

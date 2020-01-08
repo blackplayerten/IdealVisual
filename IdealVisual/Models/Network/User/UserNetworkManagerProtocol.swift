@@ -11,6 +11,6 @@ import Foundation
 protocol UserNetworkManagerProtocol {
     func create(newUser: JsonUserModel, completion: ((JsonUserModel?, NetworkError?) -> Void)?)
     func login(user: JsonUserModel, completion: ((JsonUserModel?, NetworkError?) -> Void)?)
-    func update(user: JsonUserModel, completion: ((JsonError?, NetworkError?) -> Void)?)
-    func logout(user: JsonUserModel, completion: ((NetworkError?) -> Void)?)
+    func update(token: String, user: JsonUserModel, completion: ((JsonUserModel?, NetworkError?) -> Void)?)
+    func logout(token: String, completion: ((NetworkError?) -> Void)?)
 }
