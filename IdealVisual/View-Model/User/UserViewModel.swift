@@ -80,6 +80,7 @@ final class UserViewModel: UserViewModelProtocol {
                         return
                     default:
                         Logger.log("unknown error: \(error)")
+                        completion?(ErrorsUserViewModel.unknownError)
                         return
                     }
                 }
@@ -110,6 +111,7 @@ final class UserViewModel: UserViewModelProtocol {
                     completion?(ErrorsUserViewModel.wrongCredentials)
                 default:
                     Logger.log("unknown error: \(error)")
+                    completion?(ErrorsUserViewModel.unknownError)
                 }
                 return
             }
@@ -136,7 +138,7 @@ final class UserViewModel: UserViewModelProtocol {
                                     // assume user nas no ava, so we will log in with data without it
                                     user.avatar = ""
                                 default:
-                                    Logger.log("\(ErrorsUserViewModel.unknownError)")
+                                    Logger.log("cannot get avatar: \(error)")
                                     completion?(ErrorsUserViewModel.unknownError)
                                 }
                                 return
@@ -158,6 +160,7 @@ final class UserViewModel: UserViewModelProtocol {
                             guard let user = self.userCoreData.create(token: token, username: user.username,
                                                                       email: user.email, ava: user.avatar)
                             else {
+                                Logger.log("cannot create core data user")
                                 completion?(ErrorsUserViewModel.unknownError)
                                 return
                             }
@@ -294,14 +297,13 @@ final class UserViewModel: UserViewModelProtocol {
         }
 
         self.userNetworkManager.logout(token: token, completion: { (error) in
-            DispatchQueue.main.async {
-                if let error = error {
-                    Logger.log("unknown error: \(error)")
-                    completion?(ErrorsUserViewModel.unknownError)
-                    return
-                }
-                self.userCoreData.delete()
+            if let error = error {
+                Logger.log("unknown error: \(error)")
+                completion?(ErrorsUserViewModel.unknownError)
+                return
             }
+
+            self.userCoreData.delete()
             MyFileManager.deleteDirectoriesFromAppDirectory()
             completion?(nil)
         })

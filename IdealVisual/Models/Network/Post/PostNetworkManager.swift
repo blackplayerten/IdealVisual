@@ -45,7 +45,6 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                 switch status {
                 case HTTPCodes.okay:
                     break
-                    // TODO: (on view model – user 404)
                 case HTTPCodes.unauthorized:
                     completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
                     return
@@ -117,7 +116,7 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
             do {
                 let decoder = JSONDecoder()
                 decoder.dateDecodingStrategy = .iso8601
-                let posts = try JSONDecoder().decode([JsonPostModel].self, from: data)
+                let posts = try decoder.decode([JsonPostModel].self, from: data)
                 completion?(posts, nil)
             } catch let error {
                 Logger.log("unknown error: \(error.localizedDescription)")

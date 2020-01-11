@@ -11,6 +11,7 @@ import UIKit
 
 protocol ProfileDelegate: class {
     func chooseAvatar(picker: UIImagePickerController)
+    func updateAvatar(image: UIImage)
     func showAlert(alert: UIAlertController)
     func dismissAlert()
     func enableTabBarButton()

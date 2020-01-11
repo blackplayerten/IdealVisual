@@ -10,8 +10,9 @@ import CoreData
 import Foundation
 
 protocol PostCoreDataProtocol: class {
-    func create(user: User, photo: String, date: Date, place: String, text: String, indexPhoto: Int) -> Post?
-    func update(post: Post, id: UUID?, date: Date?, place: String?, text: String?)
+    func create(user: User, id: UUID?, photo: String, date: Date, place: String,
+                text: String, indexPhoto: Int) -> Post?
+    func update(post: Post, id: UUID?, date: Date?, place: String?, text: String?, lastUpdated: Date?)
     func getAll() -> NSFetchedResultsController<Post>
     func get() -> Post?
     func delete(post: Post)

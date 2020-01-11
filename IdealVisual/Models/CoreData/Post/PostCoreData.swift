@@ -11,18 +11,24 @@ import Foundation
 import UIKit
 
 final class PostCoreData: PostCoreDataProtocol {
-    func create(user: User, photo: String, date: Date, place: String, text: String, indexPhoto: Int) -> Post? {
+    func create(user: User, id: UUID? = nil,
+                photo: String, date: Date, place: String, text: String, indexPhoto: Int) -> Post? {
         let entityDescriptionPost = NSEntityDescription.entity(forEntityName: "Post",
                                                                in: DataManager.instance.managedObjectContext)
         let managedObjectPost = NSManagedObject(entity: entityDescriptionPost!,
                                                 insertInto: DataManager.instance.managedObjectContext)
 
-        managedObjectPost.setValue(UUID(uuid: UUID_NULL), forKey: "id")
+        if let id = id {
+            managedObjectPost.setValue(id, forKey: "id")
+        } else {
+            managedObjectPost.setValue(UUID(uuid: UUID_NULL), forKey: "id")
+        }
         managedObjectPost.setValue(photo, forKey: "photo")
         managedObjectPost.setValue(date, forKey: "date")
         managedObjectPost.setValue(place, forKey: "place")
         managedObjectPost.setValue(text, forKey: "text")
         managedObjectPost.setValue(Int64(indexPhoto), forKey: "indexPhoto")
+        managedObjectPost.setValue(Date(), forKey: "lastUpdated")
 
         guard let post = managedObjectPost as? Post else { return nil }
         user.addToPosts(post)
@@ -31,7 +37,8 @@ final class PostCoreData: PostCoreDataProtocol {
         return post
     }
 
-    func update(post: Post, id: UUID? = nil, date: Date? = nil, place: String? = nil, text: String? = nil) {
+    func update(post: Post, id: UUID? = nil, date: Date? = nil, place: String? = nil, text: String? = nil,
+                lastUpdated: Date? = nil) {
         do {
             if let id = id {
                 post.setValue(id, forKey: "id")
@@ -44,6 +51,9 @@ final class PostCoreData: PostCoreDataProtocol {
             }
             if let text = text {
                 post.setValue(text, forKey: "text")
+            }
+            if let lastUpdated = lastUpdated {
+                post.setValue(lastUpdated, forKey: "lastUpdated")
             }
             try DataManager.instance.managedObjectContext.save()
         } catch {

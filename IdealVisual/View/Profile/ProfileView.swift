@@ -30,6 +30,8 @@ final class ProfileView: UIView {
     private var avaContent: Data? // for saving
     private var avaName: String?
 
+    private var un: UnknownError
+
     init(profileDelegate: ProfileDelegate) {
         self.delegateProfile = profileDelegate
         self.userViewModel = UserViewModel()
@@ -37,17 +39,19 @@ final class ProfileView: UIView {
         self.email = InputFields()
         self.password = InputFields()
         self.repeatPassword = InputFields()
+        self.un = UnknownError(text: "")
         super.init(frame: CGRect())
 
-        userViewModel?.get(completion: { (user, error) in
+        userViewModel?.get(completion: { [weak self] (user, error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
                     case ErrorsUserViewModel.noData:
-                        // TODO: ui
-                        break
+                        Logger.log(error)
+                        self?.unErr(text: "Упс, что-то пошло не так.")
                     default:
-                        print("undefined error: \(error)"); return
+                        Logger.log(error)
+                        self?.unErr(text: "Упс, что-то пошло не так.")
                     }
                 }
 
@@ -55,16 +59,16 @@ final class ProfileView: UIView {
                     return
                 }
 
-                self.username = InputFields(labelImage: UIImage(named: "login"),
+                self?.username = InputFields(labelImage: UIImage(named: "login"),
                                                    text: user.username,
                                                    placeholder: nil, validator: checkValidUsername)
-                self.email = InputFields(labelImage: UIImage(named: "email"),
+                self?.email = InputFields(labelImage: UIImage(named: "email"),
                                                 text: user.email,
                                                 placeholder: nil, validator: checkValidEmail)
-                self.password = InputFields(labelImage: UIImage(named: "password"),
+                self?.password = InputFields(labelImage: UIImage(named: "password"),
                                                    text: nil, placeholder: "Пароль",
                                                    textContentType: .newPassword, validator: checkValidPassword)
-                self.repeatPassword = InputFields(labelImage: UIImage(named: "password"),
+                self?.repeatPassword = InputFields(labelImage: UIImage(named: "password"),
                                                          text: nil, placeholder: "Повторите пароль",
                                                          textContentType: .newPassword, validator: checkValidPassword)
             }
@@ -122,6 +126,7 @@ final class ProfileView: UIView {
     @objc
     func closeProfile() {
         height?.isActive = false
+        no_settings()
         removeFromSuperview()
         delegateProfile?.enableTabBarButton()
     }
@@ -131,9 +136,28 @@ final class ProfileView: UIView {
         delegateProfile?.logOut()
     }
 
+    // FIXME: keyboard
     @objc
     private func hide() {
         self.endEditing(true)
+    }
+
+    // MARK: ui error
+    private func unErr(text: String) {
+        self.un = UnknownError(text: text)
+        scroll.addSubview(un)
+        un.translatesAutoresizingMaskIntoConstraints = false
+        un.centerXAnchor.constraint(equalTo: scroll.centerXAnchor, constant: -100).isActive = true
+        un.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -140).isActive = true
+        un.isHidden = false
+        let tapp = UITapGestureRecognizer()
+        scroll.addGestureRecognizer(tapp)
+        tapp.addTarget(self, action: #selector(taped))
+    }
+
+    @objc
+    func taped() {
+        un.isHidden = true
     }
 
 // MARK: - save/not save settings
@@ -177,20 +201,30 @@ final class ProfileView: UIView {
         }
 
         userViewModel?.update(username: usrInput, email: emlInput, ava: avaContent, avaName: avaName,
-                              password: pasInput, completion: { (error) in
+                              password: pasInput, completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-//                    case ErrorsUserViewModel.alreadyExists:
-                        // TODO: ui
-//                        break
+                    case ErrorsUserViewModel.unauthorized:
+                        Logger.log(error)
+                        self?.unErr(text: "Вы не авторизованы")
+                        sleep(3)
+                        self?.delegateProfile?.logOut()
+                    case ErrorsUserViewModel.noData:
+                        Logger.log(error)
+                        self?.unErr(text: "Невозможно загрузить данные")
                     case ErrorsUserViewModel.notFound:
-                        // TODO: ui
-                        break
+                        Logger.log(error)
+                        self?.unErr(text: "Такого пользователя нет")
+                        sleep(3)
+                        self?.delegateProfile?.logOut()
                     default:
-                        print("undefined error: \(error)"); return
+                        Logger.log(error)
+                        self?.unErr(text: "Упс, что-то пошло не так.")
                     }
                 }
+                guard let a = self?.ava.image else { return }
+                self?.delegateProfile?.updateAvatar(image: a)
             }
         })
 
@@ -230,6 +264,10 @@ extension ProfileView {
     }
 
     private func setupView() {
+        dataState.username = username.textField.text ?? ""
+        dataState.email = email.textField.text ?? ""
+        dataState.oldAva = ava.image
+
         self.translatesAutoresizingMaskIntoConstraints = false
         let currentWindow: UIWindow? = UIApplication.shared.keyWindow
         currentWindow?.addSubview(self)
@@ -242,15 +280,11 @@ extension ProfileView {
         self.layer.shadowColor = Colors.darkDarkGray.cgColor
         self.layer.shadowRadius = 5.0
         self.layer.shadowOpacity = 50.0
+
         height = self.heightAnchor.constraint(equalToConstant: 465)
         height?.isActive = true
         setNoEdit()
     }
-}
-
-// MARK: - scroll and keyboard
-extension ProfileView {
-
 }
 
 // MARK: - nav
@@ -342,26 +376,34 @@ extension ProfileView {
         ava.layer.cornerRadius = 10
         ava.layer.masksToBounds = true
 
-        userViewModel?.getAvatar(completion: { (avatar, error) in
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 60,
+                                                                     y: 60,
+                                                                     width: 50, height: 50))
+        loadingIndicator.color = Colors.blue
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.startAnimating()
+        ava.addSubview(loadingIndicator)
+
+        userViewModel?.getAvatar(completion: { [weak self] (avatar, error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
                     case ErrorsUserViewModel.noData:
-                        // TODO: ui
-                        break
-                    case ErrorsUserViewModel.notFound:
-                        // TODO: ui
-                        break
+                        Logger.log(error)
+                        self?.unErr(text: "Невозможно загрузить фотографию")
                     default:
-                        print("undefined error: \(error)"); return
+                        Logger.log(error)
+                        self?.unErr(text: "Упс, что-то пошло не так.")
                     }
+                    return
                 }
 
                 guard let avatar = avatar else {
-                    self.ava.image = UIImage(named: "default_profile")
+                    self?.ava.image = UIImage(named: "default_profile")
                     return
                 }
-                self.ava.image = UIImage(contentsOfFile: avatar)
+                self?.ava.image = UIImage(contentsOfFile: avatar)
+                loadingIndicator.stopAnimating()
             }
         })
     }
@@ -387,6 +429,7 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
         let alert = UIAlertController(title: "Выберите изображение",
                                       message: nil,
                                       preferredStyle: .actionSheet)
+
         alert.addAction(UIAlertAction(title: "Галерея",
                                       style: .default,
                                       handler: { _ in { self.testAva.sourceType = .photoLibrary

@@ -18,6 +18,8 @@ final class SignIn: UIViewController {
     private var password: InputFields?
     private var activeField: InputFields?
 
+    private let un = UnknownError(text: "Упс, что-то пошло не так.")
+
     // MARK: lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -153,6 +155,23 @@ final class SignIn: UIViewController {
         signUpButton.addTarget(self, action: #selector(goTosignUp), for: .touchUpInside)
     }
 
+    // MARK: ui error
+    private func unErr() {
+        scroll.addSubview(un)
+        un.translatesAutoresizingMaskIntoConstraints = false
+        un.centerXAnchor.constraint(equalTo: scroll.centerXAnchor, constant: -100).isActive = true
+        un.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -140).isActive = true
+        un.isHidden = false
+        let tapp = UITapGestureRecognizer()
+        scroll.addGestureRecognizer(tapp)
+        tapp.addTarget(self, action: #selector(taped))
+    }
+
+    @objc
+    func taped() {
+        un.isHidden = true
+    }
+
     // MARK: - func check authentification
     @objc
     private func checkAuth() {
@@ -175,19 +194,19 @@ final class SignIn: UIViewController {
             return
         }
 
-        userViewModel?.login(email: email, password: password, completion: { (error) in
+        userViewModel?.login(email: email, password: password, completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                        // TODO: ui
                     case ErrorsUserViewModel.wrongCredentials:
-                        self.password?.setError(text: "Неправильная почта или пароль")
+                        self?.password?.setError(text: "Неправильная почта или пароль")
                     default:
                         Logger.log("undefined error: \(error)")
+                        self?.unErr()
                         return
                     }
                 } else {
-                    self.autoLogin()
+                    self?.autoLogin()
                 }
             }
         })

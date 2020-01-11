@@ -379,3 +379,45 @@ final class CheckMistakeLabel: UILabel {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+final class UnknownError: UIView {
+    init(text: String) {
+        super.init(frame: .zero)
+        let border = CGRect(x: 0, y: 0, width: 200, height: 150)
+        let view = UIView(frame: border)
+        addSubview(view)
+        view.backgroundColor = .white
+
+        view.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        view.widthAnchor.constraint(equalToConstant: 200).isActive = true
+
+        view.layer.borderColor = UIColor.black.cgColor
+        view.layer.borderWidth = 1
+        view.layer.cornerRadius = 10
+
+        let image_error = UIImageView()
+        image_error.image = UIImage(named: "error")
+        image_error.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(image_error)
+        image_error.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        image_error.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        image_error.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        image_error.topAnchor.constraint(equalTo: view.topAnchor, constant: 30).isActive = true
+
+        let error_text = UILabel()
+        error_text.translatesAutoresizingMaskIntoConstraints = false
+        error_text.text = text
+        error_text.font = UIFont(name: "PingFang-SC-Regular", size: 14)
+        error_text.numberOfLines = 2
+        view.addSubview(error_text)
+        error_text.widthAnchor.constraint(equalToConstant: 200).isActive = true
+        error_text.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        error_text.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10).isActive = true
+        error_text.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
+        error_text.topAnchor.constraint(equalTo: image_error.bottomAnchor, constant: 20).isActive = true
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}

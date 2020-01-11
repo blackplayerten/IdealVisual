@@ -20,6 +20,8 @@ final class SignUp: UIViewController {
 
     private var titleV = UILabel()
 
+    private let un = UnknownError(text: "Упс, что-то пошло не так.")
+
     // MARK: - lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,7 +73,7 @@ final class SignUp: UIViewController {
         scroll.scrollIndicatorInsets = insets
 
         guard let activeField = activeField else { return }
-        
+
         let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y-kbSize.height)
         scroll.setContentOffset(scrollPoint, animated: true)
     }
@@ -171,6 +173,23 @@ final class SignUp: UIViewController {
         signInButton.addTarget(self, action: #selector(goToSignIn), for: .touchUpInside)
     }
 
+    // MARK: ui error
+    private func unErr() {
+        scroll.addSubview(un)
+        un.translatesAutoresizingMaskIntoConstraints = false
+        un.centerXAnchor.constraint(equalTo: scroll.centerXAnchor, constant: -100).isActive = true
+        un.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -200).isActive = true
+        un.isHidden = false
+        let tapp = UITapGestureRecognizer()
+        scroll.addGestureRecognizer(tapp)
+        tapp.addTarget(self, action: #selector(taped))
+    }
+
+    @objc
+    func taped() {
+        un.isHidden = true
+    }
+
     // MARK: - func create account
     @objc
     private func createAccount() {
@@ -185,25 +204,26 @@ final class SignUp: UIViewController {
         else { return }
 
         userViewModel?.create(username: username, email: email, password: password,
-                              completion: { (error) in
+                              completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
                     case ErrorsUserViewModel.usernameAlreadyExists:
-                        self.username?.setError(text: "Такое имя пользователя уже занято")
+                        self?.username?.setError(text: "Такое имя пользователя уже занято")
                     case ErrorsUserViewModel.usernameLengthIsWrong:
-                        self.username?.setError(text: "Неверная длина имени пользователя")
+                        self?.username?.setError(text: "Неверная длина имени пользователя")
                     case ErrorsUserViewModel.emailFormatIsWrong:
-                        self.email?.setError(text: "Неверный формат почты")
+                        self?.email?.setError(text: "Неверный формат почты")
                     case ErrorsUserViewModel.emailAlreadyExists:
-                        self.email?.setError(text: "Такая почта уже занята")
+                        self?.email?.setError(text: "Такая почта уже занята")
                     case ErrorsUserViewModel.passwordLengthIsWrong:
-                        self.password?.setError(text: "Неверная длина пароля")
+                        self?.password?.setError(text: "Неверная длина пароля")
                     default:
                         Logger.log("unknown error: \(error)")
+                        self?.unErr()
                     }
                 } else {
-                    self.autoLogin()
+                    self?.autoLogin()
                 }
             }
         })

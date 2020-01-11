@@ -23,6 +23,8 @@ final class PostView: UIViewController {
     let margin: CGFloat = 30.0
     var date: BlockPost? = nil, post: BlockPost? = nil, place: BlockPost? = nil
 
+    private var un: UnknownError?
+
     // MARK: - methods lifecycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -32,6 +34,7 @@ final class PostView: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.un = UnknownError(text: "")
 
         self.viewModel = PostViewModel()
         view.backgroundColor = .white
@@ -193,14 +196,34 @@ final class PostView: UIViewController {
     private func procError(error: ErrorViewModel?) {
         if let error = error {
             switch error {
+            case ErrorsUserViewModel.unauthorized:
+                unErr(text: "Вы не авторизованы")
+                // TODO: logout
             case ErrorsUserViewModel.noData:
-                // TODO: ui
-                break
+                unErr(text: "Невозможно отобразить данные")
             default:
-                print("undefined error: \(error)"); return
+                unErr(text: "Упс, что-то пошло не так.")
             }
         }
     }
+
+     // MARK: ui error
+       private func unErr(text: String) {
+            self.un = UnknownError(text: text)
+            scroll.addSubview(un!)
+            un!.translatesAutoresizingMaskIntoConstraints = false
+            un!.centerXAnchor.constraint(equalTo: scroll.centerXAnchor, constant: -100).isActive = true
+            un!.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -140).isActive = true
+            un!.isHidden = false
+            let tapp = UITapGestureRecognizer()
+            scroll.addGestureRecognizer(tapp)
+            tapp.addTarget(self, action: #selector(taped))
+       }
+
+       @objc
+       func taped() {
+           un!.isHidden = true
+       }
 }
 
 extension PostView: BlockProtocol {
@@ -209,23 +232,23 @@ extension PostView: BlockProtocol {
         switch from {
         case self.post:
             viewModel?.update(post: publication, date: nil, place: nil, text: post?.textView?.text,
-                             completion: { (error) in
+                             completion: { [weak self] (error) in
                                 DispatchQueue.main.async {
-                                    self.procError(error: error)
+                                    self?.procError(error: error)
                                 }
             })
         case self.place:
             viewModel?.update(post: publication, date: nil, place: place?.textView?.text, text: nil,
-                             completion: { (error) in
+                             completion: { [weak self] (error) in
                                 DispatchQueue.main.async {
-                                    self.procError(error: error)
+                                    self?.procError(error: error)
                                 }
                             })
         case self.date:
             viewModel?.update(post: publication, date: date?.datePicker?.date, place: nil, text: nil,
-                             completion: { (error) in
+                             completion: { [weak self] (error) in
                                 DispatchQueue.main.async {
-                                    self.procError(error: error)
+                                    self?.procError(error: error)
                                 }
                             })
         default: break

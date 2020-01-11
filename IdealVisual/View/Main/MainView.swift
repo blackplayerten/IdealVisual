@@ -16,14 +16,17 @@ final class MainView: UIViewController {
     private var userViewModel: UserViewModelProtocol?
     private var postViewModel: PostViewModelProtocol?
 
-    private var refreshControl = UIRefreshControl()
-
-    private let helpText = UILabel()
-    private let photo = UIButton()
+    private let refreshOnSwipeView: UIScrollView = UIScrollView()
+    private let helpText: UILabel = UILabel()
+    private let photo: UIButton = UIButton()
     private var urlAva: String?
     private var editMode: Bool = false
 
+    private let profileB: UIButton = UIButton()
+    private var avaUser: UIImage = UIImage()
     fileprivate var choose = UIImagePickerController()
+
+    private var un: UnknownError?
 
     lazy fileprivate var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -47,28 +50,98 @@ final class MainView: UIViewController {
         super.viewDidLoad()
         self.userViewModel = UserViewModel()
         self.postViewModel = PostViewModel()
+        self.un = UnknownError(text: "")
         view.backgroundColor = .white
-        let back = UIImageView(frame: CGRect(x: 0, y: view.bounds.height/2, width: view.bounds.width, height: 250))
-        back.image = UIImage(named: "fon")
-        view.addSubview(back)
 
         self.tabBarController?.delegate = self
         choose.delegate = self
         choose.sourceType = .photoLibrary
         choose.allowsEditing = true
 
-        postViewModel?.subscribe(completion: { [weak self] (_) in
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 5,
+                                                                     y: 5,
+                                                                     width: 5, height: 5))
+        loadingIndicator.color = Colors.blue
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.startAnimating()
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: loadingIndicator)
+
+        userViewModel?.getAvatar(completion: { [weak self] (avatar, error) in
             DispatchQueue.main.async {
-                self?.content.reloadData()
+                if let error = error {
+                    switch error {
+                    case ErrorsUserViewModel.noData:
+                        Logger.log(error)
+                        self?.unErr(text: "Невозможно загрузить данные")
+                    default:
+                        Logger.log(error)
+                        self?.unErr(text: "Упс, что-то пошло не так.")
+                    }
+                }
+
+                if avatar != nil {
+                    self?.avaUser = UIImage(contentsOfFile: avatar!)!
+                } else {
+                    self?.avaUser = UIImage(named: "default_profile")!
+                }
+
+                loadingIndicator.stopAnimating()
+                self?.setNavItems()
             }
         })
 
         profileV = ProfileView(profileDelegate: self)
-
-        initContent()
         setNavTitle()
-        setNavItems()
+        initContent()
+        setupHelpAndRefreshView()
         checkPhotos()
+
+        self.postViewModel?.content = self.content // TODO: REMOVE
+
+        self.postViewModel?.subscribe(completion: { [weak self] (_) in
+            Logger.log("reload data")
+            DispatchQueue.main.async {
+                self?.checkPhotos()
+                self?.setNavItems()
+                self?.content.reloadData()
+            }
+        })
+
+        postViewModel?.sync(completion: { [weak self] (error) in
+            DispatchQueue.main.async {
+                if let error = error {
+                    switch error {
+                    case ErrorsPostViewModel.unauthorized:
+                        self?.unErr(text: "Вы не авторизованы")
+                        sleep(3)
+                        self?.logOut()
+                    case ErrorsPostViewModel.notFound:
+                        self?.unErr(text: "Посты не найдены")
+                    default:
+                        self?.unErr(text: "Упс, что-то пошло не так.")
+                    }
+                    Logger.log("cannot sync: \(error)")
+                }
+            }
+        })
+    }
+
+    // MARK: ui error
+    private func unErr(text: String) {
+        self.un = UnknownError(text: text)
+        content.addSubview(un!)
+        un!.translatesAutoresizingMaskIntoConstraints = false
+        un!.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: -100).isActive = true
+        un!.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -140).isActive = true
+        un!.isHidden = false
+        let tapp = UITapGestureRecognizer()
+        view.addGestureRecognizer(tapp)
+        tapp.addTarget(self, action: #selector(taped))
+     }
+
+    @objc
+    func taped(_ sender: Any) {
+        un!.removeFromSuperview()
     }
 
 // MARK: - navigation items
@@ -81,42 +154,16 @@ final class MainView: UIViewController {
     }
 
     private func setNavItems() {
-        let profileV = UIButton()
-        profileV.translatesAutoresizingMaskIntoConstraints = false
-        profileV.clipsToBounds = true
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: profileV)
+        profileB.translatesAutoresizingMaskIntoConstraints = false
+        profileB.clipsToBounds = true
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: profileB)
 
-        userViewModel?.getAvatar(completion: { (avatar, error) in
-            DispatchQueue.main.async {
-                if let error = error {
-                    switch error {
-                    case ErrorsUserViewModel.noData:
-                        // TODO: ui
-                        break
-                    case ErrorsUserViewModel.notFound:
-                        // TODO: ui, go to login
-                        break
-                        // more errors
-                    default:
-                        print("undefined error: \(error)"); return
-                    }
-                }
+        profileB.setBackgroundImage(avaUser, for: .normal) //ava from cache
 
-                guard let avatar = avatar else {
-                    profileV.setBackgroundImage(UIImage(named: "default_profile"), for: .normal)
-                    return
-                }
-
-                DispatchQueue.main.async {
-                    profileV.setBackgroundImage(UIImage(contentsOfFile: avatar), for: .normal)
-                }
-            }
-        })
-
-        profileV.widthAnchor.constraint(equalToConstant: 33).isActive = true
-        profileV.heightAnchor.constraint(equalToConstant: 33).isActive = true
-        profileV.layer.cornerRadius = 10
-        profileV.addTarget(self, action: #selector(profile), for: .touchUpInside)
+        profileB.widthAnchor.constraint(equalToConstant: 33).isActive = true
+        profileB.heightAnchor.constraint(equalToConstant: 33).isActive = true
+        profileB.layer.cornerRadius = 10
+        profileB.addTarget(self, action: #selector(profile), for: .touchUpInside)
 
         if postViewModel?.posts.count != 0 {
             guard let markEdit = UIImage(named: "edit_gray") else { return }
@@ -124,7 +171,9 @@ final class MainView: UIViewController {
                                                                                            target: self,
                                                                                            action: #selector(edit)
             ))
-        } else { navigationItem.leftBarButtonItem = nil }
+        } else {
+            navigationItem.leftBarButtonItem = nil
+        }
     }
 
     private func setNavEditItems() {
@@ -158,18 +207,32 @@ final class MainView: UIViewController {
         content.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         content.layer.backgroundColor = UIColor.white.cgColor
 
+        let refreshControl = UIRefreshControl()
         content.refreshControl = refreshControl
         refreshControl.tintColor = Colors.lightBlue
-        refreshControl.addTarget(self, action: #selector(startLoading), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(doSync(_:)), for: .valueChanged)
     }
 
-    @objc private func startLoading() {
-        _ = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(tick),
-                                 userInfo: nil, repeats: false)
-    }
-
-    @objc private func tick() {
-        refreshControl.endRefreshing()
+    // MARK: - synchronization posts
+    @objc private func doSync(_ sender: UIRefreshControl) {
+        postViewModel?.sync(completion: { [weak self] (error) in
+            DispatchQueue.main.async {
+                if let error = error {
+                    switch error {
+                    case ErrorsPostViewModel.unauthorized:
+                        self?.unErr(text: "Вы не авторизованы")
+                        sleep(3)
+                        self?.logOut()
+                    case ErrorsPostViewModel.notFound:
+                        self?.unErr(text: "Посты не найдены")
+                    default:
+                        self?.unErr(text: "Упс, что-то пошло не так.")
+                    }
+                    Logger.log("cannot sync: \(error)")
+                }
+                sender.endRefreshing()
+            }
+        })
     }
 }
 
@@ -188,19 +251,33 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
                                       photoData: selected.jpegData(compressionQuality: 1.0),
                                       date: Date(timeIntervalSince1970: 0),
                                       place: "", text: "",
-                    completion: { (error) in
+                    completion: { [weak self] (error) in
                         DispatchQueue.main.async {
                             if let error = error {
                                 switch error {
-                                case ErrorsUserViewModel.noData:
-                                    // TODO: ui
-                                    break
+                                case ErrorsPostViewModel.unauthorized:
+                                    Logger.log(error)
+                                    self?.unErr(text: "Вы не авторизованы")
+                                    sleep(3)
+                                    self?.logOut()
+                                case ErrorsUserViewModel.notFound:
+                                    Logger.log(error)
+                                    self?.unErr(text: "Такого пользователя нет")
+                                    sleep(3)
+                                    self?.logOut()
+                                case ErrorsPostViewModel.cannotCreate:
+                                    Logger.log(error)
+                                    self?.unErr(text: "Невозможно создать пост")
+                                case ErrorsPostViewModel.noData:
+                                    Logger.log(error)
+                                    self?.unErr(text: "Невозможно загрузить данные")
                                 default:
-                                    print("undefined error: \(error)")
+                                    Logger.log(error)
+                                    self?.unErr(text: "Упс, что-то пошло не так.")
                                 }
                             }
-                            self.setNavItems()
-                            self.checkPhotos()
+                            self?.setNavItems()
+                            self?.checkPhotos()
                         }
                 })
             }
@@ -224,8 +301,11 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
 extension MainView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if editMode == true {
+            Logger.log("selected: \(indexPath.row)")
             let cell = collectionView.cellForItem(at: indexPath)
-            if let selectCell = cell as? PhotoCell { selectCell.selectedImage.isHidden = false }
+            if let selectCell = cell as? PhotoCell {
+                selectCell.selectedImage.isHidden = false
+            }
         } else {
             guard let postViewModel = postViewModel else { return }
             let post = postViewModel.posts[indexPath.item]
@@ -244,10 +324,12 @@ extension MainView: UICollectionViewDelegate {
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, shouldDeselectItemAt indexPath: IndexPath) -> Bool {
+    private func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) -> Bool {
         if editMode == true {
             let cell = collectionView.cellForItem(at: indexPath)
-            if let selectCell = cell as? PhotoCell { selectCell.selectedImage.isHidden = true }
+            if let selectCell = cell as? PhotoCell {
+                selectCell.selectedImage.isHidden = true
+            }
             return true
         }
         return false
@@ -268,39 +350,34 @@ extension MainView: UICollectionViewDataSource {
 
             guard let path = postViewModel.posts[indexPath.item].photo else { return cell }
 
-            // FIXME: что-то тут не так
-//            DispatchQueue.main.async {
-                unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
-//            }
             unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
                                       height: view.bounds.width / 3 - 1)
 
             unwrapCell.backgroundColor = .gray
+
+            let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 50,
+                                                                         y: 50,
+                                                                         width: 50, height: 50))
+            loadingIndicator.color = Colors.blue
+            loadingIndicator.hidesWhenStopped = true
+            loadingIndicator.startAnimating()
+            unwrapCell.addSubview(loadingIndicator)
+
+            DispatchQueue.main.async {
+                loadingIndicator.stopAnimating()
+                unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+            }
         }
         return cell
     }
 
-    private func checkPhotos() {
-        if postViewModel?.posts.count != 0 {
-            content.isHidden = false
-            helpText.removeFromSuperview()
-        } else {
-            content.isHidden = true
-            setHelp()
-            helpText.text = """
-            Здесь будут размещены Ваши фото \n
-            Чтобы начать свой путь к созданию идеальной ленты или блога \
-            добавьте свою первую фотографию нажав на +
-            """
-        }
-    }
+    // MARK: - set refresh and help
+    private func setupHelpAndRefreshView() {
+        let refreshControl = UIRefreshControl()
+        refreshOnSwipeView.refreshControl = refreshControl
+        refreshControl.tintColor = Colors.lightBlue
+        refreshControl.addTarget(self, action: #selector(doSync(_:)), for: .valueChanged)
 
-    private func setHelp() {
-        view.addSubview(helpText)
-        helpText.translatesAutoresizingMaskIntoConstraints = false
-        helpText.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        helpText.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50).isActive = true
-        helpText.widthAnchor.constraint(equalToConstant: 300).isActive = true
         helpText.font = UIFont(name: "PingFang-SC-Regular", size: 18)
         helpText.numberOfLines = 0
         helpText.textAlignment = .center
@@ -308,6 +385,48 @@ extension MainView: UICollectionViewDataSource {
         helpText.layer.masksToBounds = true
         helpText.layer.cornerRadius = 20
         helpText.backgroundColor = UIColor(white: 1, alpha: 0.8)
+    }
+
+    private func showHelp() {
+        view.addSubview(refreshOnSwipeView)
+        refreshOnSwipeView.translatesAutoresizingMaskIntoConstraints = false
+        refreshOnSwipeView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        refreshOnSwipeView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        refreshOnSwipeView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        refreshOnSwipeView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+
+        refreshOnSwipeView.addSubview(helpText)
+
+        helpText.translatesAutoresizingMaskIntoConstraints = false
+        helpText.centerXAnchor.constraint(equalTo: refreshOnSwipeView.centerXAnchor).isActive = true
+        helpText.topAnchor.constraint(equalTo: refreshOnSwipeView.topAnchor,
+                                     constant: 50).isActive = true
+        helpText.widthAnchor.constraint(equalToConstant: 300).isActive = true
+
+        let back = UIImageView()
+        back.image = UIImage(named: "fon")
+        refreshOnSwipeView.addSubview(back)
+        back.translatesAutoresizingMaskIntoConstraints = false
+        back.widthAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
+        back.heightAnchor.constraint(equalToConstant: 250).isActive = true
+        back.topAnchor.constraint(equalTo: helpText.bottomAnchor, constant: 100).isActive = true
+        back.bottomAnchor.constraint(equalTo: refreshOnSwipeView.bottomAnchor).isActive = true
+    }
+
+    // MARK: - check photos
+    private func checkPhotos() {
+        if postViewModel?.posts.count != 0 {
+            content.isHidden = false
+            refreshOnSwipeView.removeFromSuperview()
+        } else {
+            content.isHidden = true
+            showHelp()
+            helpText.text = """
+            Здесь будут размещены Ваши фото \n
+            Чтобы начать свой путь к созданию идеальной ленты или блога \
+            добавьте свою первую фотографию нажав на +
+            """
+        }
     }
 }
 
@@ -338,8 +457,25 @@ extension MainView: UICollectionViewDropDelegate {
                 let destinationIndexPath = coordinator.destinationIndexPath
             else { return }
 
-            collectionView.moveItem(at: sourceIndexPath, to: destinationIndexPath)
-            postViewModel?.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item)
+            postViewModel?.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item,
+                                completion: { [weak self] (error) in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        switch error {
+                        case ErrorsPostViewModel.unauthorized:
+                            self?.unErr(text: "Вы не авторизованы")
+                            sleep(3)
+                            self?.logOut()
+                        case ErrorsPostViewModel.notFound:
+                            self?.unErr(text: "Посты не найдены")
+                        case ErrorsPostViewModel.notFound:
+                            self?.unErr(text: "Невозможно отобразить данные")
+                        default:
+                            self?.unErr(text: "Упс, что-то пошло не так.")
+                        }
+                    }
+                }
+            })
         }
     }
 
@@ -364,8 +500,6 @@ extension MainView {
     private func no() {
         setNavItems()
         checkPhotos()
-        content.allowsMultipleSelection = false
-        content.dragInteractionEnabled = true
 
         content.indexPathsForSelectedItems?.forEach {
             guard let cell = content.cellForItem(at: $0) as? PhotoCell else { return }
@@ -373,31 +507,51 @@ extension MainView {
             content.deselectItem(at: $0, animated: true)
         }
 
+        content.allowsMultipleSelection = false
+        content.dragInteractionEnabled = true
+
         editMode = false
     }
 
     @objc
     private func save() {
         if editMode {
+            content.allowsMultipleSelection = false
+            content.dragInteractionEnabled = true
+            editMode = false
+
             if let selectedCells = content.indexPathsForSelectedItems {
+                if selectedCells.count == 0 {
+                    Logger.log("zero")
+                    self.setNavItems()
+                    self.checkPhotos()
+                    return
+                }
+
                 let items = selectedCells.map { $0.item }.sorted().reversed()
                 postViewModel?.delete(atIndices: [Int](items),
-                                      completion: { (error) in
+                                      completion: { [weak self] (error) in
                     DispatchQueue.main.async {
                         if let error = error {
                             switch error {
+                            case ErrorsPostViewModel.unauthorized:
+                                Logger.log(error)
+                                self?.unErr(text: "Вы не авторизованы")
+                                sleep(3)
+                                self?.logOut()
                             case ErrorsUserViewModel.noData:
-                                // TODO: ui
-                                break
-                            case ErrorsUserViewModel.notFound:
-                                Logger.log("not found")
+                                Logger.log(error)
+                                self?.unErr(text: "Невозможно загрузить данные")
+                            case ErrorsPostViewModel.notFound:
+                                Logger.log(error)
+                                self?.unErr(text: "Пост для удаления не найден")
                             default:
-                                print("undefined error: \(error)")
+                                Logger.log(error)
+                                self?.unErr(text: "Упс, что-то пошло не так.")
                             }
                         }
-                        self.setNavItems()
-                        self.checkPhotos()
-                        self.editMode = false
+                        self?.setNavItems()
+                        self?.checkPhotos()
                     }
                 })
             }
@@ -432,17 +586,26 @@ extension MainView: UITabBarControllerDelegate {
 
 // MARK: - profile delegate
 extension MainView: ProfileDelegate {
+    override func viewDidDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    internal func updateAvatar(image: UIImage) {
+        avaUser = image
+        profileB.setBackgroundImage(avaUser, for: .normal) //ava from profile view (updated)
+    }
+
     internal func logOut() {
         profileV?.removeFromSuperview()
 
-        userViewModel?.logout(completion: { (error) in
+        userViewModel?.logout(completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
-                    Logger.log("unknown error: \(error)")
-                    // TODO: ui
+                    Logger.log(error)
+                    self?.unErr(text: "Упс, что-то пошло не так.")
                     return
                 }
-                self.auth()
+                self?.auth()
             }
         })
     }
@@ -454,7 +617,9 @@ extension MainView: ProfileDelegate {
     }
 
     @objc
-    internal func profile() { show_profile() }
+    internal func profile() {
+        show_profile()
+    }
 
     @objc
     private func show_profile() {

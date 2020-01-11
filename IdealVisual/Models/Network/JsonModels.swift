@@ -28,6 +28,7 @@ struct JsonPostModel: Codable {
     var date: Date = Date(timeIntervalSince1970: 0)
     var place: String = ""
     var text: String = ""
+    var lastUpdated: Date = Date()
 }
 
 struct JsonError: Decodable {

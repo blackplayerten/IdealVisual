@@ -4,6 +4,7 @@
         <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="indexPhoto" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastUpdated" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="photo" attributeType="String"/>
         <attribute name="place" attributeType="String"/>
         <attribute name="text" attributeType="String"/>
@@ -17,7 +18,7 @@
         <relationship name="posts" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Post" inverseName="user" inverseEntity="Post"/>
     </entity>
     <elements>
-        <element name="Post" positionX="437.71875" positionY="-258.0703125" width="128" height="148"/>
+        <element name="Post" positionX="437.71875" positionY="-258.0703125" width="128" height="163"/>
         <element name="User" positionX="-30.77734375" positionY="-336.97265625" width="128" height="118"/>
     </elements>
 </model>

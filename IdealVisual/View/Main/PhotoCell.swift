@@ -28,10 +28,7 @@ final class PhotoCell: UICollectionViewCell {
         selectedImage.topAnchor.constraint(equalTo: picture.topAnchor).isActive = true
         selectedImage.rightAnchor.constraint(equalTo: picture.rightAnchor).isActive = true
         selectedImage.backgroundColor = .clear
-    }
 
-    override func prepareForReuse() {
-        super.prepareForReuse()
         selectedImage.image = UIImage(named: "selected")
         selectedImage.isHidden = true
     }
