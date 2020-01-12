@@ -64,17 +64,17 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
         postNetworkManager.get(token: token, completion: { (jsposts, error) in
             if let error = error {
-                switch error.name {
-                case ErrorsNetwork.notFound:
-                    completion?(ErrorsPostViewModel.notFound)
-                default:
-                    Logger.log("unknown: \(String(describing: error.name))")
-                    completion?(ErrorsPostViewModel.unknownError)
-                }
+                Logger.log("unknown: \(String(describing: error.name))")
+                completion?(ErrorsPostViewModel.unknownError)
                 return
             }
 
             guard var jsposts = jsposts else { return }
+
+            if jsposts.count == 0 {
+                completion?(ErrorsPostViewModel.notFound)
+                return
+            }
 
             jsposts = jsposts.sorted(by: { (first, second) in
                 return first.photoIndex ?? 0 < second.photoIndex ?? 0

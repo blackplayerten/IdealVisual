@@ -26,8 +26,6 @@ final class MainView: UIViewController {
     private var avaUser: UIImage = UIImage()
     fileprivate var choose = UIImagePickerController()
 
-    private var un: UnknownError?
-
     lazy fileprivate var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
         let sizecell = CGSize(width: cellSide, height: cellSide)
@@ -50,7 +48,6 @@ final class MainView: UIViewController {
         super.viewDidLoad()
         self.userViewModel = UserViewModel()
         self.postViewModel = PostViewModel()
-        self.un = UnknownError(text: "")
         view.backgroundColor = .white
 
         self.tabBarController?.delegate = self
@@ -128,20 +125,27 @@ final class MainView: UIViewController {
 
     // MARK: ui error
     private func unErr(text: String) {
-        self.un = UnknownError(text: text)
-        content.addSubview(un!)
-        un!.translatesAutoresizingMaskIntoConstraints = false
-        un!.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: -100).isActive = true
-        un!.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -140).isActive = true
-        un!.isHidden = false
+        var un = UnknownError(text: text)
+        view.addSubview(un)
+        un.translatesAutoresizingMaskIntoConstraints = false
+        un.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: -100).isActive = true
+        un.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -140).isActive = true
+        un.isHidden = false
+
         let tapp = UITapGestureRecognizer()
         view.addGestureRecognizer(tapp)
         tapp.addTarget(self, action: #selector(taped))
      }
 
     @objc
-    func taped(_ sender: Any) {
-        un!.removeFromSuperview()
+    func taped(_ sender: UITapGestureRecognizer) {
+        sender.removeTarget(self, action: #selector(taped))
+        view.removeGestureRecognizer(sender)
+        view.subviews.forEach {
+            if $0 is UnknownError {
+                $0.removeFromSuperview()
+            }
+        }
     }
 
 // MARK: - navigation items
@@ -301,7 +305,6 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
 extension MainView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if editMode == true {
-            Logger.log("selected: \(indexPath.row)")
             let cell = collectionView.cellForItem(at: indexPath)
             if let selectCell = cell as? PhotoCell {
                 selectCell.selectedImage.isHidden = false
@@ -516,13 +519,10 @@ extension MainView {
     @objc
     private func save() {
         if editMode {
-            content.allowsMultipleSelection = false
-            content.dragInteractionEnabled = true
             editMode = false
 
             if let selectedCells = content.indexPathsForSelectedItems {
                 if selectedCells.count == 0 {
-                    Logger.log("zero")
                     self.setNavItems()
                     self.checkPhotos()
                     return
@@ -555,6 +555,9 @@ extension MainView {
                     }
                 })
             }
+
+            content.allowsMultipleSelection = false
+            content.dragInteractionEnabled = true
         }
     }
 }
