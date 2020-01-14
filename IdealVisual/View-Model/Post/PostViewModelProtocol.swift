@@ -8,11 +8,8 @@
 
 import Foundation
 
-import UIKit
-
 protocol PostViewModelProtocol {
     var posts: [Post] { get }
-    var content: UICollectionView? { get set }
     func create(photoName: String, photoData: Data?, date: Date?, place: String?, text: String?,
                 completion: ((ErrorViewModel?) -> Void)?)
     func getPhoto(path: String) -> String

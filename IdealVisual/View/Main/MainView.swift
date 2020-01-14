@@ -47,7 +47,7 @@ final class MainView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.userViewModel = UserViewModel()
-        self.postViewModel = PostViewModel()
+        self.postViewModel = PostViewModel(delegat: self)
         view.backgroundColor = .white
 
         self.tabBarController?.delegate = self
@@ -93,13 +93,10 @@ final class MainView: UIViewController {
         setupHelpAndRefreshView()
         checkPhotos()
 
-        self.postViewModel?.content = self.content // TODO: REMOVE, delegate
-
         self.postViewModel?.subscribe(completion: { [weak self] (_) in
             DispatchQueue.main.async {
                 self?.checkPhotos()
                 self?.setNavItems()
-//                self?.content.reloadData()
             }
         })
 
@@ -590,6 +587,28 @@ extension MainView: UITabBarControllerDelegate {
     }
 }
 
+extension MainView: PostChangedDelegate {
+    // MARK: - posts changet (collection view)
+    internal func didChanged(itemsChanged: [(type: NSFetchedResultsChangeType,
+                                           indexPath: IndexPath?, newIndexPath: IndexPath?)]) {
+        content.performBatchUpdates({
+            for change in itemsChanged {
+
+                switch change.type {
+                case .insert: self.content.insertItems(at: [change.newIndexPath!])
+                case .delete: self.content.deleteItems(at: [change.indexPath!])
+                case .update: self.content.reloadItems(at: [change.indexPath!])
+                case .move:
+                    self.content.deleteItems(at: [change.indexPath!])
+                    self.content.insertItems(at: [change.newIndexPath!])
+                @unknown default:
+                    fatalError()
+                }
+            }
+        })
+    }
+}
+
 // MARK: - profile delegate
 extension MainView: ProfileDelegate {
     override func viewDidDisappear(_ animated: Bool) {
@@ -634,4 +653,9 @@ extension MainView: ProfileDelegate {
         view.addSubview(profileV)
         profileV.setup()
     }
+}
+
+protocol PostChangedDelegate: class {
+    func didChanged(itemsChanged: [(type: NSFetchedResultsChangeType,
+                    indexPath: IndexPath?, newIndexPath: IndexPath?)])
 }

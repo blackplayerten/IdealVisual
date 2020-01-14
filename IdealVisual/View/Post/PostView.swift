@@ -36,7 +36,7 @@ final class PostView: UIViewController {
         super.viewDidLoad()
         self.un = UnknownError(text: "")
 
-        self.viewModel = PostViewModel()
+        self.viewModel = PostViewModel(delegat: nil)
         view.backgroundColor = .white
         setInteraction()
         setupNavItems()
@@ -198,7 +198,6 @@ final class PostView: UIViewController {
             switch error {
             case ErrorsUserViewModel.unauthorized:
                 unErr(text: "Вы не авторизованы")
-                // TODO: logout
             case ErrorsUserViewModel.noData:
                 unErr(text: "Невозможно отобразить данные")
             default:

@@ -9,8 +9,6 @@
 import Foundation
 import CoreData
 
-import UIKit
-
 final class PostViewModel: NSObject, PostViewModelProtocol {
     private var user: User?
     private var postCoreData: PostCoreDataProtocol
@@ -23,17 +21,14 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
     private let photoFolder = "posts/"
 
-    // TODO: temp remove! delegate
-    var content: UICollectionView?
-
-//    private var sectionChanges = [(type: NSFetchedResultsChangeType, sectionIndex: Int)]()
+    private weak var delegatePosts: PostChangedDelegate?
     private var itemChanges = [(type: NSFetchedResultsChangeType, indexPath: IndexPath?, newIndexPath: IndexPath?)]()
 
     var posts = [Post]()
 
-    override init() {
+    init(delegat: PostChangedDelegate?) {
         self.user = UserCoreData().get()
-
+        self.delegatePosts = delegat
         self.postCoreData = PostCoreData()
         self.postNetworkManager = PostNetworkManager()
         self.photoNetworkManager = PhotoNetworkManager()
@@ -448,24 +443,9 @@ extension PostViewModel: NSFetchedResultsControllerDelegate {
 
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         guard let fetched = fetcher.fetchedObjects else { return }
-        posts = fetched // non-optimal way
-//        print("content changed \(fetched)")
+        posts = fetched
 
-        self.content?.performBatchUpdates({
-            for change in self.itemChanges {
-
-                switch change.type {
-                case .insert: self.content?.insertItems(at: [change.newIndexPath!])
-                case .delete: self.content?.deleteItems(at: [change.indexPath!])
-                case .update: self.content?.reloadItems(at: [change.indexPath!])
-                case .move:
-                    self.content?.deleteItems(at: [change.indexPath!])
-                    self.content?.insertItems(at: [change.newIndexPath!])
-                @unknown default:
-                    fatalError()
-                }
-            }
-        }, completion: nil)
+        delegatePosts?.didChanged(itemsChanged: self.itemChanges)
 
         for notify in notif_posts {
             notify(self)
