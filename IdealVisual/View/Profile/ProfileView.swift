@@ -205,6 +205,16 @@ final class ProfileView: UIView {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
+                    case ErrorsUserViewModel.usernameAlreadyExists:
+                        self?.username.setError(text: "Такое имя пользователя уже занято")
+                    case ErrorsUserViewModel.usernameLengthIsWrong:
+                        self?.username.setError(text: "Неверная длина имени пользователя")
+                    case ErrorsUserViewModel.emailFormatIsWrong:
+                        self?.email.setError(text: "Неверный формат почты")
+                    case ErrorsUserViewModel.emailAlreadyExists:
+                        self?.email.setError(text: "Такая почта уже занята")
+                    case ErrorsUserViewModel.passwordLengthIsWrong:
+                        self?.password.setError(text: "Неверная длина пароля")
                     case ErrorsUserViewModel.unauthorized:
                         Logger.log(error)
                         self?.unErr(text: "Вы не авторизованы")
@@ -222,18 +232,20 @@ final class ProfileView: UIView {
                         Logger.log(error)
                         self?.unErr(text: "Упс, что-то пошло не так.")
                     }
+                    return
                 }
+
+                self?.password.textField.text = ""
+                self?.password.clearState()
+                self?.repeatPassword.textField.text = ""
+                self?.repeatPassword.clearState()
+
+                self?.setupView()
+
                 guard let a = self?.ava.image else { return }
                 self?.delegateProfile?.updateAvatar(image: a)
             }
         })
-
-        password.textField.text = ""
-        password.clearState()
-        repeatPassword.textField.text = ""
-        repeatPassword.clearState()
-
-        setupView()
     }
 
     @objc
@@ -386,6 +398,7 @@ extension ProfileView {
 
         userViewModel?.getAvatar(completion: { [weak self] (avatar, error) in
             DispatchQueue.main.async {
+                loadingIndicator.stopAnimating()
                 if let error = error {
                     switch error {
                     case ErrorsUserViewModel.noData:
@@ -403,7 +416,6 @@ extension ProfileView {
                     return
                 }
                 self?.ava.image = UIImage(contentsOfFile: avatar)
-                loadingIndicator.stopAnimating()
             }
         })
     }

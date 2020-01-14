@@ -12,7 +12,8 @@ import UIKit
 
 final class PostCoreData: PostCoreDataProtocol {
     func create(user: User, id: UUID? = nil,
-                photo: String, date: Date, place: String, text: String, indexPhoto: Int) -> Post? {
+                photo: String, date: Date, place: String, text: String, indexPhoto: Int,
+                lastUpdated: Date? = Date()) -> Post? {
         let entityDescriptionPost = NSEntityDescription.entity(forEntityName: "Post",
                                                                in: DataManager.instance.managedObjectContext)
         let managedObjectPost = NSManagedObject(entity: entityDescriptionPost!,
@@ -28,7 +29,11 @@ final class PostCoreData: PostCoreDataProtocol {
         managedObjectPost.setValue(place, forKey: "place")
         managedObjectPost.setValue(text, forKey: "text")
         managedObjectPost.setValue(Int64(indexPhoto), forKey: "indexPhoto")
-        managedObjectPost.setValue(Date(), forKey: "lastUpdated")
+        if let lastUpdated = lastUpdated {
+            managedObjectPost.setValue(lastUpdated, forKey: "lastUpdated")
+        } else {
+            managedObjectPost.setValue(Date(), forKey: "lastUpdated")
+        }
 
         guard let post = managedObjectPost as? Post else { return nil }
         user.addToPosts(post)
@@ -38,7 +43,7 @@ final class PostCoreData: PostCoreDataProtocol {
     }
 
     func update(post: Post, id: UUID? = nil, date: Date? = nil, place: String? = nil, text: String? = nil,
-                lastUpdated: Date? = nil) {
+                indexPhoto: Int? = nil, lastUpdated: Date? = nil) {
         do {
             if let id = id {
                 post.setValue(id, forKey: "id")
@@ -51,6 +56,9 @@ final class PostCoreData: PostCoreDataProtocol {
             }
             if let text = text {
                 post.setValue(text, forKey: "text")
+            }
+            if let indexPhoto = indexPhoto {
+                post.setValue(Int64(indexPhoto), forKey: "indexPhoto")
             }
             if let lastUpdated = lastUpdated {
                 post.setValue(lastUpdated, forKey: "lastUpdated")

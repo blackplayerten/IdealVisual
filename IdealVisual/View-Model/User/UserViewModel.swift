@@ -32,57 +32,12 @@ final class UserViewModel: UserViewModelProtocol {
                 if let error = error {
                     switch error.name {
                     case ErrorsNetwork.wrongFields:
-                        guard let fieldErrors = error.description as? [JsonFieldError] else {
-                            Logger.log("unknown fields")
-                            completion?(ErrorsUserViewModel.unknownError)
-                            return
-                        }
-                        fieldErrors.forEach { (err) in
-                            switch err.field {
-                            case SignUpInFields.username:
-                                err.reasons.forEach { (reason) in
-                                    switch reason {
-                                    case SignUpInReasons.alreadyExists:
-                                        completion?(ErrorsUserViewModel.usernameAlreadyExists)
-                                    case SignUpInReasons.wrongLength:
-                                        completion?(ErrorsUserViewModel.usernameLengthIsWrong)
-                                    default:
-                                        Logger.log("unknown error: \(error)")
-                                        completion?(ErrorsUserViewModel.unknownError)
-                                    }
-                                }
-                            case SignUpInFields.email:
-                                err.reasons.forEach { (reason) in
-                                    switch reason {
-                                    case SignUpInReasons.alreadyExists:
-                                        completion?(ErrorsUserViewModel.emailAlreadyExists)
-                                    case SignUpInReasons.wrongEmail:
-                                        completion?(ErrorsUserViewModel.emailFormatIsWrong)
-                                    default:
-                                        Logger.log("unknown error: \(error)")
-                                        completion?(ErrorsUserViewModel.unknownError)
-                                    }
-                                }
-                            case SignUpInFields.password:
-                                err.reasons.forEach { (reason) in
-                                    switch reason {
-                                    case SignUpInReasons.wrongLength:
-                                        completion?(ErrorsUserViewModel.passwordLengthIsWrong)
-                                    default:
-                                        Logger.log("unknown error: \(error)")
-                                        completion?(ErrorsUserViewModel.unknownError)
-                                    }
-                                }
-                            default:
-                                Logger.log("error field: \(err.field)")
-                            }
-                        }
-                        return
+                        self.processWrongFields(error: error, completion: completion)
                     default:
                         Logger.log("unknown error: \(error)")
                         completion?(ErrorsUserViewModel.unknownError)
-                        return
                     }
+                    return
                 }
 
                 guard let user = user else {
@@ -243,6 +198,10 @@ final class UserViewModel: UserViewModelProtocol {
                                             completion: { (user, error) in
                 if let error = error {
                     switch error.name {
+                    case ErrorsNetwork.wrongFields:
+                        self.processWrongFields(error: error, completion: completion)
+                    case ErrorsNetwork.unauthorized:
+                        completion?(ErrorsUserViewModel.unauthorized)
                     case ErrorsNetwork.notFound:
                         completion?(ErrorsUserViewModel.notFound)
                     default:
@@ -307,5 +266,54 @@ final class UserViewModel: UserViewModelProtocol {
             MyFileManager.deleteDirectoriesFromAppDirectory()
             completion?(nil)
         })
+    }
+
+    private func processWrongFields(error: NetworkError, completion: ((ErrorViewModel?) -> Void)?) {
+        guard let fieldErrors = error.description as? [JsonFieldError] else {
+            Logger.log("unknown fields")
+            completion?(ErrorsUserViewModel.unknownError)
+            return
+        }
+        fieldErrors.forEach { (err) in
+            switch err.field {
+            case SignUpInFields.username:
+                err.reasons.forEach { (reason) in
+                    switch reason {
+                    case SignUpInReasons.alreadyExists:
+                        completion?(ErrorsUserViewModel.usernameAlreadyExists)
+                    case SignUpInReasons.wrongLength:
+                        completion?(ErrorsUserViewModel.usernameLengthIsWrong)
+                    default:
+                        Logger.log("unknown error: \(error)")
+                        completion?(ErrorsUserViewModel.unknownError)
+                    }
+                }
+            case SignUpInFields.email:
+                err.reasons.forEach { (reason) in
+                    switch reason {
+                    case SignUpInReasons.alreadyExists:
+                        completion?(ErrorsUserViewModel.emailAlreadyExists)
+                    case SignUpInReasons.wrongEmail:
+                        completion?(ErrorsUserViewModel.emailFormatIsWrong)
+                    default:
+                        Logger.log("unknown error: \(error)")
+                        completion?(ErrorsUserViewModel.unknownError)
+                    }
+                }
+            case SignUpInFields.password:
+                err.reasons.forEach { (reason) in
+                    switch reason {
+                    case SignUpInReasons.wrongLength:
+                        completion?(ErrorsUserViewModel.passwordLengthIsWrong)
+                    default:
+                        Logger.log("unknown error: \(error)")
+                        completion?(ErrorsUserViewModel.unknownError)
+                    }
+                }
+            default:
+                Logger.log("error field: \(err.field)")
+                completion?(ErrorsUserViewModel.unknownError)
+            }
+        }
     }
 }

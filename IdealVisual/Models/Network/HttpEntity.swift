@@ -25,7 +25,7 @@ struct HTTPCodes {
     static let forbidden = 403
 }
 
-struct HTTPHeaders {
+struct MyHTTPHeaders {
     static let authorization: String = "Authorization"
     static let contentType: String = "Content-Type"
 }

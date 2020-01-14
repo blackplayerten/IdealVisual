@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Alamofire
 
 final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
     func get(path: String, completion: ((Data?, NetworkError?) -> Void)?) {
@@ -16,18 +17,26 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
             return
         }
 
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 5
+        AF.download(url).responseData { response in
+            if let error = response.error {
+                if let status = response.response?.statusCode {
+                    switch status {
+                    case HTTPCodes.notFound:
+                        completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                        return
+                    default:
+                        Logger.log("unknown status code: \(status)")
+                        completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                        return
+                    }
+                }
 
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
                 Logger.log("unknown error: \(error.localizedDescription)")
                 completion?(nil, NetworkError(name: error.localizedDescription))
                 return
             }
 
-            if let response = response as? HTTPURLResponse {
-                let status = response.statusCode
+            if let status = response.response?.statusCode {
                 switch status {
                 case HTTPCodes.okay:
                     break
@@ -41,7 +50,7 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
                 }
             }
 
-            guard let data = data else {
+            guard let data = response.value else {
                 Logger.log("data error: \(ErrorsNetwork.noData)")
                 completion?(nil, NetworkError(name: ErrorsNetwork.noData))
                 return
@@ -57,63 +66,36 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
             return
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = HTTPMethods.post
-        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
+        let mimeType = MimeTypes.getFromExtension(ext: URL(fileURLWithPath: name).pathExtension)
 
-        request.timeoutInterval = 5
+        AF.upload(multipartFormData: { multipartFormData in
+            multipartFormData.append(data, withName: "file", fileName: name, mimeType: mimeType)
+        }, to: url, headers: [.authorization(bearerToken: token)])
+            .responseDecodable(of: JsonUploadedPhotoTo.self) { response in
+                if let error = response.error {
+                    if let status = response.response?.statusCode {
+                        switch status {
+                        case HTTPCodes.unauthorized:
+                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                            return
+                        default:
+                            Logger.log("unknown status code: \(status)")
+                            completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                            return
+                        }
+                    }
 
-        let boundary = UUID().uuidString
-        request.setValue(MultipartFormData.getContentTypeValue(boundary: boundary),
-                         forHTTPHeaderField: HTTPHeaders.contentType)
-
-        let body = MultipartFormData.createBody(parameters: [String: String](),
-                                                boundary: boundary,
-                                                data: data,
-                                                mimeType: URL(fileURLWithPath: name).pathExtension,
-                                                filename: name)
-
-        request.httpBody = body
-
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(nil, NetworkError(name: error.localizedDescription))
-                return
-            }
-
-            if let response = response as? HTTPURLResponse {
-                let status = response.statusCode
-                switch status {
-                case HTTPCodes.okay:
-                    break
-                case HTTPCodes.unauthorized:
-                    completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
-                    return
-                default:
-                    Logger.log("unknown status code: \(status)")
-                    completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                    Logger.log("unknown error: \(error.localizedDescription)")
+                    completion?(nil, NetworkError(name: error.localizedDescription))
                     return
                 }
-            }
 
-            guard let data = data else {
-                Logger.log("data error: \(ErrorsNetwork.noData)")
-                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
-                return
-            }
-
-            var uploadedPath: String?
-            do {
-                let tmp = try JSONDecoder().decode(JsonUploadedPhotoTo.self, from: data)
-                if tmp.path != "" {
-                    uploadedPath = tmp.path
+                guard let uploadedPath = response.value else {
+                    Logger.log("data error: \(ErrorsNetwork.noData)")
+                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    return
                 }
-            } catch let error {
-                Logger.log("unknown  error: \(error.localizedDescription)")
-                completion?(nil, NetworkError(name: error.localizedDescription))
-            }
-            completion?(uploadedPath, nil)
+                completion?(uploadedPath.path, nil)
         }.resume()
     }
 }

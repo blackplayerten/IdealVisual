@@ -23,7 +23,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
     private let photoFolder = "posts/"
 
-    // TODO: temp remove!
+    // TODO: temp remove! delegate
     var content: UICollectionView?
 
 //    private var sectionChanges = [(type: NSFetchedResultsChangeType, sectionIndex: Int)]()
@@ -64,6 +64,11 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
         postNetworkManager.get(token: token, completion: { (jsposts, error) in
             if let error = error {
+                if error.name == ErrorsNetwork.unauthorized {
+                    completion?(ErrorsPostViewModel.unauthorized)
+                    return
+                }
+
                 Logger.log("unknown: \(String(describing: error.name))")
                 completion?(ErrorsPostViewModel.unknownError)
                 return
@@ -72,6 +77,10 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
             guard var jsposts = jsposts else { return }
 
             if jsposts.count == 0 {
+                self.posts.forEach {
+                    self.postCoreData.delete(post: $0)
+                }
+
                 completion?(ErrorsPostViewModel.notFound)
                 return
             }
@@ -89,12 +98,18 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                         foundArray.append(jspost.id)
                         found = true
                         if post.date != jspost.date || post.place != jspost.place || post.text != jspost.text ||
+                            post.indexPhoto != jspost.photoIndex ||
                             post.lastUpdated ?? Date(timeIntervalSince1970: 0) != jspost.lastUpdated {
                             if post.lastUpdated != nil && post.lastUpdated! <= jspost.lastUpdated {
                                 // our post is old: sync in
+                                var photoIndex: Int?
+                                if let jsPhotoIndex = jspost.photoIndex {
+                                    photoIndex = Int(jsPhotoIndex)
+                                }
                                 self.postCoreData.update(post: post,
                                                          id: jspost.id, date: jspost.date,
                                                          place: jspost.place, text: jspost.text,
+                                                         indexPhoto: photoIndex,
                                                          lastUpdated: jspost.lastUpdated)
                             } else {
                                 // post on server is old: sync out
@@ -171,6 +186,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
                             // меняем айди на айди поста сервера
                             self.postCoreData.update(post: post, id: created.id, date: nil, place: nil, text: nil,
+                                                     indexPhoto: nil,
                                                      lastUpdated: created.lastUpdated)
                         })
                     })
@@ -178,46 +194,49 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
             }
 
             for jspost in jsposts {
-                var found = false
-                for post in self.posts where jspost.id == post.id {
-                    found = true
-                    break
+                if foundArray.contains(jspost.id) {
+                    continue
                 }
-                if !found {
-                    self.photoNetworkManager.get(path: jspost.photo, completion: { (photoData, error) in
-                        if let error = error {
-                            switch error.name {
-                            case ErrorsNetwork.unauthorized:
-                                completion?(ErrorsPostViewModel.unauthorized)
-                            case ErrorsNetwork.notFound:
-                                completion?(ErrorsPostViewModel.notFound)
-                            case ErrorsNetwork.noData:
-                                completion?(ErrorsPostViewModel.noData)
-                            default:
-                                Logger.log("unknown error: \(error)")
-                                completion?(ErrorsPostViewModel.unknownError)
-                            }
+                self.photoNetworkManager.get(path: jspost.photo, completion: { (photoData, error) in
+                    if let error = error {
+                        switch error.name {
+                        case ErrorsNetwork.unauthorized:
+                            completion?(ErrorsPostViewModel.unauthorized)
+                        case ErrorsNetwork.notFound:
+                            Logger.log("photo not found")
+                            // skip this post
+                        case ErrorsNetwork.noData:
+                            completion?(ErrorsPostViewModel.noData)
+                        default:
+                            Logger.log("unknown error: \(error)")
+                            completion?(ErrorsPostViewModel.unknownError)
                         }
+                        return
+                    }
 
-                        guard let photoData = photoData else {
-                            Logger.log("can't get photo data")
-                            return
-                        }
+                    guard let photoData = photoData else {
+                        Logger.log("200 OK, but got nil photoData")
+                        return
+                    }
 
-                        guard let photoName = URL(string: jspost.photo)?.lastPathComponent else {
-                            Logger.log("can't get photo name with extension: \(jspost.photo)")
-                            return
-                        }
+                    guard let photoName = URL(string: jspost.photo)?.lastPathComponent else {
+                        Logger.log("can't get photo name with extension: \(jspost.photo)")
+                        return
+                    }
 
-                        let photoPath: String = self.photoFolder + photoName
-                        _ = MyFileManager.saveFile(data: photoData, filePath: photoPath)
-                        _ = self.postCoreData.create(user: user, id: jspost.id,
-                                                     photo: photoPath, date: jspost.date, place: jspost.place,
-                                                     text: jspost.text, indexPhoto: Int(jspost.photoIndex ?? 0))
-                    })
-                }
+                    let photoPath: String = self.photoFolder + photoName
+                    _ = MyFileManager.saveFile(data: photoData, filePath: photoPath)
+                    _ = self.postCoreData.create(user: user, id: jspost.id,
+                                                 photo: photoPath, date: jspost.date, place: jspost.place,
+                                                 text: jspost.text, indexPhoto: Int(jspost.photoIndex ?? 0),
+                                                 lastUpdated: jspost.date)
+                })
             }
-            completion?(nil)
+            if self.posts.count != 0 {
+                completion?(nil)
+            } else {
+                completion?(ErrorsPostViewModel.notFound)
+            }
         }
     )
 }
@@ -243,7 +262,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
         }
 
         guard let created = postCoreData.create(user: user, id: nil, photo: photoPath, date: date, place: place,
-                                                text: text, indexPhoto: indexPhoto)
+                                                text: text, indexPhoto: indexPhoto, lastUpdated: nil)
         else {
             Logger.log("error on create: \(ErrorsPostViewModel.cannotCreate)")
             completion?(ErrorsPostViewModel.cannotCreate)
@@ -292,6 +311,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                 }
 
                 _ = self.postCoreData.update(post: created, id: post.id, date: nil, place: nil, text: nil,
+                                             indexPhoto: nil,
                                              lastUpdated: post.lastUpdated)
                 completion?(nil)
             })
@@ -317,7 +337,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
     func update(post: Post,
                 date: Date? = nil, place: String? = nil, text: String? = nil,
                 completion: ((ErrorViewModel?) -> Void)?) {
-        postCoreData.update(post: post, id: post.id, date: date, place: place, text: text, lastUpdated: Date())
+        postCoreData.update(post: post, id: post.id, date: date, place: place, text: text,
+                            indexPhoto: nil, lastUpdated: Date())
 
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
@@ -446,9 +467,9 @@ extension PostViewModel: NSFetchedResultsControllerDelegate {
             }
         }, completion: nil)
 
-//        for notify in notif_posts {
-//            notify(self)
-//        }
+        for notify in notif_posts {
+            notify(self)
+        }
         self.itemChanges.removeAll()
     }
 }

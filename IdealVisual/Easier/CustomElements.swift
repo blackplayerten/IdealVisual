@@ -410,6 +410,7 @@ final class UnknownError: UIView {
         error_text.font = UIFont(name: "PingFang-SC-Regular", size: 14)
         error_text.numberOfLines = 2
         view.addSubview(error_text)
+        error_text.textAlignment = .center
         error_text.widthAnchor.constraint(equalToConstant: 200).isActive = true
         error_text.heightAnchor.constraint(equalToConstant: 30).isActive = true
         error_text.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10).isActive = true

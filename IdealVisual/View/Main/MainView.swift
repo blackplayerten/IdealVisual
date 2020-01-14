@@ -93,14 +93,13 @@ final class MainView: UIViewController {
         setupHelpAndRefreshView()
         checkPhotos()
 
-        self.postViewModel?.content = self.content // TODO: REMOVE
+        self.postViewModel?.content = self.content // TODO: REMOVE, delegate
 
         self.postViewModel?.subscribe(completion: { [weak self] (_) in
-            Logger.log("reload data")
             DispatchQueue.main.async {
                 self?.checkPhotos()
                 self?.setNavItems()
-                self?.content.reloadData()
+//                self?.content.reloadData()
             }
         })
 
@@ -113,7 +112,8 @@ final class MainView: UIViewController {
                         sleep(3)
                         self?.logOut()
                     case ErrorsPostViewModel.notFound:
-                        self?.unErr(text: "Посты не найдены")
+                        // only manual sync triggers alert
+                        break
                     default:
                         self?.unErr(text: "Упс, что-то пошло не так.")
                     }
@@ -125,7 +125,7 @@ final class MainView: UIViewController {
 
     // MARK: ui error
     private func unErr(text: String) {
-        var un = UnknownError(text: text)
+        let un = UnknownError(text: text)
         view.addSubview(un)
         un.translatesAutoresizingMaskIntoConstraints = false
         un.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: -100).isActive = true
@@ -327,15 +327,13 @@ extension MainView: UICollectionViewDelegate {
         }
     }
 
-    private func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) -> Bool {
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         if editMode == true {
             let cell = collectionView.cellForItem(at: indexPath)
             if let selectCell = cell as? PhotoCell {
                 selectCell.selectedImage.isHidden = true
             }
-            return true
         }
-        return false
     }
 }
 
@@ -529,6 +527,11 @@ extension MainView {
                 }
 
                 let items = selectedCells.map { $0.item }.sorted().reversed()
+                content.indexPathsForSelectedItems?.forEach {
+                    guard let cell = content.cellForItem(at: $0) as? PhotoCell else { return }
+                    cell.selectedImage.isHidden = true
+                    content.deselectItem(at: $0, animated: true)
+                }
                 postViewModel?.delete(atIndices: [Int](items),
                                       completion: { [weak self] (error) in
                     DispatchQueue.main.async {

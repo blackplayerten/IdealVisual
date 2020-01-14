@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Alamofire
 
 final class PostNetworkManager: PostNetworkManagerProtocol {
     func create(token: String, post: JsonPostModel, completion: ((JsonPostModel?, NetworkError?) -> Void)?) {
@@ -14,65 +15,40 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
             Logger.log("invalid posts url: \(String(describing: NetworkURLS.postsURL))")
             return
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = HTTPMethods.post
-        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
-        request.addValue(MimeTypes.appJSON, forHTTPHeaderField: HTTPHeaders.contentType)
 
-        let jsonData: Data
-        do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            jsonData = try encoder.encode(post)
-        } catch {
-            Logger.log("can't encode data")
-            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
-            return
-        }
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        AF.request(url, method: .post, parameters: post, encoder: JSONParameterEncoder(encoder: encoder),
+                   headers: [.accept(MimeTypes.appJSON), .authorization(bearerToken: token)])
+            .validate(contentType: [MimeTypes.appJSON])
+            .responseDecodable(of: JsonPostModel.self, decoder: decoder) { response in
+                if let error = response.error {
+                    if let status = response.response?.statusCode {
+                        switch status {
+                        case HTTPCodes.unauthorized:
+                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                        case HTTPCodes.notFound:
+                            completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                        default:
+                            Logger.log("unknown status: \(status)")
+                            completion?(nil, NetworkError(name: "unknown status: \(status)"))
+                        }
+                        return
+                    }
 
-        request.httpBody = jsonData
-        request.timeoutInterval = 5
-
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(nil, NetworkError(name: error.localizedDescription))
-                return
-            }
-
-            if let response = response as? HTTPURLResponse {
-                let status = response.statusCode
-                switch status {
-                case HTTPCodes.okay:
-                    break
-                case HTTPCodes.unauthorized:
-                    completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
-                    return
-                case HTTPCodes.notFound:
-                    completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
-                    return
-                default:
-                    Logger.log("unknown status: \(status)")
-                    completion?(nil, NetworkError(name: "unknown status: \(status)"))
+                    Logger.log("unknown error: \(error.localizedDescription)")
+                    completion?(nil, NetworkError(name: error.localizedDescription))
                     return
                 }
-            }
 
-            guard let data = data else {
-                Logger.log("error data: \(ErrorsNetwork.noData)")
-                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                let post  = try decoder.decode(JsonPostModel.self, from: data)
+                guard let post = response.value else {
+                    Logger.log("error data: \(ErrorsNetwork.noData)")
+                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    return
+                }
                 completion?(post, nil)
-            } catch let error {
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(nil, NetworkError(name: error.localizedDescription))
-            }
         }.resume()
     }
 
@@ -81,47 +57,35 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
             Logger.log("invalid posts url: \(String(describing: NetworkURLS.postsURL))")
             return
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = HTTPMethods.get
-        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
 
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(nil, NetworkError(name: error.localizedDescription))
-                return
-            }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        AF.request(url, method: .get, headers: [.accept(MimeTypes.appJSON), .authorization(bearerToken: token)])
+            .validate(contentType: [MimeTypes.appJSON])
+            .responseDecodable(of: [JsonPostModel].self, decoder: decoder) { response in
+                if let error = response.error {
+                    if let status = response.response?.statusCode {
+                        switch status {
+                        case HTTPCodes.unauthorized:
+                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                        default:
+                            Logger.log("unknown status code: \(status)")
+                            completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                        }
+                        return
+                    }
 
-            if let response = response as? HTTPURLResponse {
-                let status = response.statusCode
-                switch status {
-                case HTTPCodes.okay:
-                    break
-                case HTTPCodes.unauthorized:
-                    completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
-                    return
-                default:
-                    Logger.log("unknown status code: \(status)")
-                    completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                    Logger.log("unknown error: \(error.localizedDescription)")
+                    completion?(nil, NetworkError(name: error.localizedDescription))
                     return
                 }
-            }
 
-            guard let data = data else {
-                Logger.log("error data: \(ErrorsNetwork.noData)")
-                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                let posts = try decoder.decode([JsonPostModel].self, from: data)
+                guard let posts = response.value else {
+                    Logger.log("error data: \(ErrorsNetwork.noData)")
+                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    return
+                }
                 completion?(posts, nil)
-            } catch let error {
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(nil, NetworkError(name: error.localizedDescription))
-            }
         }.resume()
     }
 
@@ -130,65 +94,40 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
             Logger.log("invalid posts url: \(String(describing: NetworkURLS.postsURL))")
             return
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = HTTPMethods.put
-        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
-        request.addValue(MimeTypes.appJSON, forHTTPHeaderField: HTTPHeaders.contentType)
 
-        let jsonData: Data
-        do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            jsonData = try encoder.encode(post)
-        } catch {
-            Logger.log("can't encode data")
-            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
-            return
-        }
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        AF.request(url, method: .put, parameters: post, encoder: JSONParameterEncoder(encoder: encoder),
+                   headers: [.accept(MimeTypes.appJSON), .authorization(bearerToken: token)])
+            .validate(contentType: [MimeTypes.appJSON])
+            .responseDecodable(of: JsonPostModel.self, decoder: decoder) { response in
+                if let error = response.error {
+                    if let status = response.response?.statusCode {
+                        switch status {
+                        case HTTPCodes.unauthorized:
+                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                        case HTTPCodes.notFound:
+                            completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                        default:
+                            Logger.log("unknown status: \(status)")
+                            completion?(nil, NetworkError(name: "unknown status: \(status)"))
+                        }
+                        return
+                    }
 
-        request.httpBody = jsonData
-        request.timeoutInterval = 5
-
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if let error = error {
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(nil, NetworkError(name: error.localizedDescription))
-                return
-            }
-
-            if let response = response as? HTTPURLResponse {
-                let status = response.statusCode
-                switch status {
-                case HTTPCodes.okay:
-                    break
-                case HTTPCodes.unauthorized:
-                    completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
-                    return
-                case HTTPCodes.notFound:
-                    completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
-                    return
-                default:
-                    Logger.log("unknown status code: \(status)")
-                    completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                    Logger.log("unknown error: \(error.localizedDescription)")
+                    completion?(nil, NetworkError(name: error.localizedDescription))
                     return
                 }
-            }
 
-            guard let data = data else {
-                Logger.log("error data: \(ErrorsNetwork.noData)")
-                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
-                return
-            }
-
-            do {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                let post  = try decoder.decode(JsonPostModel.self, from: data)
+                guard let post = response.value else {
+                    Logger.log("error data: \(ErrorsNetwork.noData)")
+                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    return
+                }
                 completion?(post, nil)
-            } catch let error {
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(nil, NetworkError(name: error.localizedDescription))
-            }
         }.resume()
     }
 
@@ -197,34 +136,29 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
             Logger.log("invalid post url: \(String(describing: NetworkURLS.postsURL))")
             return
         }
-        var c = URLComponents(url: url, resolvingAgainstBaseURL: true)
-        var queryids = [URLQueryItem]()
-        for id in ids {
-            queryids.append(URLQueryItem(name: "id", value: id.uuidString))
-        }
-        c?.queryItems = queryids
-        var request = URLRequest(url: c!.url!)
-        request.httpMethod = HTTPMethods.delete
-        request.addValue(Authorization.getBearerToken(token: token), forHTTPHeaderField: HTTPHeaders.authorization)
-        request.timeoutInterval = 5
 
-        URLSession.shared.dataTask(with: request) { (_, response, error) in
-            if let error = error {
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(NetworkError(name: error.localizedDescription))
-                return
-            }
+        let encoder = URLEncodedFormParameterEncoder(encoder: URLEncodedFormEncoder(arrayEncoding: .noBrackets))
+        AF.request(url, method: .delete, parameters: ["id": ids.map { $0.uuidString }], encoder: encoder,
+                   headers: [.accept(MimeTypes.appJSON), .authorization(bearerToken: token)])
+            .validate(contentType: [MimeTypes.appJSON]).response { response in
+                if let error = response.error {
+                    if let status = response.response?.statusCode {
+                        switch status {
+                        case HTTPCodes.unauthorized:
+                            completion?(NetworkError(name: ErrorsNetwork.unauthorized))
+                        default:
+                            Logger.log("unknown status: \(status)")
+                            completion?(NetworkError(name: "unknown status: \(status)"))
+                        }
+                        return
+                    }
 
-            if let response = response as? HTTPURLResponse {
-                let status = response.statusCode
-                switch status {
-                case HTTPCodes.okay:
-                    completion?(nil)
-                default:
-                    Logger.log("unknown status code: \(status)")
-                    completion?(NetworkError(name: "unknown status code: \(status)"))
+                    Logger.log("unknown error: \(error.localizedDescription)")
+                    completion?(NetworkError(name: error.localizedDescription))
+                    return
                 }
-            }
+
+                completion?(nil)
         }.resume()
     }
 }
