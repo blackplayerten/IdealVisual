@@ -265,7 +265,7 @@ final class InputFields: UIView, UITextFieldDelegate {
 
         labelMode.leftAnchor.constraint(equalTo: textField.rightAnchor, constant: 10).isActive = true
         guard let tvCount = textField.text?.count else { return }
-        labelMode.text = "\(tvCount)/50"
+        labelMode.text = "\(tvCount)"
         labelMode.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -20).isActive = true
         labelMode.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         labelMode.heightAnchor.constraint(equalToConstant: 30).isActive = true
@@ -317,7 +317,7 @@ final class InputFields: UIView, UITextFieldDelegate {
 
         let newLength = (textField.text!.count + string.count) - range.length
         if newLength <= 50 {
-            self.labelMode.text = "\(newLength)/50"
+            self.labelMode.text = "\(newLength)"
             return true
         } else {
             return false
@@ -353,7 +353,7 @@ final class InputFields: UIView, UITextFieldDelegate {
 
     func clearState() {
         if let text = textField.text {
-            self.labelMode.text = "\(text.count)/50"
+            self.labelMode.text = "\(text.count)"
         } else {
             self.labelMode.text = String(50)
         }

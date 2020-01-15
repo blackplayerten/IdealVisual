@@ -117,6 +117,9 @@ final class SignUp: UIViewController {
 
     // MARK: set fields
     private func setAuthFields() {
+        let hideKey: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(taped))
+        scroll.addGestureRecognizer(hideKey)
+
         guard
             let username = username,
             let email = email,
@@ -188,11 +191,20 @@ final class SignUp: UIViewController {
     @objc
     func taped() {
         un.isHidden = true
+        scroll.endEditing(true)
     }
 
     // MARK: - func create account
     @objc
     private func createAccount() {
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 45,
+                                                                     y: 495,
+                                                                     width: 50, height: 50))
+        loadingIndicator.color = Colors.blue
+        loadingIndicator.hidesWhenStopped = true
+        scroll.addSubview(loadingIndicator)
+        loadingIndicator.startAnimating()
+
         if !checkValidInputs() {
             return
         }
@@ -222,7 +234,9 @@ final class SignUp: UIViewController {
                         Logger.log("unknown error: \(error)")
                         self?.unErr()
                     }
+                    loadingIndicator.stopAnimating()
                 } else {
+                    loadingIndicator.stopAnimating()
                     self?.autoLogin()
                 }
             }

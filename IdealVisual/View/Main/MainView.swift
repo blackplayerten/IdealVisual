@@ -602,7 +602,7 @@ extension MainView: PostChangedDelegate {
                     self.content.deleteItems(at: [change.indexPath!])
                     self.content.insertItems(at: [change.newIndexPath!])
                 @unknown default:
-                    fatalError()
+                    return
                 }
             }
         })

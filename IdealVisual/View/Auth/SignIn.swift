@@ -108,6 +108,9 @@ final class SignIn: UIViewController {
 
     // MARK: - set fields
     private func setAuthFields() {
+        let hideKey: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(taped))
+        scroll.addGestureRecognizer(hideKey)
+
         guard
             let email = email,
             let password = password
@@ -170,6 +173,7 @@ final class SignIn: UIViewController {
     @objc
     func taped() {
         un.isHidden = true
+        scroll.endEditing(true)
     }
 
     // MARK: - func check authentification
@@ -194,6 +198,14 @@ final class SignIn: UIViewController {
             return
         }
 
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 90,
+                                                                     y: 425,
+                                                                     width: 50, height: 50))
+        loadingIndicator.color = Colors.blue
+        loadingIndicator.hidesWhenStopped = true
+        loadingIndicator.startAnimating()
+        scroll.addSubview(loadingIndicator)
+
         userViewModel?.login(email: email, password: password, completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
@@ -205,7 +217,9 @@ final class SignIn: UIViewController {
                         self?.unErr()
                         return
                     }
+                    loadingIndicator.stopAnimating()
                 } else {
+                    loadingIndicator.stopAnimating()
                     self?.autoLogin()
                 }
             }

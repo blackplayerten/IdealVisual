@@ -16,7 +16,6 @@ enum BlockPostType {
 
 final class PostView: UIViewController {
     private var viewModel: PostViewModelProtocol?
-    private var hideKeyboard = UITapGestureRecognizer() // FIXME: hide keyboard on tap
     var publication: Post?
     let photo = UIImageView()
     private var scroll = UIScrollView()
@@ -96,7 +95,8 @@ final class PostView: UIViewController {
         scroll.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
 
-        scroll.addGestureRecognizer(hideKeyboard)
+        let hideKey: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(taped))
+        scroll.addGestureRecognizer(hideKey)
     }
 
     @objc
@@ -221,7 +221,8 @@ final class PostView: UIViewController {
 
        @objc
        func taped() {
-           un!.isHidden = true
+            un!.isHidden = true
+            scroll.endEditing(true)
        }
 }
 

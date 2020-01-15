@@ -158,6 +158,7 @@ final class ProfileView: UIView {
     @objc
     func taped() {
         un.isHidden = true
+        self.endEditing(true)
     }
 
 // MARK: - save/not save settings
@@ -168,7 +169,6 @@ final class ProfileView: UIView {
             dataState.oldAva == ava.image &&
             password.textField.text?.count == 0 &&
             repeatPassword.textField.text?.count == 0 {
-            Logger.log("no changes")
 
             password.textField.text = ""
             password.clearState()
@@ -200,6 +200,14 @@ final class ProfileView: UIView {
             return
         }
 
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 310,
+                                                                     y: 43,
+                                                                     width: 50, height: 50))
+        loadingIndicator.color = Colors.blue
+        loadingIndicator.hidesWhenStopped = true
+        self.addSubview(loadingIndicator)
+        loadingIndicator.startAnimating()
+        
         userViewModel?.update(username: usrInput, email: emlInput, ava: avaContent, avaName: avaName,
                               password: pasInput, completion: { [weak self] (error) in
             DispatchQueue.main.async {
@@ -232,6 +240,7 @@ final class ProfileView: UIView {
                         Logger.log(error)
                         self?.unErr(text: "Упс, что-то пошло не так.")
                     }
+                    loadingIndicator.stopAnimating()
                     return
                 }
 
@@ -240,6 +249,7 @@ final class ProfileView: UIView {
                 self?.repeatPassword.textField.text = ""
                 self?.repeatPassword.clearState()
 
+                loadingIndicator.stopAnimating()
                 self?.setupView()
 
                 guard let a = self?.ava.image else { return }
@@ -295,6 +305,10 @@ extension ProfileView {
 
         height = self.heightAnchor.constraint(equalToConstant: 465)
         height?.isActive = true
+
+        let hideKey: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(taped))
+        self.addGestureRecognizer(hideKey)
+
         setNoEdit()
     }
 }
