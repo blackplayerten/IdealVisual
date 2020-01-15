@@ -223,7 +223,7 @@ final class SignUp: UIViewController {
                     case ErrorsUserViewModel.usernameAlreadyExists:
                         self?.username?.setError(text: "Такое имя пользователя уже занято")
                     case ErrorsUserViewModel.usernameLengthIsWrong:
-                        self?.username?.setError(text: "Неверная длина имени пользователя")
+                        self?.username?.setError(text: "Неверная длина имени пользователя, минимум: 4")
                     case ErrorsUserViewModel.emailFormatIsWrong:
                         self?.email?.setError(text: "Неверный формат почты")
                     case ErrorsUserViewModel.emailAlreadyExists:

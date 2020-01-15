@@ -628,7 +628,6 @@ extension MainView: ProfileDelegate {
                 if let error = error {
                     Logger.log(error)
                     self?.unErr(text: "Упс, что-то пошло не так.")
-                    return
                 }
                 self?.auth()
             }
