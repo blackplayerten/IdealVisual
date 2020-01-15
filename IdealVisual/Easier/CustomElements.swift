@@ -264,8 +264,7 @@ final class InputFields: UIView, UITextFieldDelegate {
         textField.autocapitalizationType = .none
 
         labelMode.leftAnchor.constraint(equalTo: textField.rightAnchor, constant: 10).isActive = true
-        guard let tvCount = textField.text?.count else { return }
-        labelMode.text = "\(tvCount)"
+        labelMode.text = ""
         labelMode.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -20).isActive = true
         labelMode.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         labelMode.heightAnchor.constraint(equalToConstant: 30).isActive = true
