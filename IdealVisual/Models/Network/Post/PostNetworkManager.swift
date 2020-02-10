@@ -38,8 +38,12 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                         return
                     }
 
-                    Logger.log("unknown error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError(name: error.localizedDescription))
+                    }
                     return
                 }
 
@@ -75,8 +79,12 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                         return
                     }
 
-                    Logger.log("unknown error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError(name: error.localizedDescription))
+                    }
                     return
                 }
 
@@ -117,8 +125,12 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                         return
                     }
 
-                    Logger.log("unknown error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError(name: error.localizedDescription))
+                    }
                     return
                 }
 
@@ -153,8 +165,12 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                         return
                     }
 
-                    Logger.log("unknown error: \(error.localizedDescription)")
-                    completion?(NetworkError(name: error.localizedDescription))
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(NetworkError(name: ErrorsNetwork.noConnection))
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(NetworkError(name: error.localizedDescription))
+                    }
                     return
                 }
 

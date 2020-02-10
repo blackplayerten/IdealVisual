@@ -59,13 +59,16 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
         postNetworkManager.get(token: token, completion: { (jsposts, error) in
             if let error = error {
-                if error.name == ErrorsNetwork.unauthorized {
+                switch error.name {
+                case ErrorsNetwork.unauthorized:
                     completion?(ErrorsPostViewModel.unauthorized)
-                    return
+                case ErrorsNetwork.noConnection:
+                    completion?(ErrorsPostViewModel.noConnection)
+                default:
+                    Logger.log("unknown: \(String(describing: error.name))")
+                    completion?(ErrorsPostViewModel.unknownError)
                 }
 
-                Logger.log("unknown: \(String(describing: error.name))")
-                completion?(ErrorsPostViewModel.unknownError)
                 return
             }
 

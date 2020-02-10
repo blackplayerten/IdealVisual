@@ -12,6 +12,8 @@ typealias ErrorViewModel = String
 
 // MARK: - user errors
 struct ErrorsUserViewModel {
+    static let noConnection: String = "no internet connection"
+
     static let ok: ErrorViewModel = "ok"
     static let noData: ErrorViewModel = "user has no data"
     static let unauthorized: ErrorViewModel = "user unauthorized"
@@ -54,6 +56,8 @@ struct SignUpInReasons {
 
 // MARK: - post errors
 struct ErrorsPostViewModel {
+    static let noConnection: ErrorViewModel = "no internet connection"
+
     static let ok: ErrorViewModel = "ok"
     static let noData: ErrorViewModel = "post has no data"
     static let noID: ErrorViewModel = "post has no id"

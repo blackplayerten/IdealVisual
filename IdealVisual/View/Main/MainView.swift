@@ -41,7 +41,7 @@ final class MainView: UIViewController {
         super.viewWillAppear(animated)
         self.tabBarController?.tabBar.isHidden = false
         navigationController?.navigationBar.barStyle = .default
-        navigationController?.navigationBar.barTintColor = .white
+        navigationController?.navigationBar.backgroundColor = .white
     }
 
     override func viewDidLoad() {
@@ -69,10 +69,10 @@ final class MainView: UIViewController {
                     switch error {
                     case ErrorsUserViewModel.noData:
                         Logger.log(error)
-                        self?.unErr(text: "Невозможно загрузить данные")
+                        self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
                     default:
                         Logger.log(error)
-                        self?.unErr(text: "Упс, что-то пошло не так.")
+                        self?._error(text: "Упс, что-то пошло не так.", color: Colors.red)
                     }
                 }
 
@@ -105,14 +105,16 @@ final class MainView: UIViewController {
                 if let error = error {
                     switch error {
                     case ErrorsPostViewModel.unauthorized:
-                        self?.unErr(text: "Вы не авторизованы")
+                        self?._error(text: "Вы не авторизованы", color: Colors.red)
                         sleep(3)
                         self?.logOut()
                     case ErrorsPostViewModel.notFound:
                         // only manual sync triggers alert
                         break
+                    case ErrorsPostViewModel.noConnection:
+                        self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                     default:
-                        self?.unErr(text: "Упс, что-то пошло не так.")
+                        self?._error(text: "Ошибка синхронизации", color: Colors.red)
                     }
                     Logger.log("cannot sync: \(error)")
                 }
@@ -121,28 +123,12 @@ final class MainView: UIViewController {
     }
 
     // MARK: ui error
-    private func unErr(text: String) {
-        let un = UnknownError(text: text)
+    private func _error(text: String, color: UIColor? = Colors.red) {
+        let un = UIError(text: text, place: view, color: color)
         view.addSubview(un)
         un.translatesAutoresizingMaskIntoConstraints = false
-        un.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: -100).isActive = true
-        un.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -140).isActive = true
-        un.isHidden = false
-
-        let tapp = UITapGestureRecognizer()
-        view.addGestureRecognizer(tapp)
-        tapp.addTarget(self, action: #selector(taped))
-     }
-
-    @objc
-    func taped(_ sender: UITapGestureRecognizer) {
-        sender.removeTarget(self, action: #selector(taped))
-        view.removeGestureRecognizer(sender)
-        view.subviews.forEach {
-            if $0 is UnknownError {
-                $0.removeFromSuperview()
-            }
-        }
+        un.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: -view.bounds.width / 2).isActive = true
+        un.centerYAnchor.constraint(equalTo: content.topAnchor).isActive = true
     }
 
 // MARK: - navigation items
@@ -221,13 +207,15 @@ final class MainView: UIViewController {
                 if let error = error {
                     switch error {
                     case ErrorsPostViewModel.unauthorized:
-                        self?.unErr(text: "Вы не авторизованы")
+                        self?._error(text: "Вы не авторизованы")
                         sleep(3)
                         self?.logOut()
                     case ErrorsPostViewModel.notFound:
-                        self?.unErr(text: "Посты не найдены")
+                        self?._error(text: "Посты не найдены", color: Colors.darkGray)
+                    case ErrorsPostViewModel.noConnection:
+                        self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                     default:
-                        self?.unErr(text: "Упс, что-то пошло не так.")
+                        self?._error(text: "Ошибка синхронизации")
                     }
                     Logger.log("cannot sync: \(error)")
                 }
@@ -258,23 +246,23 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
                                 switch error {
                                 case ErrorsPostViewModel.unauthorized:
                                     Logger.log(error)
-                                    self?.unErr(text: "Вы не авторизованы")
+                                    self?._error(text: "Вы не авторизованы")
                                     sleep(3)
                                     self?.logOut()
                                 case ErrorsUserViewModel.notFound:
                                     Logger.log(error)
-                                    self?.unErr(text: "Такого пользователя нет")
+                                    self?._error(text: "Такого пользователя нет")
                                     sleep(3)
                                     self?.logOut()
                                 case ErrorsPostViewModel.cannotCreate:
                                     Logger.log(error)
-                                    self?.unErr(text: "Невозможно создать пост")
+                                    self?._error(text: "Невозможно создать пост", color: Colors.darkGray)
                                 case ErrorsPostViewModel.noData:
                                     Logger.log(error)
-                                    self?.unErr(text: "Невозможно загрузить данные")
+                                    self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
                                 default:
                                     Logger.log(error)
-                                    self?.unErr(text: "Упс, что-то пошло не так.")
+                                    self?._error(text: "Упс, что-то пошло не так.")
                                 }
                             }
                             self?.setNavItems()
@@ -461,15 +449,15 @@ extension MainView: UICollectionViewDropDelegate {
                     if let error = error {
                         switch error {
                         case ErrorsPostViewModel.unauthorized:
-                            self?.unErr(text: "Вы не авторизованы")
+                            self?._error(text: "Вы не авторизованы")
                             sleep(3)
                             self?.logOut()
                         case ErrorsPostViewModel.notFound:
-                            self?.unErr(text: "Посты не найдены")
+                            self?._error(text: "Ошибка синхронизации", color: Colors.darkGray)
                         case ErrorsPostViewModel.notFound:
-                            self?.unErr(text: "Невозможно отобразить данные")
+                            self?._error(text: "Невозможно отобразить данные", color: Colors.darkGray)
                         default:
-                            self?.unErr(text: "Упс, что-то пошло не так.")
+                            self?._error(text: "Упс, что-то пошло не так.")
                         }
                     }
                 }
@@ -536,18 +524,18 @@ extension MainView {
                             switch error {
                             case ErrorsPostViewModel.unauthorized:
                                 Logger.log(error)
-                                self?.unErr(text: "Вы не авторизованы")
+                                self?._error(text: "Вы не авторизованы")
                                 sleep(3)
                                 self?.logOut()
                             case ErrorsUserViewModel.noData:
                                 Logger.log(error)
-                                self?.unErr(text: "Невозможно загрузить данные")
+                                self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
                             case ErrorsPostViewModel.notFound:
                                 Logger.log(error)
-                                self?.unErr(text: "Пост для удаления не найден")
+                                self?._error(text: "Пост для удаления не найден", color: Colors.darkGray)
                             default:
                                 Logger.log(error)
-                                self?.unErr(text: "Упс, что-то пошло не так.")
+                                self?._error(text: "Упс, что-то пошло не так.")
                             }
                         }
                         self?.setNavItems()
@@ -626,8 +614,13 @@ extension MainView: ProfileDelegate {
         userViewModel?.logout(completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
-                    Logger.log(error)
-                    self?.unErr(text: "Упс, что-то пошло не так.")
+                    switch error {
+                    case ErrorsUserViewModel.noConnection:
+                        self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
+                    default:
+                        Logger.log(error)
+                        self?._error(text: "Упс, что-то пошло не так.")
+                    }
                 }
                 self?.auth()
             }

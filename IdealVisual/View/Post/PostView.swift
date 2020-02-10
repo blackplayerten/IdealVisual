@@ -22,7 +22,7 @@ final class PostView: UIViewController {
     let margin: CGFloat = 30.0
     var date: BlockPost? = nil, post: BlockPost? = nil, place: BlockPost? = nil
 
-    private var un: UnknownError?
+    private var un: UIError?
 
     // MARK: - methods lifecycle
     override func viewWillAppear(_ animated: Bool) {
@@ -33,7 +33,7 @@ final class PostView: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.un = UnknownError(text: "")
+        self.un = UIError(text: "", place: view, color: Colors.red)
 
         self.viewModel = PostViewModel(delegat: nil)
         view.backgroundColor = .white
@@ -208,7 +208,7 @@ final class PostView: UIViewController {
 
      // MARK: ui error
        private func unErr(text: String) {
-            self.un = UnknownError(text: text)
+        self.un = UIError(text: text, place: view, color: Colors.red)
             scroll.addSubview(un!)
             un!.translatesAutoresizingMaskIntoConstraints = false
             un!.centerXAnchor.constraint(equalTo: scroll.centerXAnchor, constant: -100).isActive = true

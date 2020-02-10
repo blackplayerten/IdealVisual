@@ -19,6 +19,8 @@ struct NetworkError {
 }
 
 struct ErrorsNetwork {
+    static let noConnection: String = "no internet connection"
+
     static let okay: String = "ok"
     static let noData: String = "noData"
     static let unauthorized: String = "unauthorized"

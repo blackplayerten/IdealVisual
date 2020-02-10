@@ -16,6 +16,7 @@ struct Colors {
     static let lightGray = UIColor(red: 0.898, green: 0.898, blue: 0.898, alpha: 1)
     static let darkGray = UIColor(red: 0.741, green: 0.741, blue: 0.741, alpha: 1)
     static let darkDarkGray = UIColor(red: 0.23, green: 0.23, blue: 0.23, alpha: 1)
+    static let red = UIColor(red: 0.792, green: 0.073, blue: 0.073, alpha: 1)
 }
 
 // MARK: - substrate button
@@ -379,42 +380,40 @@ final class CheckMistakeLabel: UILabel {
     }
 }
 
-final class UnknownError: UIView {
-    init(text: String) {
+final class UIError: UIView {
+    init(text: String, place: UIView, color: UIColor? = Colors.red) {
         super.init(frame: .zero)
-        let border = CGRect(x: 0, y: 0, width: 200, height: 150)
+        let border = CGRect(x: 0, y: 0, width: place.bounds.width, height: 40)
         let view = UIView(frame: border)
         addSubview(view)
-        view.backgroundColor = .white
+        view.backgroundColor = color
 
-        view.heightAnchor.constraint(equalToConstant: 150).isActive = true
-        view.widthAnchor.constraint(equalToConstant: 200).isActive = true
+        view.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        view.widthAnchor.constraint(equalToConstant: place.bounds.width).isActive = true
 
-        view.layer.borderColor = UIColor.black.cgColor
-        view.layer.borderWidth = 1
         view.layer.cornerRadius = 10
-
-        let image_error = UIImageView()
-        image_error.image = UIImage(named: "error")
-        image_error.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(image_error)
-        image_error.widthAnchor.constraint(equalToConstant: 40).isActive = true
-        image_error.heightAnchor.constraint(equalToConstant: 40).isActive = true
-        image_error.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        image_error.topAnchor.constraint(equalTo: view.topAnchor, constant: 30).isActive = true
+        view.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
 
         let error_text = UILabel()
         error_text.translatesAutoresizingMaskIntoConstraints = false
         error_text.text = text
-        error_text.font = UIFont(name: "PingFang-SC-Regular", size: 14)
+        error_text.font = UIFont(name: "PingFang-SC-SemiBold", size: 18)
+        error_text.textColor = .white
         error_text.numberOfLines = 2
         view.addSubview(error_text)
         error_text.textAlignment = .center
-        error_text.widthAnchor.constraint(equalToConstant: 200).isActive = true
-        error_text.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        error_text.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10).isActive = true
-        error_text.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
-        error_text.topAnchor.constraint(equalTo: image_error.bottomAnchor, constant: 20).isActive = true
+        error_text.widthAnchor.constraint(equalToConstant: view.bounds.width).isActive = true
+        error_text.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        error_text.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        error_text.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+
+        UIView.animate(withDuration: 0.3, delay: 2, options: .curveEaseOut, animations: {
+            self.transform = CGAffineTransform(translationX: 0, y: -40)
+        }, completion: {
+            if $0 {
+                self.removeFromSuperview()
+            }
+        })
     }
 
     required init?(coder: NSCoder) {

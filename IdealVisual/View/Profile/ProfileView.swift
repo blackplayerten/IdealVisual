@@ -17,7 +17,9 @@ final class ProfileView: UIView {
     private weak var delegateProfile: ProfileDelegate?
     private var userViewModel: UserViewModelProtocol?
 
-    private let scroll = UIScrollView()
+    private let scroll: UIScrollView = UIScrollView()
+    private var navBar: UIView? = UIView()
+
     private var height: NSLayoutConstraint?
 
     private var username: InputFields
@@ -25,12 +27,16 @@ final class ProfileView: UIView {
     private var password: InputFields
     private var repeatPassword: InputFields
 
-    private var testAva = UIImagePickerController()
-    private let ava = UIImageView()
+    private var testAva: UIImagePickerController = UIImagePickerController()
+    private let ava: UIImageView = UIImageView()
     private var avaContent: Data? // for saving
     private var avaName: String?
 
-    private var un: UnknownError
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        navBar?.frame.size = CGSize(width: frame.width, height: 45)
+        navBar?.frame.origin = CGPoint(x: 0, y: ((UIApplication.shared.keyWindow?.safeAreaInsets.top)! + 10))
+    }
 
     init(profileDelegate: ProfileDelegate) {
         self.delegateProfile = profileDelegate
@@ -39,8 +45,10 @@ final class ProfileView: UIView {
         self.email = InputFields()
         self.password = InputFields()
         self.repeatPassword = InputFields()
-        self.un = UnknownError(text: "")
         super.init(frame: CGRect())
+
+        navBar = UIView()
+        addSubview(navBar!)
 
         userViewModel?.get(completion: { [weak self] (user, error) in
             DispatchQueue.main.async {
@@ -48,10 +56,10 @@ final class ProfileView: UIView {
                     switch error {
                     case ErrorsUserViewModel.noData:
                         Logger.log(error)
-                        self?.unErr(text: "Упс, что-то пошло не так.")
+                        self?._error(text: "Упс, что-то пошло не так.")
                     default:
                         Logger.log(error)
-                        self?.unErr(text: "Упс, что-то пошло не так.")
+                        self?._error(text: "Упс, что-то пошло не так.")
                     }
                 }
 
@@ -88,7 +96,7 @@ final class ProfileView: UIView {
         swipe.addTarget(self, action: #selector(closeProfile))
         self.addGestureRecognizer(swipe)
 
-        setNavButtons()
+        setNavButtons(edit_mode: false)
         setAva()
         setFields()
         [username, email, password, repeatPassword].forEach {
@@ -107,7 +115,7 @@ final class ProfileView: UIView {
         dataState.oldAva = ava.image
 
         height?.isActive = false
-        setNavEditButtons()
+        setNavButtons(edit_mode: true)
 
         height = self.heightAnchor.constraint(equalToConstant: self.bounds.height + 155)
         height?.isActive = true
@@ -123,45 +131,7 @@ final class ProfileView: UIView {
         setPassword()
     }
 
-    @objc
-    func closeProfile() {
-        height?.isActive = false
-        no_settings()
-        removeFromSuperview()
-        delegateProfile?.enableTabBarButton()
-    }
-
-    @objc
-    private func logout() {
-        delegateProfile?.logOut()
-    }
-
-    // FIXME: keyboard
-    @objc
-    private func hide() {
-        self.endEditing(true)
-    }
-
-    // MARK: ui error
-    private func unErr(text: String) {
-        self.un = UnknownError(text: text)
-        scroll.addSubview(un)
-        un.translatesAutoresizingMaskIntoConstraints = false
-        un.centerXAnchor.constraint(equalTo: scroll.centerXAnchor, constant: -100).isActive = true
-        un.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -140).isActive = true
-        un.isHidden = false
-        let tapp = UITapGestureRecognizer()
-        scroll.addGestureRecognizer(tapp)
-        tapp.addTarget(self, action: #selector(taped))
-    }
-
-    @objc
-    func taped() {
-        un.isHidden = true
-        self.endEditing(true)
-    }
-
-// MARK: - save/not save settings
+    // MARK: - save/not save settings
     @objc
     private func save_settings() {
         if dataState.email == email.textField.text &&
@@ -200,12 +170,12 @@ final class ProfileView: UIView {
             return
         }
 
-        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 310,
-                                                                     y: 43,
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: navBar!.frame.width / 2 + 70,
+                                                                     y: 0,
                                                                      width: 50, height: 50))
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true
-        self.addSubview(loadingIndicator)
+        navBar!.addSubview(loadingIndicator)
         loadingIndicator.startAnimating()
 
         userViewModel?.update(username: usrInput, email: emlInput, ava: avaContent, avaName: avaName,
@@ -223,22 +193,24 @@ final class ProfileView: UIView {
                         self?.email.setError(text: "Такая почта уже занята")
                     case ErrorsUserViewModel.passwordLengthIsWrong:
                         self?.password.setError(text: "Неверная длина пароля")
+                    case ErrorsUserViewModel.noConnection:
+                        self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                     case ErrorsUserViewModel.unauthorized:
                         Logger.log(error)
-                        self?.unErr(text: "Вы не авторизованы")
+                        self?._error(text: "Вы не авторизованы")
                         sleep(3)
                         self?.delegateProfile?.logOut()
                     case ErrorsUserViewModel.noData:
                         Logger.log(error)
-                        self?.unErr(text: "Невозможно загрузить данные")
+                        self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
                     case ErrorsUserViewModel.notFound:
                         Logger.log(error)
-                        self?.unErr(text: "Такого пользователя нет")
+                        self?._error(text: "Такого пользователя нет")
                         sleep(3)
                         self?.delegateProfile?.logOut()
                     default:
                         Logger.log(error)
-                        self?.unErr(text: "Упс, что-то пошло не так.")
+                        self?._error(text: "Упс, что-то пошло не так.")
                     }
                     loadingIndicator.stopAnimating()
                     return
@@ -277,19 +249,39 @@ final class ProfileView: UIView {
         removeConstraint(height!)
         setupView()
     }
+
+    // MARK: - close view/logout
+    @objc
+    func closeProfile() {
+        height?.isActive = false
+        no_settings()
+        removeFromSuperview()
+        delegateProfile?.enableTabBarButton()
+    }
+
+    @objc
+    private func logout() {
+        delegateProfile?.logOut()
+    }
+
+    // MARK: - ui error
+    private func _error(text: String, color: UIColor? = Colors.red) {
+        let er = UIError(text: text, place: scroll, color: color)
+        scroll.addSubview(er)
+        er.translatesAutoresizingMaskIntoConstraints = false
+        er.leftAnchor.constraint(equalTo: navBar!.leftAnchor).isActive = true
+        er.rightAnchor.constraint(equalTo: navBar!.rightAnchor).isActive = true
+        er.topAnchor.constraint(equalTo: navBar!.bottomAnchor).isActive = true
+    }
 }
 
-// MARK: - add view
+// MARK: - setup view
 extension ProfileView {
     func setup() {
         setupView()
     }
 
     private func setupView() {
-        dataState.username = username.textField.text ?? ""
-        dataState.email = email.textField.text ?? ""
-        dataState.oldAva = ava.image
-
         self.translatesAutoresizingMaskIntoConstraints = false
         let currentWindow: UIWindow? = UIApplication.shared.keyWindow
         currentWindow?.addSubview(self)
@@ -298,6 +290,7 @@ extension ProfileView {
         self.layer.cornerRadius = 20
         self.topAnchor.constraint(equalTo: (superview?.topAnchor)!).isActive = true
         self.leftAnchor.constraint(equalTo: (superview?.safeAreaLayoutGuide.leftAnchor)!).isActive = true
+        self.rightAnchor.constraint(equalTo: (superview?.safeAreaLayoutGuide.rightAnchor)!).isActive = true
         self.backgroundColor = .white
         self.layer.shadowColor = Colors.darkDarkGray.cgColor
         self.layer.shadowRadius = 5.0
@@ -309,50 +302,73 @@ extension ProfileView {
         let hideKey: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(taped))
         self.addGestureRecognizer(hideKey)
 
+        setScroll()
         setNoEdit()
+
+        dataState.username = username.textField.text ?? ""
+        dataState.email = email.textField.text ?? ""
+        dataState.oldAva = ava.image
     }
 }
 
 // MARK: - nav
 extension ProfileView {
-    private func setNavButtons() {
-        guard let markSettings = UIImage(named: "settings") else { return }
-        let settings = SubstrateButton(image: markSettings, side: 33, target: self, action: #selector(setEdit),
-                                       substrateColor: Colors.lightBlue)
-        addSubview(settings)
-        settings.translatesAutoresizingMaskIntoConstraints = false
-        settings.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
-        settings.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
+    private func setNavButtons(edit_mode: Bool) {
+        if !edit_mode {
+            guard let markSettings = UIImage(named: "settings") else { return }
+            let settings = SubstrateButton(image: markSettings, side: 33, target: self, action: #selector(setEdit),
+                                           substrateColor: Colors.lightBlue)
+            navBar?.addSubview(settings)
+            settings.translatesAutoresizingMaskIntoConstraints = false
+            settings.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
+            settings.leftAnchor.constraint(equalTo: navBar!.leftAnchor, constant: 20).isActive = true
 
-        guard let markLogout = UIImage(named: "logout") else { return }
-        let substrateLogout = SubstrateButton(image: markLogout, side: 33, target: self, action: #selector(logout),
-                                       substrateColor: Colors.darkGray)
-        addSubview(substrateLogout)
-        substrateLogout.translatesAutoresizingMaskIntoConstraints = false
-        substrateLogout.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
-        substrateLogout.rightAnchor.constraint(
-            equalTo: self.safeAreaLayoutGuide.rightAnchor,
-            constant: -20
-        ).isActive = true
+            guard let markLogout = UIImage(named: "logout") else { return }
+            let substrateLogout = SubstrateButton(image: markLogout, side: 33, target: self,
+                                                  action: #selector(logout), substrateColor: Colors.darkGray)
+            navBar?.addSubview(substrateLogout)
+            substrateLogout.translatesAutoresizingMaskIntoConstraints = false
+            substrateLogout.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
+            substrateLogout.rightAnchor.constraint(equalTo: navBar!.rightAnchor, constant: -20).isActive = true
+        } else {
+            guard let markYes = UIImage(named: "yes") else { return }
+            let yes = SubstrateButton(image: markYes, side: 33, target: self, action: #selector(save_settings),
+                                      substrateColor: Colors.yellow)
+            navBar?.addSubview(yes)
+            yes.translatesAutoresizingMaskIntoConstraints = false
+            yes.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
+            yes.rightAnchor.constraint(equalTo: navBar!.rightAnchor, constant: -20).isActive = true
+
+            guard let markNo = UIImage(named: "close") else { return }
+            let substrateNot = SubstrateButton(image: markNo, side: 33, target: self, action: #selector(no_settings),
+                                     substrateColor: Colors.darkGray)
+            navBar?.addSubview(substrateNot)
+            substrateNot.translatesAutoresizingMaskIntoConstraints = false
+            substrateNot.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
+            substrateNot.leftAnchor.constraint(equalTo: navBar!.leftAnchor, constant: 20).isActive = true
+        }
+    }
+}
+
+// MARK: - scroll and keyboard
+extension ProfileView {
+    private func setScroll() {
+        addSubview(scroll)
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.topAnchor.constraint(equalTo: navBar!.bottomAnchor).isActive = true
+        scroll.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        scroll.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        scroll.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+
+        // tap on keyboard
+        let tapp = UITapGestureRecognizer()
+        scroll.addGestureRecognizer(tapp)
+        tapp.addTarget(self, action: #selector(taped))
     }
 
     @objc
-    private func setNavEditButtons() {
-        guard let markYes = UIImage(named: "yes") else { return }
-        let yes = SubstrateButton(image: markYes, side: 33, target: self, action: #selector(save_settings),
-                                  substrateColor: Colors.yellow)
-        addSubview(yes)
-        yes.translatesAutoresizingMaskIntoConstraints = false
-        yes.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
-        yes.rightAnchor.constraint(equalTo: self.safeAreaLayoutGuide.rightAnchor, constant: -20).isActive = true
-
-        guard let markNo = UIImage(named: "close") else { return }
-        let substrateNot = SubstrateButton(image: markNo, side: 33, target: self, action: #selector(no_settings),
-                                 substrateColor: Colors.darkGray)
-        addSubview(substrateNot)
-        substrateNot.translatesAutoresizingMaskIntoConstraints = false
-        substrateNot.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 7).isActive = true
-        substrateNot.leftAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leftAnchor, constant: 20).isActive = true
+    func taped() {
+        self.endEditing(true)
     }
 }
 
@@ -360,9 +376,9 @@ extension ProfileView {
 extension ProfileView {
     private func setFields() {
         [username, email].forEach {
-            addSubview($0)
+            scroll.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+            $0.centerXAnchor.constraint(equalTo: scroll.centerXAnchor).isActive = true
             $0.heightAnchor.constraint(equalToConstant: 40).isActive = true
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
         }
@@ -375,9 +391,9 @@ extension ProfileView {
 extension ProfileView {
     private func setPassword() {
         [password, repeatPassword].forEach {
-            addSubview($0)
+            scroll.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+            $0.centerXAnchor.constraint(equalTo: scroll.centerXAnchor).isActive = true
             $0.heightAnchor.constraint(equalToConstant: 40).isActive = true
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.isHidden = false
@@ -390,10 +406,10 @@ extension ProfileView {
 // MARK: - ava
 extension ProfileView {
     private func setAva() {
-        addSubview(ava)
+        scroll.addSubview(ava)
         ava.translatesAutoresizingMaskIntoConstraints = false
-        ava.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        ava.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor, constant: 33+30+7).isActive = true
+        ava.centerXAnchor.constraint(equalTo: scroll.centerXAnchor).isActive = true
+        ava.topAnchor.constraint(equalTo: scroll.topAnchor, constant: 10).isActive = true
         ava.widthAnchor.constraint(equalToConstant: 170).isActive = true
         ava.heightAnchor.constraint(equalToConstant: 170).isActive = true
         ava.contentMode = .scaleAspectFill
@@ -405,10 +421,10 @@ extension ProfileView {
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 60,
                                                                      y: 60,
                                                                      width: 50, height: 50))
+        ava.addSubview(loadingIndicator)
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.startAnimating()
-        ava.addSubview(loadingIndicator)
 
         userViewModel?.getAvatar(completion: { [weak self] (avatar, error) in
             DispatchQueue.main.async {
@@ -417,10 +433,10 @@ extension ProfileView {
                     switch error {
                     case ErrorsUserViewModel.noData:
                         Logger.log(error)
-                        self?.unErr(text: "Невозможно загрузить фотографию")
+                        self?._error(text: "Невозможно загрузить фотографию", color: Colors.darkGray)
                     default:
                         Logger.log(error)
-                        self?.unErr(text: "Упс, что-то пошло не так.")
+                        self?._error(text: "Упс, что-то пошло не так.")
                     }
                     return
                 }
@@ -479,7 +495,7 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
 extension ProfileView {
     private func renderBottomLine() {
         let lineBottom = LineClose()
-        addSubview(lineBottom)
+        scroll.addSubview(lineBottom)
         lineBottom.translatesAutoresizingMaskIntoConstraints = false
         lineBottom.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15).isActive = true
         lineBottom.centerXAnchor.constraint(equalTo: self.centerXAnchor, constant: -23).isActive = true

@@ -33,6 +33,8 @@ final class UserViewModel: UserViewModelProtocol {
                     switch error.name {
                     case ErrorsNetwork.wrongFields:
                         self.processWrongFields(error: error, completion: completion)
+                    case ErrorsNetwork.noConnection:
+                        completion?(ErrorsUserViewModel.noConnection)
                     default:
                         Logger.log("unknown error: \(error)")
                         completion?(ErrorsUserViewModel.unknownError)
@@ -64,6 +66,8 @@ final class UserViewModel: UserViewModelProtocol {
                 switch error.name {
                 case ErrorsNetwork.forbidden:
                     completion?(ErrorsUserViewModel.wrongCredentials)
+                case ErrorsNetwork.noConnection:
+                    completion?(ErrorsUserViewModel.noConnection)
                 default:
                     Logger.log("unknown error: \(error)")
                     completion?(ErrorsUserViewModel.unknownError)
@@ -204,6 +208,8 @@ final class UserViewModel: UserViewModelProtocol {
                         completion?(ErrorsUserViewModel.unauthorized)
                     case ErrorsNetwork.notFound:
                         completion?(ErrorsUserViewModel.notFound)
+                    case ErrorsNetwork.noConnection:
+                        completion?(ErrorsUserViewModel.noConnection)
                     default:
                         Logger.log("\(ErrorsUserViewModel.unknownError)")
                         completion?(ErrorsUserViewModel.unknownError)
@@ -257,8 +263,13 @@ final class UserViewModel: UserViewModelProtocol {
 
         self.userNetworkManager.logout(token: token, completion: { (error) in
             if let error = error {
-                Logger.log("unknown error: \(error)")
-                completion?(ErrorsUserViewModel.unknownError)
+                switch error.name {
+                case ErrorsNetwork.noConnection:
+                    completion?(ErrorsUserViewModel.noConnection)
+                default:
+                    Logger.log("unknown error: \(error)")
+                    completion?(ErrorsUserViewModel.unknownError)
+                }
                 return
             }
 

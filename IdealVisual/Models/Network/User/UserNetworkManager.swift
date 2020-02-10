@@ -21,8 +21,12 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
             .validate(contentType: [MimeTypes.appJSON])
             .responseData { response in
                 if let error = response.error {
-                    Logger.log("unknown error: \(error))")
-                    completion?(nil, NetworkError(name: "unknown error: \(error))"))
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError(name: error.localizedDescription))
+                    }
                     return
                 }
 
@@ -87,8 +91,12 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                         return
                     }
 
-                    Logger.log("unknown network error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError(name: error.localizedDescription))
+                    }
                     return
                 }
 
@@ -127,8 +135,12 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                         }
                     }
 
-                    Logger.log("unknown network error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError(name: error.localizedDescription))
+                    }
                     return
                 }
 
@@ -183,8 +195,12 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
         AF.request(url, method: .delete, headers: [.authorization(bearerToken: token)])
             .response { response in
                 if let error = response.error {
-                    Logger.log("unknown network error: \(error.localizedDescription)")
-                    completion?(NetworkError(name: error.localizedDescription))
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(NetworkError(name: ErrorsNetwork.noConnection))
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(NetworkError(name: error.localizedDescription))
+                    }
                     return
                 }
 

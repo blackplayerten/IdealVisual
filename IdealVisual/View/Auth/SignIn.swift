@@ -11,19 +11,24 @@ import UIKit
 
 final class SignIn: UIViewController {
     private var scroll = UIScrollView()
-    private var titleV = UILabel()
+    private var titleView: UIView?
 
     private var userViewModel: UserViewModelProtocol?
     private var email: InputFields?
     private var password: InputFields?
     private var activeField: InputFields?
 
-    private let un = UnknownError(text: "Упс, что-то пошло не так.")
-
     // MARK: lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.barStyle = .default
+        navigationController?.navigationBar.isTranslucent = false
+
         view.backgroundColor = .white
+        self.titleView = UIView(frame: CGRect(x: 0, y: UIApplication.shared.keyWindow!.safeAreaInsets.top,
+                                              width: self.view.bounds.width, height: 80))
+        view.addSubview(titleView!)
+
         setNav()
         setScroll()
 
@@ -52,6 +57,15 @@ final class SignIn: UIViewController {
     }
 
     // MARK: - scroll and keyboard
+    private func setScroll() {
+        view.addSubview(scroll)
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.topAnchor.constraint(equalTo: titleView!.bottomAnchor).isActive = true
+        scroll.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        scroll.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+    }
+
     @objc
     func keyboardWillShow(_ notification: Notification) {
         let info = notification.userInfo!
@@ -74,33 +88,25 @@ final class SignIn: UIViewController {
         scroll.scrollIndicatorInsets = .zero
     }
 
-    private func setScroll() {
-        view.addSubview(scroll)
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.topAnchor.constraint(equalTo: titleV.bottomAnchor, constant: 20).isActive = true
-        scroll.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        scroll.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-    }
-
     // MARK: - navigation
     private func setNav() {
+        let titleV = UILabel()
         titleV.backgroundColor = .white
-        view.addSubview(titleV)
+        titleView?.addSubview(titleV)
         titleV.text = "IdealVisual"
         titleV.translatesAutoresizingMaskIntoConstraints = false
-        titleV.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -30).isActive = true
-        titleV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
+        titleV.rightAnchor.constraint(equalTo: titleView!.rightAnchor, constant: -30).isActive = true
+        titleV.topAnchor.constraint(equalTo: titleView!.topAnchor, constant: 20).isActive = true
         titleV.font = UIFont(name: "Montserrat-Bold", size: 35)
         titleV.adjustsFontSizeToFitWidth = true
 
         let logo = UIImageView()
-        view.addSubview(logo)
+        titleView?.addSubview(logo)
         logo.translatesAutoresizingMaskIntoConstraints = false
         logo.image = UIImage(named: "app")?.withRenderingMode(.alwaysOriginal)
         logo.widthAnchor.constraint(equalToConstant: 35).isActive = true
         logo.heightAnchor.constraint(equalToConstant: 35).isActive = true
-        logo.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 25).isActive = true
+        logo.topAnchor.constraint(equalTo: titleView!.topAnchor, constant: 25).isActive = true
         logo.rightAnchor.constraint(equalTo: titleV.leftAnchor, constant: -20).isActive = true
         logo.layer.masksToBounds = true
         logo.layer.cornerRadius = 10
@@ -159,20 +165,17 @@ final class SignIn: UIViewController {
     }
 
     // MARK: ui error
-    private func unErr() {
-        scroll.addSubview(un)
-        un.translatesAutoresizingMaskIntoConstraints = false
-        un.centerXAnchor.constraint(equalTo: scroll.centerXAnchor, constant: -100).isActive = true
-        un.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -140).isActive = true
-        un.isHidden = false
-        let tapp = UITapGestureRecognizer()
-        scroll.addGestureRecognizer(tapp)
-        tapp.addTarget(self, action: #selector(taped))
+    private func _error(text: String, color: UIColor? = Colors.red) {
+        let er = UIError(text: text, place: scroll, color: color)
+        scroll.addSubview(er)
+        er.translatesAutoresizingMaskIntoConstraints = false
+        er.leftAnchor.constraint(equalTo: titleView!.leftAnchor).isActive = true
+        er.rightAnchor.constraint(equalTo: titleView!.rightAnchor).isActive = true
+        er.topAnchor.constraint(equalTo: titleView!.bottomAnchor).isActive = true
     }
 
     @objc
     func taped() {
-        un.isHidden = true
         scroll.endEditing(true)
     }
 
@@ -210,18 +213,18 @@ final class SignIn: UIViewController {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
+                    case ErrorsUserViewModel.noConnection:
+                        self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                     case ErrorsUserViewModel.wrongCredentials:
                         self?.password?.setError(text: "Неправильная почта или пароль")
                     default:
-                        Logger.log("undefined error: \(error)")
-                        self?.unErr()
-                        return
+                        Logger.log("unknown error: \(error)")
+                        self?._error(text: "Упс, что-то пошло не так")
                     }
-                    loadingIndicator.stopAnimating()
                 } else {
-                    loadingIndicator.stopAnimating()
                     self?.autoLogin()
                 }
+                loadingIndicator.stopAnimating()
             }
         })
     }
