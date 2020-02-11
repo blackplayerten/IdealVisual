@@ -27,18 +27,19 @@ final class ProfileView: UIView {
     private var password: InputFields
     private var repeatPassword: InputFields
 
+    private var settings: SubstrateButton?
+    private var substrateLogout: SubstrateButton?
+    private var yes: SubstrateButton?
+    private var substrateNot: SubstrateButton?
+
     private var testAva: UIImagePickerController = UIImagePickerController()
     private let ava: UIImageView = UIImageView()
     private var avaContent: Data? // for saving
     private var avaName: String?
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        navBar?.frame.size = CGSize(width: frame.width, height: 45)
-        navBar?.frame.origin = CGPoint(x: 0, y: ((UIApplication.shared.keyWindow?.safeAreaInsets.top)! + 10))
-    }
-
+    // MARK: - init
     init(profileDelegate: ProfileDelegate) {
+        // MARK: text fields
         self.delegateProfile = profileDelegate
         self.userViewModel = UserViewModel()
         self.username = InputFields()
@@ -47,9 +48,33 @@ final class ProfileView: UIView {
         self.repeatPassword = InputFields()
         super.init(frame: CGRect())
 
+        // MARK: nav bar
         navBar = UIView()
         addSubview(navBar!)
+        navBar?.translatesAutoresizingMaskIntoConstraints = false
+        navBar?.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        navBar?.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        navBar?.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor).isActive = true
+        navBar?.heightAnchor.constraint(equalToConstant: 45).isActive = true
 
+        // MARK: nav bar buttons
+        guard let markSettings = UIImage(named: "settings") else { return }
+        self.settings = SubstrateButton(image: markSettings, side: 33, target: self, action: #selector(setEdit),
+                                       substrateColor: Colors.lightBlue)
+
+        guard let markLogout = UIImage(named: "logout") else { return }
+        self.substrateLogout = SubstrateButton(image: markLogout, side: 33, target: self,
+                                              action: #selector(logout), substrateColor: Colors.darkGray)
+
+        guard let markYes = UIImage(named: "yes") else { return }
+        self.yes = SubstrateButton(image: markYes, side: 33, target: self, action: #selector(save_settings),
+                                  substrateColor: Colors.yellow)
+
+        guard let markNo = UIImage(named: "close") else { return }
+        self.substrateNot = SubstrateButton(image: markNo, side: 33, target: self, action: #selector(no_settings),
+                                           substrateColor: Colors.darkGray)
+
+        // MARK: user settings view-model
         userViewModel?.get(completion: { [weak self] (user, error) in
             DispatchQueue.main.async {
                 if let error = error {
@@ -314,35 +339,35 @@ extension ProfileView {
 // MARK: - nav
 extension ProfileView {
     private func setNavButtons(edit_mode: Bool) {
+        guard let settings = settings, let substrateLogout = substrateLogout,
+            let yes = yes, let substrateNot = substrateNot
+        else { return }
+
         if !edit_mode {
-            guard let markSettings = UIImage(named: "settings") else { return }
-            let settings = SubstrateButton(image: markSettings, side: 33, target: self, action: #selector(setEdit),
-                                           substrateColor: Colors.lightBlue)
-            navBar?.addSubview(settings)
+            yes.removeFromSuperview()
+            substrateNot.removeFromSuperview()
+
+            navBar!.addSubview(settings)
+            navBar!.addSubview(substrateLogout)
+
             settings.translatesAutoresizingMaskIntoConstraints = false
             settings.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
             settings.leftAnchor.constraint(equalTo: navBar!.leftAnchor, constant: 20).isActive = true
 
-            guard let markLogout = UIImage(named: "logout") else { return }
-            let substrateLogout = SubstrateButton(image: markLogout, side: 33, target: self,
-                                                  action: #selector(logout), substrateColor: Colors.darkGray)
-            navBar?.addSubview(substrateLogout)
             substrateLogout.translatesAutoresizingMaskIntoConstraints = false
             substrateLogout.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
             substrateLogout.rightAnchor.constraint(equalTo: navBar!.rightAnchor, constant: -20).isActive = true
         } else {
-            guard let markYes = UIImage(named: "yes") else { return }
-            let yes = SubstrateButton(image: markYes, side: 33, target: self, action: #selector(save_settings),
-                                      substrateColor: Colors.yellow)
-            navBar?.addSubview(yes)
+             settings.removeFromSuperview()
+             substrateLogout.removeFromSuperview()
+
+            navBar!.addSubview(yes)
+            navBar!.addSubview(substrateNot)
+
             yes.translatesAutoresizingMaskIntoConstraints = false
             yes.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
             yes.rightAnchor.constraint(equalTo: navBar!.rightAnchor, constant: -20).isActive = true
 
-            guard let markNo = UIImage(named: "close") else { return }
-            let substrateNot = SubstrateButton(image: markNo, side: 33, target: self, action: #selector(no_settings),
-                                     substrateColor: Colors.darkGray)
-            navBar?.addSubview(substrateNot)
             substrateNot.translatesAutoresizingMaskIntoConstraints = false
             substrateNot.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
             substrateNot.leftAnchor.constraint(equalTo: navBar!.leftAnchor, constant: 20).isActive = true
