@@ -1,6 +1,0 @@
-module Pods_IdealVisual {
-  umbrella header "Pods-IdealVisual-umbrella.h"
-
-  export *
-  module * { export * }
-}
