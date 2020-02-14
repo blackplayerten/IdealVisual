@@ -28,7 +28,7 @@ final class PostView: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.tabBarController?.tabBar.isHidden = true
-        navigationController?.navigationBar.barStyle = .black
+        navigationController?.navigationBar.barStyle = .default
     }
 
     override func viewDidLoad() {
@@ -58,6 +58,7 @@ final class PostView: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
 
+    // MARK: - keyboard
     private var activeField: BlockPost?
 
     @objc
@@ -72,8 +73,14 @@ final class PostView: UIViewController {
 
         guard let activeField = activeField else { return }
 
-        let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y-kbSize.height)
-        scroll.setContentOffset(scrollPoint, animated: true)
+        let visible_screen_without_keyboard = scroll.bounds.height - kbSize.height
+
+        let tr = scroll.convert(activeField.frame, to: nil)
+
+        if tr.origin.y + tr.height > visible_screen_without_keyboard {
+            let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y - kbSize.height)
+            scroll.setContentOffset(scrollPoint, animated: true)
+        }
     }
 
     @objc
@@ -209,19 +216,20 @@ final class PostView: UIViewController {
      // MARK: ui error
        private func unErr(text: String) {
         self.un = UIError(text: text, place: view, color: Colors.red)
-            scroll.addSubview(un!)
-            un!.translatesAutoresizingMaskIntoConstraints = false
-            un!.centerXAnchor.constraint(equalTo: scroll.centerXAnchor, constant: -100).isActive = true
-            un!.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -140).isActive = true
-            un!.isHidden = false
-            let tapp = UITapGestureRecognizer()
-            scroll.addGestureRecognizer(tapp)
-            tapp.addTarget(self, action: #selector(taped))
+        view.addSubview(un!)
+        un!.translatesAutoresizingMaskIntoConstraints = false
+        un!.topAnchor.constraint(equalTo: (navigationController?.navigationBar.bottomAnchor)!).isActive = true
+        un!.leftAnchor.constraint(equalTo: scroll.leftAnchor).isActive = true
+        un!.rightAnchor.constraint(equalTo: scroll.rightAnchor).isActive = true
+
+        // hide keyboard
+        let tapp = UITapGestureRecognizer()
+        scroll.addGestureRecognizer(tapp)
+        tapp.addTarget(self, action: #selector(taped))
        }
 
        @objc
        func taped() {
-            un!.isHidden = true
             scroll.endEditing(true)
        }
 }

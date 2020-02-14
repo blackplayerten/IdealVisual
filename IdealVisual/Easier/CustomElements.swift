@@ -408,7 +408,7 @@ final class UIError: UIView {
         error_text.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
 
         UIView.animate(withDuration: 0.3, delay: 2, options: .curveEaseOut, animations: {
-            self.transform = CGAffineTransform(translationX: 0, y: -40)
+            self.transform = CGAffineTransform(translationX: 0, y: -100)
         }, completion: {
             if $0 {
                 self.removeFromSuperview()

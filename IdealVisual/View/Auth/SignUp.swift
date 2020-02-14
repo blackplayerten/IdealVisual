@@ -85,8 +85,14 @@ final class SignUp: UIViewController {
 
         guard let activeField = activeField else { return }
 
-        let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y-kbSize.height)
-        scroll.setContentOffset(scrollPoint, animated: true)
+        let visible_screen_without_keyboard = scroll.bounds.height - kbSize.height
+
+        let tr = scroll.convert(activeField.frame, to: nil)
+
+        if tr.origin.y + tr.height > visible_screen_without_keyboard {
+            let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y - kbSize.height)
+            scroll.setContentOffset(scrollPoint, animated: true)
+        }
     }
 
     @objc
