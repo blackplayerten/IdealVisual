@@ -219,9 +219,9 @@ final class SignIn: UIViewController {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.noConnection:
+                    case .noConnection:
                         self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
-                    case ErrorsUserViewModel.wrongCredentials:
+                    case .wrongCredentials:
                         self?.password?.setError(text: "Неправильная почта или пароль")
                     default:
                         Logger.log("unknown error: \(error)")

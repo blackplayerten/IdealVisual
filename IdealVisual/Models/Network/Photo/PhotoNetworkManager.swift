@@ -14,7 +14,7 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
     func get(path: String) -> Promise<Data> {
         guard let url = NetworkURLS.staticURL?.appendingPathComponent(path) else {
             Logger.log("invalid static url '\(String(describing: NetworkURLS.staticURL))' and append path '\(path)'")
-            return Promise<Data> { seal in seal.reject(NetworkError(name: "bug")) }
+            return Promise<Data> { seal in seal.reject(NetworkErr.invalidURL) }
         }
 
         return Promise<Data> { seal in
@@ -23,15 +23,15 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.notFound:
-                            return seal.reject(NetworkError(name: ErrorsNetwork.notFound))
+                            return seal.reject(NetworkErr.notFound)
                         default:
                             Logger.log("unknown status code: \(status)")
-                            return seal.reject(NetworkError(name: "unknown status code: \(status)"))
+                            return seal.reject(NetworkErr.unknown)
                         }
                     }
 
                     Logger.log("unknown error: \(error.localizedDescription)")
-                    return seal.reject(NetworkError(name: error.localizedDescription))
+                    return seal.reject(NetworkErr.unknown)
                 }
 
                 if let status = response.response?.statusCode {
@@ -39,16 +39,16 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
                     case HTTPCodes.okay:
                         break
                     case HTTPCodes.notFound:
-                        return seal.reject(NetworkError(name: ErrorsNetwork.notFound))
+                        return seal.reject(NetworkErr.notFound)
                     default:
                         Logger.log("unknown status code: \(status)")
-                        return seal.reject(NetworkError(name: "unknown status code: \(status)"))
+                        return seal.reject(NetworkErr.unknown)
                     }
                 }
 
                 guard let data = response.value else {
-                    Logger.log("data error: \(ErrorsNetwork.noData)")
-                    return seal.reject(NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("error data")
+                    return seal.reject(NetworkErr.noData)
                 }
                 return seal.fulfill(data)
             }
@@ -58,7 +58,7 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
     func upload(token: String, data: Data, name: String) -> Promise<String> {
         guard let url = NetworkURLS.upload else {
             Logger.log("invalid static url: \(String(describing: NetworkURLS.upload))")
-            return Promise<String> { seal in seal.reject(NetworkError(name: "bug")) }
+            return Promise<String> { seal in seal.reject(NetworkErr.notFound) }
         }
 
         let mimeType = MimeTypes.getFromExtension(ext: URL(fileURLWithPath: name).pathExtension)
@@ -72,20 +72,20 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.unauthorized:
-                            return seal.reject(NetworkError(name: ErrorsNetwork.unauthorized))
+                            return seal.reject(NetworkErr.unauthorized)
                         default:
                             Logger.log("unknown status code: \(status)")
-                            return seal.reject(NetworkError(name: "unknown status code: \(status)"))
+                            return seal.reject(NetworkErr.unknown)
                         }
                     }
 
                     Logger.log("unknown error: \(error.localizedDescription)")
-                    return seal.reject(NetworkError(name: error.localizedDescription))
+                    return seal.reject(NetworkErr.unknown)
                 }
 
                 guard let uploadedPath = response.value else {
-                    Logger.log("data error: \(ErrorsNetwork.noData)")
-                    return seal.reject(NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("error data")
+                    return seal.reject(NetworkErr.noData)
                 }
                 return seal.fulfill(uploadedPath.path)
             }

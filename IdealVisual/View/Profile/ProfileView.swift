@@ -79,7 +79,7 @@ final class ProfileView: UIView {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.noData:
+                    case .noData:
                         Logger.log(error)
                         self?._error(text: "Упс, что-то пошло не так.")
                     default:
@@ -208,27 +208,27 @@ final class ProfileView: UIView {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.usernameAlreadyExists:
+                    case .usernameAlreadyExists:
                         self?.username.setError(text: "Такое имя пользователя уже занято")
-                    case ErrorsUserViewModel.usernameLengthIsWrong:
+                    case .usernameLengthIsWrong:
                         self?.username.setError(text: "Неверная длина имени пользователя, минимум: 4")
-                    case ErrorsUserViewModel.emailFormatIsWrong:
+                    case .emailFormatIsWrong:
                         self?.email.setError(text: "Неверный формат почты")
-                    case ErrorsUserViewModel.emailAlreadyExists:
+                    case .emailAlreadyExists:
                         self?.email.setError(text: "Такая почта уже занята")
-                    case ErrorsUserViewModel.passwordLengthIsWrong:
+                    case .passwordLengthIsWrong:
                         self?.password.setError(text: "Неверная длина пароля")
-                    case ErrorsUserViewModel.noConnection:
+                    case .noConnection:
                         self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
-                    case ErrorsUserViewModel.unauthorized:
+                    case .unauthorized:
                         Logger.log(error)
                         self?._error(text: "Вы не авторизованы")
                         sleep(3)
                         self?.delegateProfile?.logOut()
-                    case ErrorsUserViewModel.noData:
+                    case .noData:
                         Logger.log(error)
                         self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
-                    case ErrorsUserViewModel.notFound:
+                    case .notFound:
                         Logger.log(error)
                         self?._error(text: "Такого пользователя нет")
                         sleep(3)
@@ -456,7 +456,7 @@ extension ProfileView {
                 loadingIndicator.stopAnimating()
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.noData:
+                    case .noData:
                         Logger.log(error)
                         self?._error(text: "Невозможно загрузить фотографию", color: Colors.darkGray)
                     default:

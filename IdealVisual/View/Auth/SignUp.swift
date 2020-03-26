@@ -226,17 +226,17 @@ final class SignUp: UIViewController {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.noConnection:
+                    case .noConnection:
                         self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
-                    case ErrorsUserViewModel.usernameAlreadyExists:
+                    case .usernameAlreadyExists:
                         self?.username?.setError(text: "Такое имя пользователя уже занято")
-                    case ErrorsUserViewModel.usernameLengthIsWrong:
+                    case .usernameLengthIsWrong:
                         self?.username?.setError(text: "Неверная длина имени пользователя, минимум: 4")
-                    case ErrorsUserViewModel.emailFormatIsWrong:
+                    case .emailFormatIsWrong:
                         self?.email?.setError(text: "Неверный формат почты")
-                    case ErrorsUserViewModel.emailAlreadyExists:
+                    case .emailAlreadyExists:
                         self?.email?.setError(text: "Такая почта уже занята")
-                    case ErrorsUserViewModel.passwordLengthIsWrong:
+                    case .passwordLengthIsWrong:
                         self?.password?.setError(text: "Неверная длина пароля")
                     default:
                         Logger.log("unknown error: \(error)")

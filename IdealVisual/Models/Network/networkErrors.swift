@@ -8,23 +8,35 @@
 
 import Foundation
 
-struct NetworkError: Error {
+struct WrongFieldsNetworkEror: Error {
     let name: String
-    let description: Any?
+    let description: Any
 
-    init(name: String, description: Any? = nil) {
+    init(name: String, description: Any) {
         self.name = name
         self.description = description
     }
 }
 
-struct ErrorsNetwork {
-    static let noConnection: String = "no internet connection"
-
-    static let okay: String = "ok"
-    static let noData: String = "noData"
-    static let unauthorized: String = "unauthorized"
-    static let notFound: String = "not found"
-    static let wrongFields: String = "wrong fields"
-    static let forbidden: String = "forbidden"
+enum NetworkErr: Error {
+    case noConnection
+    case ok
+    case noData
+    case notFound
+    case unauthorized
+    case wrongFields(WrongFieldsNetworkEror)
+    case forbidden
+    case unknown
+    case invalidURL
 }
+
+//struct ErrorsNetwork {
+//    static let noConnection: String = "no internet connection"
+//
+//    static let okay: String = "ok"
+//    static let noData: String = "noData"
+//    static let unauthorized: String = "unauthorized"
+//    static let notFound: String = "not found"
+//    static let wrongFields: String = "wrong fields"
+//    static let forbidden: String = "forbidden"
+//}

@@ -13,5 +13,5 @@ protocol PostNetworkManagerProtocol {
     func create(token: String, post: JsonPostModel) -> Promise<JsonPostModel>
     func get(token: String) -> Promise<[JsonPostModel]>
     func update(token: String, post: JsonPostModel) -> Promise<JsonPostModel>
-    func delete(token: String, ids: [UUID]) -> Promise<NetworkError>
+    func delete(token: String, ids: [UUID]) -> Promise<NetworkErr>
 }

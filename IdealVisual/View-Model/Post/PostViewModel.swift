@@ -70,7 +70,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
         converted.photo = ""
 
         guard let user = self.user, let token = user.token else {
-            return Promise<Any> { seal in seal.reject(ErrorsUserViewModel.notFound) }
+            return Promise<Any> { seal in seal.reject(UserViewModelErrors.notFound) }
         }
 
         // Search for post and return promise with action depending on difference
@@ -94,17 +94,17 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                         self.postNetworkManager.update(token: token, post: converted)
                     }.done { _ in
                     }.catch { (error) in
-                        guard let error = error as? NetworkError else {
-                            return seal.reject(ErrorsPostViewModel.unknownError)
+                        guard let error = error as? NetworkErr else {
+                            return seal.reject(PostViewModelErrors.unknown)
                         }
-                        switch error.name {
-                        case ErrorsNetwork.noData:
-                            return seal.reject(ErrorsPostViewModel.noData)
-                        case ErrorsNetwork.unauthorized:
-                            return seal.reject(ErrorsPostViewModel.unauthorized)
+                        switch error {
+                        case .noData:
+                            return seal.reject(PostViewModelErrors.noData)
+                        case .unauthorized:
+                            return seal.reject(PostViewModelErrors.unauthorized)
                         default:
                             Logger.log("unknown error: \(error)")
-                            return seal.reject(ErrorsPostViewModel.unknownError)
+                            return seal.reject(PostViewModelErrors.unknown)
                         }
                     }
                 }
@@ -121,11 +121,11 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
         guard let ph = post.photo, let dataPhoto = MyFileManager.getFile(filePath: ph),
             let namePhoto = URL(string: ph)?.lastPathComponent
         else {
-            return Promise<Any> { seal in seal.reject(ErrorsPostViewModel.noData) }
+            return Promise<Any> { seal in seal.reject(PostViewModelErrors.noData) }
         }
 
         guard let user = self.user, let token = user.token else {
-            return Promise<Any> { seal in seal.reject(ErrorsUserViewModel.notFound) }
+            return Promise<Any> { seal in seal.reject(UserViewModelErrors.notFound) }
         }
 
         return Promise<Any> { seal in
@@ -141,18 +141,18 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                 try self.postCoreData.update(post: post, id: created.id, date: nil, place: nil, text: nil,
                                              indexPhoto: nil, lastUpdated: created.lastUpdated)
             }.catch { (error) in
-                guard let error = error as? NetworkError else {
-                    return seal.reject(ErrorsPostViewModel.unknownError)
+                guard let error = error as? NetworkErr else {
+                    return seal.reject(PostViewModelErrors.unknown)
                 }
-                switch error.name {
-                case ErrorsNetwork.noConnection:
-                    return seal.reject(ErrorsPostViewModel.noConnection)
-                case ErrorsNetwork.unauthorized:
-                    return seal.reject(ErrorsUserViewModel.unauthorized)
-                case ErrorsNetwork.notFound:
-                    return seal.reject(ErrorsPostViewModel.notFound)
+                switch error {
+                case .noConnection:
+                    return seal.reject(PostViewModelErrors.noConnection)
+                case .unauthorized:
+                    return seal.reject(UserViewModelErrors.unauthorized)
+                case .notFound:
+                    return seal.reject(PostViewModelErrors.notFound)
                 default:
-                    return seal.reject(ErrorsPostViewModel.unknownError)
+                    return seal.reject(PostViewModelErrors.unknown)
                 }
             }
         }
@@ -235,7 +235,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                 try self.posts.forEach {
                     try self.postCoreData.delete(post: $0)
                 }
-                return Promise<[JsonPostModel]> { seal in seal.reject(ErrorsPostViewModel.notFound) }
+                return Promise<[JsonPostModel]> { seal in seal.reject(PostViewModelErrors.notFound) }
             }
 
             let sorted_posts = jsposts.sorted(by: { (first, second) in
@@ -443,22 +443,22 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
         return Promise<Void> { seal in
             guard let photoData = photoData, let date = date, let place = place, let text = text else {
-                return seal.reject(ErrorsPostViewModel.noData)
+                return seal.reject(PostViewModelErrors.noData)
             }
 
             // for core data
             let indexPhoto = posts.count
 
             guard let user = user, let token = user.token else {
-                Logger.log("error unautorized: \(ErrorsPostViewModel.cannotCreate)")
-                return seal.reject(ErrorsPostViewModel.unauthorized)
+                Logger.log("error unautorized: \(PostViewModelErrors.cannotCreate)")
+                return seal.reject(PostViewModelErrors.unauthorized)
             }
 
             guard let created = postCoreData.create(user: user, id: nil, photo: photoPath, date: date, place: place,
                                                     text: text, indexPhoto: indexPhoto, lastUpdated: nil)
             else {
-                Logger.log("error on create: \(ErrorsPostViewModel.cannotCreate)")
-                return seal.reject(ErrorsPostViewModel.cannotCreate)
+                Logger.log("error on create: \(PostViewModelErrors.cannotCreate)")
+                return seal.reject(PostViewModelErrors.cannotCreate)
             }
 
             firstly {
@@ -473,21 +473,21 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                 try self.postCoreData.update(post: created, id: post.id, date: nil, place: nil, text: nil,
                                              indexPhoto: nil, lastUpdated: post.lastUpdated)
             }.catch { (error) in
-                guard let error = error as? NetworkError else {
-                    return seal.reject(ErrorsPostViewModel.unknownError)
+                guard let error = error as? NetworkErr else {
+                    return seal.reject(PostViewModelErrors.unknown)
                 }
-                switch error.name {
-                case ErrorsNetwork.noConnection:
-                    seal.reject(ErrorsPostViewModel.noConnection)
-                case ErrorsNetwork.unauthorized:
-                    seal.reject(ErrorsPostViewModel.unauthorized)
-                case ErrorsNetwork.notFound:
-                    seal.reject(ErrorsPostViewModel.notFound)
-                case ErrorsNetwork.noData:
-                    seal.reject(ErrorsPostViewModel.noData)
+                switch error {
+                case .noConnection:
+                    seal.reject(PostViewModelErrors.noConnection)
+                case .unauthorized:
+                    seal.reject(PostViewModelErrors.unauthorized)
+                case .notFound:
+                    seal.reject(PostViewModelErrors.notFound)
+                case .noData:
+                    seal.reject(PostViewModelErrors.noData)
                 default:
                     Logger.log("unknown error: \(error)")
-                    seal.reject(ErrorsPostViewModel.unknownError)
+                    seal.reject(PostViewModelErrors.unknown)
                 }
             }
         }
@@ -564,12 +564,12 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                                          indexPhoto: nil, lastUpdated: Date())
         } catch {
             Logger.log("error")
-            return Promise<Void> { seal in seal.reject(ErrorsPostViewModel.unknownError) }
+            return Promise<Void> { seal in seal.reject(PostViewModelErrors.unknown) }
         }
 
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
-            return Promise<Void> { seal in seal.reject(ErrorsPostViewModel.unauthorized)}
+            return Promise<Void> { seal in seal.reject(PostViewModelErrors.unauthorized)}
         }
         var jsonPost = convertDBModelToJSON(post: post)
         jsonPost.photo = "" // don't update photo on server
@@ -579,17 +579,17 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                 postNetworkManager.update(token: token, post: jsonPost)
             }.catch { (error) in
                 Logger.log(error)
-                guard let error = error as? NetworkError else {
-                    return seal.reject(ErrorsPostViewModel.unknownError)
+                guard let error = error as? NetworkErr else {
+                    return seal.reject(PostViewModelErrors.unknown)
                 }
-                switch error.name {
-                case ErrorsNetwork.noData:
-                    seal.reject(ErrorsPostViewModel.noData)
-                case ErrorsNetwork.unauthorized:
-                    seal.reject(ErrorsPostViewModel.unauthorized)
+                switch error {
+                case .noData:
+                    seal.reject(PostViewModelErrors.noData)
+                case .unauthorized:
+                    seal.reject(PostViewModelErrors.unauthorized)
                 default:
                     Logger.log("unknown error: \(error)")
-                    seal.reject(ErrorsPostViewModel.unknownError)
+                    seal.reject(PostViewModelErrors.unknown)
                 }
             }
         }
@@ -635,25 +635,25 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
-            return Promise<Void> { seal in seal.reject(ErrorsPostViewModel.unauthorized) }
+            return Promise<Void> { seal in seal.reject(PostViewModelErrors.unauthorized) }
         }
 
         return Promise<Void> { seal in
             firstly {
                 self.postNetworkManager.delete(token: token, ids: uuids)
             }.catch { (error) in
-                guard let error = error as? NetworkError else {
-                    return seal.reject(ErrorsPostViewModel.unknownError)
+                guard let error = error as? NetworkErr else {
+                    return seal.reject(PostViewModelErrors.unknown)
                 }
-                switch error.name {
-                case ErrorsNetwork.noConnection:
-                    seal.reject(ErrorsPostViewModel.noConnection)
-                case ErrorsNetwork.unauthorized:
-                    seal.reject(ErrorsUserViewModel.unauthorized)
-                case ErrorsNetwork.notFound:
-                    seal.reject(ErrorsPostViewModel.notFound)
+                switch error {
+                case .noConnection:
+                    seal.reject(PostViewModelErrors.noConnection)
+                case .unauthorized:
+                    seal.reject(PostViewModelErrors.unauthorized)
+                case .notFound:
+                    seal.reject(PostViewModelErrors.notFound)
                 default:
-                    seal.reject(ErrorsPostViewModel.unknownError)
+                    seal.reject(PostViewModelErrors.unknown)
                 }
             }
         }

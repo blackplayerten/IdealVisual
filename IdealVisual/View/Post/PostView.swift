@@ -201,12 +201,12 @@ final class PostView: UIViewController {
     }
 
     // MARK: - processing errors
-    private func procError(error: ErrorViewModel?) {
+    private func procError(error: PostViewModelErrors?) {
         if let error = error {
             switch error {
-            case ErrorsUserViewModel.unauthorized:
+            case .unauthorized:
                 unErr(text: "Вы не авторизованы")
-            case ErrorsUserViewModel.noData:
+            case .noData:
                 unErr(text: "Невозможно отобразить данные")
             default:
                 unErr(text: "Упс, что-то пошло не так.")
@@ -244,7 +244,7 @@ extension PostView: BlockProtocol {
             firstly {
                 viewModel.update(post: publication, date: nil, place: nil, text: post?.textView?.text)
             }.catch { (error) in
-                self.procError(error: error as? ErrorViewModel)
+                self.procError(error: error as? PostViewModelErrors)
             }
 
 //            viewModel?.update(post: publication, date: nil, place: nil, text: post?.textView?.text,
@@ -257,7 +257,7 @@ extension PostView: BlockProtocol {
             firstly {
                 viewModel.update(post: publication, date: nil, place: place?.textView?.text, text: nil)
             }.catch {  (error) in
-               self.procError(error: error as? ErrorViewModel)
+               self.procError(error: error as? PostViewModelErrors)
             }
 //            viewModel?.update(post: publication, date: nil, place: place?.textView?.text, text: nil,
 //                             completion: { [weak self] (error) in
@@ -266,12 +266,18 @@ extension PostView: BlockProtocol {
 //                                }
 //                            })
         case self.date:
-            viewModel?.update(post: publication, date: date?.datePicker?.date, place: nil, text: nil,
-                             completion: { [weak self] (error) in
-                                DispatchQueue.main.async {
-                                    self?.procError(error: error)
-                                }
-                            })
+            firstly {
+                viewModel.update(post: publication, date: date?.datePicker?.date, place: nil, text: nil)
+            }.catch { (error) in
+                self.procError(error: error as? PostViewModelErrors)
+            }
+
+//            viewModel?.update(post: publication, date: date?.datePicker?.date, place: nil, text: nil,
+//                             completion: { [weak self] (error) in
+//                                DispatchQueue.main.async {
+//                                    self?.procError(error: error)
+//                                }
+//                            })
         default: break
         }
     }

@@ -10,7 +10,7 @@ import Foundation
 import Alamofire
 
 final class UserNetworkManager: UserNetworkManagerProtocol {
-    func create(newUser: JsonUserModel, completion: ((JsonUserModel?, NetworkError?) -> Void)?) {
+    func create(newUser: JsonUserModel, completion: ((JsonUserModel?, NetworkErr?) -> Void)?) {
         guard let url = NetworkURLS.accountURL else {
             Logger.log("invalid create url: '\(String(describing: NetworkURLS.accountURL))'")
             return
@@ -22,10 +22,10 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
             .responseData { response in
                 if let error = response.error {
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(nil, NetworkErr.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(nil, NetworkError(name: error.localizedDescription))
+                        completion?(nil, NetworkErr.unknown)
                     }
                     return
                 }
@@ -36,26 +36,27 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                         break
                     case HTTPCodes.unprocessableEntity:
                         guard let data = response.value else {
-                            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                            completion?(nil, NetworkErr.noData)
                             return
                         }
                         do {
                             let errors = try JSONDecoder().decode(JsonError.self, from: data)
-                            completion?(nil, NetworkError(name: ErrorsNetwork.wrongFields, description: errors.errors))
+                            completion?(nil, NetworkErr.wrongFields(
+                                WrongFieldsNetworkEror(name: "wrongFields", description: errors.errors)))
                         } catch let error {
                             Logger.log("unknown network error: \(error.localizedDescription)")
-                            completion?(nil, NetworkError(name: error.localizedDescription))
+                            completion?(nil, NetworkErr.unknown)
                         }
                         return
                     default:
                         Logger.log("unknown status code: \(status))")
-                        completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                        completion?(nil, NetworkErr.unknown)
                         return
                     }
                 }
 
                 guard let data = response.value else {
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    completion?(nil, NetworkErr.noData)
                     return
                 }
 
@@ -64,12 +65,12 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                     completion?(user, nil)
                 } catch let error {
                     Logger.log("unknown network error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    completion?(nil, NetworkErr.unknown)
                 }
         }.resume()
     }
 
-    func login(user: JsonUserModel, completion: ((JsonUserModel?, NetworkError?) -> Void)?) {
+    func login(user: JsonUserModel, completion: ((JsonUserModel?, NetworkErr?) -> Void)?) {
         guard let url = NetworkURLS.sessionURL else {
             Logger.log("invalid login url: '\(String(describing: NetworkURLS.sessionURL))'")
             return
@@ -83,33 +84,33 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.forbidden:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.forbidden))
+                            completion?(nil, NetworkErr.forbidden)
                         default:
                             Logger.log("unknown staus code: \(status))")
-                            completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                            completion?(nil, NetworkErr.unknown)
                         }
                         return
                     }
 
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(nil, NetworkErr.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(nil, NetworkError(name: error.localizedDescription))
+                        completion?(nil, NetworkErr.unknown)
                     }
                     return
                 }
 
                 guard let user = response.value else {
-                    Logger.log("data error: \(ErrorsNetwork.noData)")
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("error data")
+                    completion?(nil, NetworkErr.noData)
                     return
                 }
                 completion?(user, nil)
         }.resume()
     }
 
-    func update(token: String, user: JsonUserModel, completion: ((JsonUserModel?, NetworkError?) -> Void)?) {
+    func update(token: String, user: JsonUserModel, completion: ((JsonUserModel?, NetworkErr?) -> Void)?) {
         guard let url = NetworkURLS.accountURL else {
             Logger.log("invalid update url: '\(String(describing: NetworkURLS.accountURL))'")
             return
@@ -123,23 +124,23 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.unauthorized:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                            completion?(nil, NetworkErr.unauthorized)
                             return
                         case HTTPCodes.notFound:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                            completion?(nil, NetworkErr.notFound)
                             return
                         default:
                             Logger.log("unknown staus code: \(status))")
-                            completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                            completion?(nil, NetworkErr.unknown)
                             return
                         }
                     }
 
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(nil, NetworkErr.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(nil, NetworkError(name: error.localizedDescription))
+                        completion?(nil, NetworkErr.unknown)
                     }
                     return
                 }
@@ -150,29 +151,29 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                         break
                     case HTTPCodes.unprocessableEntity:
                         guard let data = response.value else {
-                            Logger.log("data error: \(ErrorsNetwork.noData)")
-                            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                            Logger.log("error data")
+                            completion?(nil, NetworkErr.noData)
                             return
                         }
                         do {
                             let errors = try JSONDecoder().decode(JsonError.self, from: data)
-                            completion?(nil, NetworkError(name: ErrorsNetwork.wrongFields,
-                                                          description: errors.errors))
+                            completion?(nil, NetworkErr.wrongFields(
+                                WrongFieldsNetworkEror(name: "wrongFields", description: errors.errors)))
                         } catch let error {
                             Logger.log("unknown network error: \(error.localizedDescription)")
-                            completion?(nil, NetworkError(name: error.localizedDescription))
+                            completion?(nil, NetworkErr.unknown)
                         }
                         return
                     default:
                         Logger.log("unknown staus code: \(status))")
-                        completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                        completion?(nil, NetworkErr.unknown)
                         return
                     }
                 }
 
                 guard let data = response.value else {
-                    Logger.log("data error: \(ErrorsNetwork.noData)")
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("error data")
+                    completion?(nil, NetworkErr.noData)
                     return
                 }
 
@@ -181,12 +182,12 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                     completion?(user, nil)
                 } catch let error {
                     Logger.log("unknown network error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    completion?(nil, NetworkErr.unknown)
                 }
         }.resume()
     }
 
-    func logout(token: String, completion: ((NetworkError?) -> Void)?) {
+    func logout(token: String, completion: ((NetworkErr?) -> Void)?) {
         guard let url = NetworkURLS.sessionURL else {
             Logger.log("invalid login url: '\(String(describing: NetworkURLS.sessionURL))'")
             return
@@ -196,10 +197,10 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
             .response { response in
                 if let error = response.error {
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(NetworkErr.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(NetworkError(name: error.localizedDescription))
+                        completion?(NetworkErr.unknown)
                     }
                     return
                 }
@@ -210,7 +211,7 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                         completion?(nil)
                     default:
                         Logger.log("unknown status code: \(status)")
-                        completion?(NetworkError(name: "unknown status code: \(status)"))
+                        completion?(NetworkErr.unknown)
                     }
                 }
         }.resume()

@@ -28,7 +28,7 @@ class AppLoader: UIViewController {
                 userViewModel?.get(completion: { (_, error) in
                     if let error = error {
                         switch error {
-                        case ErrorsUserViewModel.noData:
+                        case .noData:
                             let signIn = SignIn()
                             self?.view.window!.rootViewController = signIn
                         default:
