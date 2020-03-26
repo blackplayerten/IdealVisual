@@ -10,6 +10,7 @@ import UIKit
 import Foundation
 import MobileCoreServices
 import CoreData
+import PromiseKit
 
 final class MainView: UIViewController {
     private var profileV: ProfileView?
@@ -66,8 +67,8 @@ final class MainView: UIViewController {
         userViewModel?.getAvatar(completion: { [weak self] (avatar, error) in
             DispatchQueue.main.async {
                 if let error = error {
-                    switch error {
-                    case ErrorsUserViewModel.noData:
+                    switch error.name {
+                    case ErrorsUserViewModel.noData.name:
                         Logger.log(error)
                         self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
                     default:
@@ -100,26 +101,37 @@ final class MainView: UIViewController {
             }
         })
 
-        postViewModel?.sync(completion: { [weak self] (error) in
-            DispatchQueue.main.async {
-                if let error = error {
-                    switch error {
-                    case ErrorsPostViewModel.unauthorized:
-                        self?._error(text: "Вы не авторизованы", color: Colors.red)
-                        sleep(3)
-                        self?.logOut()
-                    case ErrorsPostViewModel.notFound:
-                        // only manual sync triggers alert
-                        break
-                    case ErrorsPostViewModel.noConnection:
-                        self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
-                    default:
-                        self?._error(text: "Ошибка синхронизации", color: Colors.red)
-                    }
-                    Logger.log("cannot sync: \(error)")
-                }
+        guard let postViewModel = self.postViewModel else {
+            fatalError()
+        }
+
+        do {
+            try postViewModel.sync()
+        } catch {
+            Logger.log(error)
+
+            guard let err = error as? ErrorViewModel else {
+                Logger.log("unknown error: \(error)")
+                self._error(text: "Неизвестная ошибка", color: Colors.red)
+                return
             }
-        })
+
+            switch err {
+            case ErrorsPostViewModel.unauthorized:
+            self._error(text: "Вы не авторизованы", color: Colors.red)
+            sleep(3)
+            self.logOut()
+            case ErrorsPostViewModel.notFound:
+                // only manual sync triggers alert
+                break
+            case ErrorsPostViewModel.noConnection:
+                self._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
+            default:
+                self._error(text: "Ошибка синхронизации", color: Colors.red)
+            }
+        } catch ErrorsPostViewModel.noConnection {
+
+        } catch ErrorsPostViewModel.
     }
 
     // MARK: ui error
@@ -202,6 +214,13 @@ final class MainView: UIViewController {
 
     // MARK: - synchronization posts
     @objc private func doSync(_ sender: UIRefreshControl) {
+        guard let viewModel = postViewModel else { return }
+        do {
+            try postViewModel?.sync()
+        } catch {
+
+        }
+
         postViewModel?.sync(completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
@@ -236,6 +255,14 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
         if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
             if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 let photoName = url.lastPathComponent
+                guard let viewModel = postViewModel else { return }
+                firstly {
+                    viewModel.create(photoName: photoName, photoData: selected.jpegData(compressionQuality: 1.0),
+                                     date: Date(timeIntervalSince1970: 0), place: "", text: "")
+                }.catch { (error) in
+
+                }
+
                 postViewModel?.create(photoName: photoName,
                                       photoData: selected.jpegData(compressionQuality: 1.0),
                                       date: Date(timeIntervalSince1970: 0),
@@ -440,8 +467,15 @@ extension MainView: UICollectionViewDropDelegate {
         let items = coordinator.items
         for item in items {
             guard let sourceIndexPath = item.sourceIndexPath,
-                let destinationIndexPath = coordinator.destinationIndexPath
+                let destinationIndexPath = coordinator.destinationIndexPath,
+                let viewModel = postViewModel
             else { return }
+
+            do {
+                try viewModel.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item)
+            } catch {
+
+            }
 
             postViewModel?.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item,
                                 completion: { [weak self] (error) in
@@ -501,6 +535,8 @@ extension MainView {
 
     @objc
     private func save() {
+        guard let viewModel = postViewModel else { return }
+
         if editMode {
             editMode = false
 
@@ -517,6 +553,13 @@ extension MainView {
                     cell.selectedImage.isHidden = true
                     content.deselectItem(at: $0, animated: true)
                 }
+
+                firstly {
+                    viewModel.delete(atIndices: [Int](items))
+                }.catch { (error) in
+
+                }
+
                 postViewModel?.delete(atIndices: [Int](items),
                                       completion: { [weak self] (error) in
                     DispatchQueue.main.async {

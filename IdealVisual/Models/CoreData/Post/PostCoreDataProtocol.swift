@@ -13,10 +13,10 @@ protocol PostCoreDataProtocol: class {
     func create(user: User, id: UUID?, photo: String, date: Date, place: String,
                 text: String, indexPhoto: Int, lastUpdated: Date?) -> Post?
     func update(post: Post, id: UUID?, date: Date?, place: String?, text: String?, indexPhoto: Int?,
-                lastUpdated: Date?)
+                lastUpdated: Date?) throws
     func getAll() -> NSFetchedResultsController<Post>
     func get() -> Post?
-    func delete(post: Post)
+    func delete(post: Post) throws
     func reinitIndices(posts: [Post])
     func swap(_ posts: [Post], source: Int, dest: Int)
 }

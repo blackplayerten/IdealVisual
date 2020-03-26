@@ -43,30 +43,27 @@ final class PostCoreData: PostCoreDataProtocol {
     }
 
     func update(post: Post, id: UUID? = nil, date: Date? = nil, place: String? = nil, text: String? = nil,
-                indexPhoto: Int? = nil, lastUpdated: Date? = nil) {
-        do {
-            if let id = id {
-                post.setValue(id, forKey: "id")
-            }
-            if let date = date {
-                post.setValue(date, forKey: "date")
-            }
-            if let place = place {
-                post.setValue(place, forKey: "place")
-            }
-            if let text = text {
-                post.setValue(text, forKey: "text")
-            }
-            if let indexPhoto = indexPhoto {
-                post.setValue(Int64(indexPhoto), forKey: "indexPhoto")
-            }
-            if let lastUpdated = lastUpdated {
-                post.setValue(lastUpdated, forKey: "lastUpdated")
-            }
-            try DataManager.instance.managedObjectContext.save()
-        } catch {
-            Logger.log(error)
+                indexPhoto: Int? = nil, lastUpdated: Date? = nil) throws {
+        if let id = id {
+            post.setValue(id, forKey: "id")
         }
+        if let date = date {
+            post.setValue(date, forKey: "date")
+        }
+        if let place = place {
+            post.setValue(place, forKey: "place")
+        }
+        if let text = text {
+            post.setValue(text, forKey: "text")
+        }
+        if let indexPhoto = indexPhoto {
+            post.setValue(Int64(indexPhoto), forKey: "indexPhoto")
+        }
+        if let lastUpdated = lastUpdated {
+            post.setValue(lastUpdated, forKey: "lastUpdated")
+        }
+
+        try DataManager.instance.managedObjectContext.save()
     }
 
     func getAll() -> NSFetchedResultsController<Post> {
@@ -92,7 +89,7 @@ final class PostCoreData: PostCoreDataProtocol {
         return nil
     }
 
-    func delete(post: Post) {
+    func delete(post: Post) throws {
         DataManager.instance.managedObjectContext.delete(post)
         DataManager.instance.saveContext()
     }

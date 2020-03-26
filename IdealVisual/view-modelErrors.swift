@@ -8,31 +8,39 @@
 
 import Foundation
 
-typealias ErrorViewModel = String
+struct ErrorViewModel: Error {
+    let name: String
+
+    static func == (left: ErrorViewModel, right: ErrorViewModel) -> Bool {
+        return left.name == right.name
+    }
+}
 
 // MARK: - user errors
 struct ErrorsUserViewModel {
-    static let noConnection: String = "no internet connection"
+    static let noConnection: ErrorViewModel = ErrorViewModel(name: "no internet connection")
 
-    static let ok: ErrorViewModel = "ok"
-    static let noData: ErrorViewModel = "user has no data"
-    static let unauthorized: ErrorViewModel = "user unauthorized"
-    static let notFound: ErrorViewModel = "user not found"
+    static let ok: ErrorViewModel = ErrorViewModel(name: "ok")
+    static let noData: ErrorViewModel = ErrorViewModel(name: "user has no data")
+    static let unauthorized: ErrorViewModel = ErrorViewModel(name: "user unauthorized")
+    static let notFound: ErrorViewModel = ErrorViewModel(name: "user not found")
 
-    static let usernameAlreadyExists: ErrorViewModel = "user already exists"
-    static let usernameLengthIsWrong: ErrorViewModel = "username length is wrong"
+    static let usernameAlreadyExists: ErrorViewModel = ErrorViewModel(name: "user already exists")
+    static let usernameLengthIsWrong: ErrorViewModel = ErrorViewModel(name: "username length is wrong")
 
-    static let emailAlreadyExists: ErrorViewModel = "email already exists"
-    static let emailFormatIsWrong: ErrorViewModel = "email format is wrong" // check validation if this error happens
+    static let emailAlreadyExists: ErrorViewModel = ErrorViewModel(name: "email already exists")
 
-    static let passwordLengthIsWrong: ErrorViewModel = "password length is wrong"
+    // check validation if this error happens
+    static let emailFormatIsWrong: ErrorViewModel = ErrorViewModel(name: "email format is wrong")
 
-    static let filesystemSave: ErrorViewModel = "can't save file"
+    static let passwordLengthIsWrong: ErrorViewModel = ErrorViewModel(name: "password length is wrong")
 
-    static let wrongCredentials: ErrorViewModel = "wrong email-password pair"
+    static let filesystemSave: ErrorViewModel = ErrorViewModel(name: "can't save file")
+
+    static let wrongCredentials: ErrorViewModel = ErrorViewModel(name: "wrong email-password pair")
 
     // just in case our error handling is wrong
-    static let unknownError: ErrorViewModel = "unknown error"
+    static let unknownError: ErrorViewModel = ErrorViewModel(name: "unknown error")
 }
 
 // MARK: - sign in, sugn up errors
@@ -55,17 +63,30 @@ struct SignUpInReasons {
 }
 
 // MARK: - post errors
-struct ErrorsPostViewModel {
-    static let noConnection: ErrorViewModel = "no internet connection"
+enum ErrorsPostViewModel {
+    case noConnection
+    case ok
+    case noData
+    static let noID: ErrorViewModel = ErrorViewModel(name: "post has no id")
 
-    static let ok: ErrorViewModel = "ok"
-    static let noData: ErrorViewModel = "post has no data"
-    static let noID: ErrorViewModel = "post has no id"
+    static let notFound: ErrorViewModel = ErrorViewModel(name: "post not found")
 
-    static let notFound: ErrorViewModel = "post not found"
+    static let unauthorized: ErrorViewModel = ErrorViewModel(name: "user unauthorized")
+    static let cannotCreate: ErrorViewModel = ErrorViewModel(name: "cannot create post")
 
-    static let unauthorized: ErrorViewModel = "user unauthorized"
-    static let cannotCreate: ErrorViewModel = "cannot create post"
-
-    static let unknownError: ErrorViewModel = "unknown error"
+    static let unknownError: ErrorViewModel = ErrorViewModel(name: "unknown error")
 }
+//enum ErrorsPostViewModel: Error {
+//    case noConnection
+//
+////    static let ok: ErrorViewModel = ErrorViewModel(name: "ok")
+////    static let noData: ErrorViewModel = ErrorViewModel(name: "post has no data")
+////    static let noID: ErrorViewModel = ErrorViewModel(name: "post has no id")
+////
+////    static let notFound: ErrorViewModel = ErrorViewModel(name: "post not found")
+////
+////    static let unauthorized: ErrorViewModel = ErrorViewModel(name: "user unauthorized")
+////    static let cannotCreate: ErrorViewModel = ErrorViewModel(name: "cannot create post")
+////
+////    static let unknownError: ErrorViewModel = ErrorViewModel(name: "unknown error")
+//}

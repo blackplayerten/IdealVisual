@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import PromiseKit
 
 enum BlockPostType {
     case datePicker
@@ -237,21 +238,33 @@ final class PostView: UIViewController {
 extension PostView: BlockProtocol {
     func updateBlock(from: BlockPost) {
         guard let publication = publication else { return }
+        guard let viewModel = viewModel else { return }
         switch from {
         case self.post:
-            viewModel?.update(post: publication, date: nil, place: nil, text: post?.textView?.text,
-                             completion: { [weak self] (error) in
-                                DispatchQueue.main.async {
-                                    self?.procError(error: error)
-                                }
-            })
+            firstly {
+                viewModel.update(post: publication, date: nil, place: nil, text: post?.textView?.text)
+            }.catch { (error) in
+                self.procError(error: error as? ErrorViewModel)
+            }
+
+//            viewModel?.update(post: publication, date: nil, place: nil, text: post?.textView?.text,
+//                             completion: { [weak self] (error) in
+//                                DispatchQueue.main.async {
+//                                    self?.procError(error: error)
+//                                }
+//            })
         case self.place:
-            viewModel?.update(post: publication, date: nil, place: place?.textView?.text, text: nil,
-                             completion: { [weak self] (error) in
-                                DispatchQueue.main.async {
-                                    self?.procError(error: error)
-                                }
-                            })
+            firstly {
+                viewModel.update(post: publication, date: nil, place: place?.textView?.text, text: nil)
+            }.catch {  (error) in
+               self.procError(error: error as? ErrorViewModel)
+            }
+//            viewModel?.update(post: publication, date: nil, place: place?.textView?.text, text: nil,
+//                             completion: { [weak self] (error) in
+//                                DispatchQueue.main.async {
+//                                    self?.procError(error: error)
+//                                }
+//                            })
         case self.date:
             viewModel?.update(post: publication, date: date?.datePicker?.date, place: nil, text: nil,
                              completion: { [weak self] (error) in

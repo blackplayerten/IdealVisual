@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct NetworkError {
+struct NetworkError: Error {
     let name: String
     let description: Any?
 
