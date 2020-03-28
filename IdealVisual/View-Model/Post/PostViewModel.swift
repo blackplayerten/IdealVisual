@@ -15,6 +15,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
     private var postCoreData: PostCoreDataProtocol
     private var postNetworkManager: PostNetworkManagerProtocol
     private var photoNetworkManager: PhotoNetworkManagerProtocol
+    private var promise = Promise()
 
     private var notif_posts = [(PostViewModelProtocol) -> Void]()
 
@@ -438,10 +439,12 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
     // MARK: - create post
     func create(photoName: String, photoData: Data?, date: Date? = nil, place: String? = nil,
                 text: String? = nil) -> Promise<Void> {
+        guard promise.isResolved else { return promise }
+
         let photoPath: String = photoFolder + photoName
         _ = MyFileManager.saveFile(data: photoData!, filePath: photoPath)
 
-        return Promise<Void> { seal in
+        promise = Promise { seal in
             guard let photoData = photoData, let date = date, let place = place, let text = text else {
                 return seal.reject(PostViewModelErrors.noData)
             }
@@ -491,6 +494,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                 }
             }
         }
+
+        return promise
 
 //        photoNetworkManager.upload(token: token, data: photoData, name: photoName,
 //                                   completion: { (path, error) in
@@ -559,6 +564,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
     // MARK: - update
     func update(post: Post, date: Date? = nil, place: String? = nil, text: String? = nil) -> Promise<Void> {
+        guard promise.isResolved else { return promise }
+
         do {
             try self.postCoreData.update(post: post, id: post.id, date: date, place: place, text: text,
                                          indexPhoto: nil, lastUpdated: Date())
@@ -574,7 +581,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
         var jsonPost = convertDBModelToJSON(post: post)
         jsonPost.photo = "" // don't update photo on server
 
-        return Promise<Void> { seal in
+        promise = Promise { seal in
             firstly {
                 postNetworkManager.update(token: token, post: jsonPost)
             }.catch { (error) in
@@ -593,6 +600,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                 }
             }
         }
+
+        return promise
 
 //        postNetworkManager.update(token: token, post: jsonPost,
 //            completion: { (_, error) in
@@ -618,6 +627,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
     // MARK: - delete
     func delete(atIndices: [Int]) -> Promise<Void> {
+        guard promise.isResolved else { return promise }
         var uuids = [UUID]()
         for index in atIndices {
             let delPost = posts[index]
@@ -638,7 +648,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
             return Promise<Void> { seal in seal.reject(PostViewModelErrors.unauthorized) }
         }
 
-        return Promise<Void> { seal in
+        promise = Promise { seal in
             firstly {
                 self.postNetworkManager.delete(token: token, ids: uuids)
             }.catch { (error) in
@@ -657,6 +667,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                 }
             }
         }
+
+        return promise
 
 //        postNetworkManager.delete(token: token, ids: uuids, completion: { (error) in
 //            if let error = error {
