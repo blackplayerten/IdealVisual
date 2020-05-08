@@ -32,16 +32,16 @@ final class SignUp: UIViewController {
         setScroll()
         self.userViewModel = UserViewModel()
 
-        self.username = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
+        self.username = InputFields(tag: 0, labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
                                     textContentType: .username, validator: checkValidUsername,
                                     inputDelegate: self)
-        self.email = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
+        self.email = InputFields(tag: 1, labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
                                  textContentType: .emailAddress, keyboardType: .emailAddress,
                                  validator: checkValidEmail, inputDelegate: self)
-        self.password = InputFields(labelImage: UIImage(named: "password"), text: nil,
+        self.password = InputFields(tag: 2, labelImage: UIImage(named: "password"), text: nil,
                                     placeholder: "Пароль", textContentType: .newPassword,
                                     validator: checkValidPassword, inputDelegate: self)
-        self.repeatPassword = InputFields(labelImage: UIImage(named: "password"), text: nil,
+        self.repeatPassword = InputFields(tag: 3, labelImage: UIImage(named: "password"), text: nil,
                                           placeholder: "Повторите пароль",
                                           textContentType: .newPassword, validator: checkValidPassword,
                                           inputDelegate: self)

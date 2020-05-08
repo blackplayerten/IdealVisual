@@ -100,10 +100,10 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
         }
     }
 
-    func update(token: String, post: JsonPostModel) -> Promise<JsonPostModel> {
+    func update(token: String, post: JsonPostModel) -> Promise<Any> {
         guard let url = NetworkURLS.postsURL else {
             Logger.log("invalid posts url: \(String(describing: NetworkURLS.postsURL))")
-            return Promise<JsonPostModel> { seal in seal.reject(NetworkErr.notFound)}
+            return Promise<Any> { seal in seal.reject(NetworkErr.notFound)}
         }
 
         let encoder = JSONEncoder()
@@ -111,7 +111,7 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
 
-        return Promise<JsonPostModel> { seal in
+        return Promise<Any> { seal in
             AF.request(url, method: .put, parameters: post, encoder: JSONParameterEncoder(encoder: encoder),
                    headers: [.accept(MimeTypes.appJSON), .authorization(bearerToken: token)])
                 .validate(contentType: [MimeTypes.appJSON])

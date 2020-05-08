@@ -13,4 +13,5 @@ protocol UserNetworkManagerProtocol {
     func login(user: JsonUserModel, completion: ((JsonUserModel?, NetworkErr?) -> Void)?)
     func update(token: String, user: JsonUserModel, completion: ((JsonUserModel?, NetworkErr?) -> Void)?)
     func logout(token: String, completion: ((NetworkErr?) -> Void)?)
+    
 }

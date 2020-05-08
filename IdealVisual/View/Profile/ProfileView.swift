@@ -11,7 +11,7 @@ import Foundation
 import UIKit
 import Photos
 
-final class ProfileView: UIView {
+final class ProfileView: UIView, InputFieldDelegate {
     private var dataState = State()
 
     private weak var delegateProfile: ProfileDelegate?
@@ -42,20 +42,23 @@ final class ProfileView: UIView {
         // MARK: text fields
         self.delegateProfile = profileDelegate
         self.userViewModel = UserViewModel()
-        self.username = InputFields()
-        self.email = InputFields()
-        self.password = InputFields()
-        self.repeatPassword = InputFields()
+        self.username = InputFields(tag: 0)
+        self.email = InputFields(tag: 1)
+        self.password = InputFields(tag: 2)
+        self.repeatPassword = InputFields(tag: 3)
         super.init(frame: CGRect())
 
         // MARK: nav bar
-        navBar = UIView()
-        addSubview(navBar!)
-        navBar?.translatesAutoresizingMaskIntoConstraints = false
-        navBar?.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-        navBar?.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-        navBar?.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor).isActive = true
-        navBar?.heightAnchor.constraint(equalToConstant: 45).isActive = true
+        guard let nav = navBar else {
+            Logger.log("no navigation bar in profile")
+            return
+        }
+        addSubview(nav)
+        nav.translatesAutoresizingMaskIntoConstraints = false
+        nav.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        nav.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        nav.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor).isActive = true
+        nav.heightAnchor.constraint(equalToConstant: 45).isActive = true
 
         // MARK: nav bar buttons
         guard let markSettings = UIImage(named: "settings") else { return }
@@ -92,34 +95,91 @@ final class ProfileView: UIView {
                     return
                 }
 
-                self?.username = InputFields(labelImage: UIImage(named: "login"),
-                                                   text: user.username,
-                                                   placeholder: nil, validator: checkValidUsername)
-                self?.email = InputFields(labelImage: UIImage(named: "email"),
-                                                text: user.email,
-                                                placeholder: nil, validator: checkValidEmail)
-                self?.password = InputFields(labelImage: UIImage(named: "password"),
-                                                   text: nil, placeholder: "Пароль",
-                                                   textContentType: .newPassword, validator: checkValidPassword)
-                self?.repeatPassword = InputFields(labelImage: UIImage(named: "password"),
-                                                         text: nil, placeholder: "Повторите пароль",
-                                                         textContentType: .newPassword, validator: checkValidPassword)
+                self?.username = InputFields(tag: 0, labelImage: UIImage(named: "login"),
+                                                   text: user.username, placeholder: nil,
+                                                   validator: checkValidUsername, inputDelegate: self)
+                self?.email = InputFields(tag: 1, labelImage: UIImage(named: "email"),
+                                                text: user.email, placeholder: nil,
+                                                validator: checkValidEmail, inputDelegate: self)
+                self?.password = InputFields(tag: 2, labelImage: UIImage(named: "password"), text: nil,
+                                             placeholder: "Пароль", textContentType: .newPassword,
+                                             validator: checkValidPassword, inputDelegate: self)
+                self?.repeatPassword = InputFields(tag: 3, labelImage: UIImage(named: "password"),
+                                                   text: nil, placeholder: "Повторите пароль",
+                                                   textContentType: .newPassword, validator: checkValidPassword,
+                                                   inputDelegate: self)
             }
         })
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    // MARK: - keyboard
+    private var activeField: InputFields?
+
+    func setActiveField(inputField: InputFields) {
+        activeField = inputField
+    }
+
+    @objc
+    func keyboardWillShow(_ notification: Notification) {
+        guard let superview = superview else {
+            Logger.log("no superview!!!")
+            return
+        }
+
+        guard let activeField = activeField else {
+            Logger.log("no active InputField")
+            return
+        }
+
+        let info = notification.userInfo!
+
+        guard let rect: CGRect = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+            Logger.log("no keyboard size")
+            return
+        }
+        let kbSize = rect.size
+
+        let insets = UIEdgeInsets(top: 0, left: 0, bottom: kbSize.height, right: 0)
+        scroll.contentInset = insets
+        scroll.scrollIndicatorInsets = insets
+
+        let visible_screen_without_keyboard = superview.bounds.height - kbSize.height
+
+        let tr = scroll.convert(activeField.frame, to: nil)
+
+        if tr.origin.y > visible_screen_without_keyboard {
+            let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y - kbSize.height)
+            scroll.setContentOffset(scrollPoint, animated: true)
+        }
+    }
+
+    @objc
+    func keyboardWillHide(_ notification: Notification) {
+        scroll.contentInset = .zero
+        scroll.scrollIndicatorInsets = .zero
+    }
+
+    @objc
+    func taped() {
+        scroll.endEditing(true)
+    }
 
 // MARK: - no edit mode
     private func setNoEdit() {
         testAva.delegate = self
         testAva.allowsEditing = true
         ava.isUserInteractionEnabled = false
-
-        let swipe = UISwipeGestureRecognizer()
-        swipe.direction = .up
-        swipe.addTarget(self, action: #selector(closeProfile))
-        self.addGestureRecognizer(swipe)
 
         setNavButtons(edit_mode: false)
         setAva()
@@ -142,8 +202,15 @@ final class ProfileView: UIView {
         height?.isActive = false
         setNavButtons(edit_mode: true)
 
-        height = self.heightAnchor.constraint(equalToConstant: self.bounds.height + 155)
-        height?.isActive = true
+        height = self.heightAnchor.constraint(equalToConstant: 560)
+        guard let _height = height else {
+            Logger.log("no height in edit mode!")
+            return
+        }
+        _height.isActive = true
+
+        // MARK: - SCROLL CONTENT PROFILE
+//        scroll.updateContentView()
 
         let tap = UITapGestureRecognizer()
         ava.isUserInteractionEnabled = true
@@ -189,18 +256,26 @@ final class ProfileView: UIView {
         guard let usrInput = username.textField.text,
             let emlInput = email.textField.text,
             let pasInput = password.textField.text
-        else { return }
+        else {
+            Logger.log("no text in textfields")
+            return
+        }
+
+        guard let navigationBar = navBar else {
+            Logger.log("no navigtion bar")
+            return
+        }
 
         if usrInput == "" && emlInput == "" && pasInput == "" && avaContent == nil {
             return
         }
 
-        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: navBar!.frame.width / 2 + 70,
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: navigationBar.frame.width / 2 + 70,
                                                                      y: 0,
                                                                      width: 50, height: 50))
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true
-        navBar!.addSubview(loadingIndicator)
+        navigationBar.addSubview(loadingIndicator)
         loadingIndicator.startAnimating()
 
         userViewModel?.update(username: usrInput, email: emlInput, ava: avaContent, avaName: avaName,
@@ -271,32 +346,27 @@ final class ProfileView: UIView {
             ava.image = oldAvaImage
         }
 
-        removeConstraint(height!)
+        guard let _height = height else {
+            Logger.log("height of view is nil")
+            return
+        }
+        removeConstraint(_height)
         setupView()
-    }
-
-    // MARK: - close view/logout
-    @objc
-    func closeProfile() {
-        height?.isActive = false
-        no_settings()
-        removeFromSuperview()
-        delegateProfile?.enableTabBarButton()
-    }
-
-    @objc
-    private func logout() {
-        delegateProfile?.logOut()
     }
 
     // MARK: - ui error
     private func _error(text: String, color: UIColor? = Colors.red) {
+        guard let navigationBar = navBar else {
+            Logger.log("no navigation bar")
+            return
+        }
+
         let er = UIError(text: text, place: scroll, color: color)
         scroll.addSubview(er)
         er.translatesAutoresizingMaskIntoConstraints = false
-        er.leftAnchor.constraint(equalTo: navBar!.leftAnchor).isActive = true
-        er.rightAnchor.constraint(equalTo: navBar!.rightAnchor).isActive = true
-        er.topAnchor.constraint(equalTo: navBar!.bottomAnchor).isActive = true
+        er.leftAnchor.constraint(equalTo: navigationBar.leftAnchor).isActive = true
+        er.rightAnchor.constraint(equalTo: navigationBar.rightAnchor).isActive = true
+        er.topAnchor.constraint(equalTo: navigationBar.bottomAnchor).isActive = true
     }
 }
 
@@ -307,27 +377,50 @@ extension ProfileView {
     }
 
     private func setupView() {
+        guard let superview = superview else {
+            Logger.log("no superview")
+            return
+        }
+
         self.translatesAutoresizingMaskIntoConstraints = false
         let currentWindow: UIWindow? = UIApplication.shared.keyWindow
         currentWindow?.addSubview(self)
-        self.widthAnchor.constraint(equalTo: (superview?.safeAreaLayoutGuide.widthAnchor)!).isActive = true
+
         self.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         self.layer.cornerRadius = 20
-        self.topAnchor.constraint(equalTo: (superview?.topAnchor)!).isActive = true
-        self.leftAnchor.constraint(equalTo: (superview?.safeAreaLayoutGuide.leftAnchor)!).isActive = true
-        self.rightAnchor.constraint(equalTo: (superview?.safeAreaLayoutGuide.rightAnchor)!).isActive = true
         self.backgroundColor = .white
-        self.layer.shadowColor = Colors.darkDarkGray.cgColor
-        self.layer.shadowRadius = 5.0
+        self.layer.shadowColor = Colors.darkGray.cgColor
+        self.layer.shadowOffset = CGSize(width: 0.0, height: 5.0)
         self.layer.shadowOpacity = 50.0
+        self.layer.shadowRadius = 1.0
+        self.layer.masksToBounds = false
 
-        height = self.heightAnchor.constraint(equalToConstant: 465)
-        height?.isActive = true
+        let paddingtop = UIApplication.shared.windows.first?.safeAreaInsets.top
+        self.topAnchor.constraint(equalTo: superview.topAnchor, constant: paddingtop ?? 0).isActive = true
+        self.widthAnchor.constraint(equalToConstant: superview.frame.width).isActive = true
+
+        height = self.heightAnchor.constraint(equalToConstant: 420)
+
+        guard let _height = height else {
+            Logger.log("no height")
+            return
+        }
+        _height.isActive = true
+
+        guard let navigationBar = navBar else {
+            Logger.log("no navigation bar")
+            return
+        }
+
+        addSubview(scroll)
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.topAnchor.constraint(equalTo: navigationBar.bottomAnchor).isActive = true
+        scroll.widthAnchor.constraint(equalToConstant: superview.frame.width).isActive = true
+        scroll.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -30).isActive = true
 
         let hideKey: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(taped))
-        self.addGestureRecognizer(hideKey)
+        scroll.addGestureRecognizer(hideKey)
 
-        setScroll()
         setNoEdit()
 
         dataState.username = username.textField.text ?? ""
@@ -339,6 +432,7 @@ extension ProfileView {
 // MARK: - nav
 extension ProfileView {
     private func setNavButtons(edit_mode: Bool) {
+        guard let navigationBar = navBar else { return }
         guard let settings = settings, let substrateLogout = substrateLogout,
             let yes = yes, let substrateNot = substrateNot
         else { return }
@@ -347,53 +441,31 @@ extension ProfileView {
             yes.removeFromSuperview()
             substrateNot.removeFromSuperview()
 
-            navBar!.addSubview(settings)
-            navBar!.addSubview(substrateLogout)
+            navigationBar.addSubview(settings)
+            navigationBar.addSubview(substrateLogout)
 
             settings.translatesAutoresizingMaskIntoConstraints = false
-            settings.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
-            settings.leftAnchor.constraint(equalTo: navBar!.leftAnchor, constant: 20).isActive = true
+            settings.topAnchor.constraint(equalTo: navigationBar.topAnchor, constant: 7).isActive = true
+            settings.leftAnchor.constraint(equalTo: navigationBar.leftAnchor, constant: 20).isActive = true
 
             substrateLogout.translatesAutoresizingMaskIntoConstraints = false
-            substrateLogout.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
-            substrateLogout.rightAnchor.constraint(equalTo: navBar!.rightAnchor, constant: -20).isActive = true
+            substrateLogout.topAnchor.constraint(equalTo: navigationBar.topAnchor, constant: 7).isActive = true
+            substrateLogout.rightAnchor.constraint(equalTo: navigationBar.rightAnchor, constant: -20).isActive = true
         } else {
              settings.removeFromSuperview()
              substrateLogout.removeFromSuperview()
 
-            navBar!.addSubview(yes)
-            navBar!.addSubview(substrateNot)
+            navigationBar.addSubview(yes)
+            navigationBar.addSubview(substrateNot)
 
             yes.translatesAutoresizingMaskIntoConstraints = false
-            yes.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
-            yes.rightAnchor.constraint(equalTo: navBar!.rightAnchor, constant: -20).isActive = true
+            yes.topAnchor.constraint(equalTo: navigationBar.topAnchor, constant: 7).isActive = true
+            yes.rightAnchor.constraint(equalTo: navigationBar.rightAnchor, constant: -20).isActive = true
 
             substrateNot.translatesAutoresizingMaskIntoConstraints = false
-            substrateNot.topAnchor.constraint(equalTo: navBar!.topAnchor, constant: 7).isActive = true
-            substrateNot.leftAnchor.constraint(equalTo: navBar!.leftAnchor, constant: 20).isActive = true
+            substrateNot.topAnchor.constraint(equalTo: navigationBar.topAnchor, constant: 7).isActive = true
+            substrateNot.leftAnchor.constraint(equalTo: navigationBar.leftAnchor, constant: 20).isActive = true
         }
-    }
-}
-
-// MARK: - scroll and keyboard
-extension ProfileView {
-    private func setScroll() {
-        addSubview(scroll)
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.topAnchor.constraint(equalTo: navBar!.bottomAnchor).isActive = true
-        scroll.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-        scroll.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-        scroll.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-
-        // tap on keyboard
-        let tapp = UITapGestureRecognizer()
-        scroll.addGestureRecognizer(tapp)
-        tapp.addTarget(self, action: #selector(taped))
-    }
-
-    @objc
-    func taped() {
-        self.endEditing(true)
     }
 }
 
@@ -516,13 +588,53 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
     }
 }
 
-// MARK: - bottom line
+// MARK: - bottom line, close view and logout
 extension ProfileView {
     private func renderBottomLine() {
+        guard let superview = superview  else {
+            Logger.log("no superview")
+            return
+        }
+
+        let swipeView = UIView()
+        addSubview(swipeView)
+        swipeView.translatesAutoresizingMaskIntoConstraints = false
+        swipeView.topAnchor.constraint(equalTo: scroll.bottomAnchor).isActive = true
+        swipeView.widthAnchor.constraint(equalToConstant: superview.frame.width).isActive = true
+        swipeView.heightAnchor.constraint(equalToConstant: 30).isActive = true
+
         let lineBottom = LineClose()
-        scroll.addSubview(lineBottom)
+        swipeView.addSubview(lineBottom)
         lineBottom.translatesAutoresizingMaskIntoConstraints = false
-        lineBottom.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15).isActive = true
-        lineBottom.centerXAnchor.constraint(equalTo: self.centerXAnchor, constant: -23).isActive = true
+        lineBottom.centerYAnchor.constraint(equalTo: swipeView.centerYAnchor).isActive = true
+        lineBottom.centerXAnchor.constraint(equalTo: swipeView.centerXAnchor, constant: -23).isActive = true
+        lineBottom.bottomAnchor.constraint(equalTo: swipeView.bottomAnchor, constant: -15).isActive = true
+
+        let swipe = UISwipeGestureRecognizer()
+        swipe.direction = .up
+        swipe.addTarget(self, action: #selector(closeProfile))
+        swipeView.addGestureRecognizer(swipe)
+    }
+
+    @objc
+    func closeProfile() {
+        guard let _heigt = height else {
+            Logger.log("no height")
+            return
+        }
+
+        username.clearState()
+        email.clearState()
+        password.clearState()
+        repeatPassword.clearState()
+
+        _heigt.isActive = false
+        removeFromSuperview()
+        delegateProfile?.enableTabBarButton()
+    }
+
+    @objc
+    private func logout() {
+        delegateProfile?.logOut()
     }
 }

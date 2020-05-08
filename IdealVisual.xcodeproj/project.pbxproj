@@ -192,7 +192,6 @@
 				188B5FB32361E68200EA3701 /* Models */,
 				632195CA3321E1A5988D39D1 /* View */,
 				18999E1E2398F83C003C0F44 /* View-Model */,
-				18F8EA9323B296E20085A9BD /* view-modelErrors.swift */,
 				18F8EA8B23B232D20085A9BD /* Easier */,
 				188F4E3723BE8BF100043E70 /* fonts */,
 			);
@@ -345,6 +344,7 @@
 		18999E1E2398F83C003C0F44 /* View-Model */ = {
 			isa = PBXGroup;
 			children = (
+				18F8EA9323B296E20085A9BD /* view-modelErrors.swift */,
 				1853FC3623B7ACDF0015A31A /* User */,
 				1853FC3723B7ACF40015A31A /* Post */,
 			);
@@ -410,7 +410,6 @@
 				9C268BAC885081135A8D57AD /* Pods-IdealVisual.debug.xcconfig */,
 				FF38FB8C9FF56CB9EF1E3D4E /* Pods-IdealVisual.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};

@@ -213,7 +213,7 @@ final class InputFields: UIView, UITextFieldDelegate {
 
     private weak var inputDelegate: InputFieldDelegate?
 
-    init(labelImage: UIImage? = nil, text: String? = nil, placeholder: String? = nil,
+    init(tag: Int, labelImage: UIImage? = nil, text: String? = nil, placeholder: String? = nil,
          textContentType: UITextContentType? = nil, keyboardType: UIKeyboardType = .default,
          validator: Validator? = nil,
          inputDelegate: InputFieldDelegate? = nil) {
@@ -222,6 +222,8 @@ final class InputFields: UIView, UITextFieldDelegate {
         self.inputDelegate = inputDelegate
 
         super.init(frame: .zero)
+        self.tag = tag
+
         addSubview(blockView)
         blockView.translatesAutoresizingMaskIntoConstraints = false
         blockView.widthAnchor.constraint(equalToConstant: 300).isActive = true
@@ -299,6 +301,17 @@ final class InputFields: UIView, UITextFieldDelegate {
 
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         inputDelegate?.setActiveField(inputField: self)
+        return true
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let nextTextFieldTag = tag + 1
+
+        if let nextTextField = (superview?.viewWithTag(nextTextFieldTag) as? InputFields)?.textField {
+            nextTextField.becomeFirstResponder()
+        } else {
+            textField.resignFirstResponder()
+        }
         return true
     }
 
@@ -418,5 +431,25 @@ final class UIError: UIView {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+// show alert always on top
+public extension UIAlertController {
+    func show() {
+        // create new window on top main window
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        let vc = UIViewController()
+        vc.view.backgroundColor = .clear
+        window.rootViewController = vc
+        window.windowLevel = UIWindow.Level.alert + 1
+        window.makeKeyAndVisible()
+        vc.present(self, animated: true, completion: nil)
+    }
+}
+
+extension UIScrollView {
+    func updateContentView() {
+        contentSize.height = subviews.sorted(by: { $0.frame.maxY < $1.frame.maxY }).last?.frame.maxY ?? contentSize.height
     }
 }

@@ -18,5 +18,5 @@ protocol PostViewModelProtocol {
     func subscribe(completion: @escaping (PostViewModelProtocol) -> Void)
     func delete(atIndices: [Int]) -> Promise<Void>
     func swap(source: Int, dest: Int) throws
-    func sync() throws
+    func sync() -> Promise<Void>
 }

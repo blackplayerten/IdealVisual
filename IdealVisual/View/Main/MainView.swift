@@ -62,6 +62,7 @@ final class MainView: UIViewController {
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.startAnimating()
+        self.navigationController?.navigationBar.barTintColor = .white
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: loadingIndicator)
 
         userViewModel?.getAvatar(completion: { [weak self] (avatar, error) in
@@ -105,9 +106,9 @@ final class MainView: UIViewController {
             fatalError()
         }
 
-        do {
-            try postViewModel.sync()
-        } catch {
+        firstly {
+            postViewModel.sync()
+        }.catch { (error) in
             if let err = error as? PostViewModelErrors {
                 switch err {
                 case PostViewModelErrors.unauthorized:
@@ -272,7 +273,16 @@ final class MainView: UIViewController {
 
 // MARK: - picker
 extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    internal func showAlert(alert: UIAlertController) { present(alert, animated: true) }
+    internal func showAlert(alert: UIAlertController) {
+        // show alert on top profile view
+        if #available(iOS 13.0, *) {
+            if let profileController = UIApplication.shared.keyWindow?.rootViewController {
+                profileController.present(alert, animated: true, completion: nil)
+            }
+        } else {
+            alert.show()
+        }
+    }
 
     private func openGallery() { present(choose, animated: true, completion: nil) }
 

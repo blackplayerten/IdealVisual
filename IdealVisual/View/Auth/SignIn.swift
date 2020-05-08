@@ -34,10 +34,10 @@ final class SignIn: UIViewController {
 
         self.userViewModel = UserViewModel()
 
-        self.email = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
+        self.email = InputFields(tag: 0, labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
                                  textContentType: .emailAddress, keyboardType: .emailAddress,
                                  validator: checkValidEmail, inputDelegate: self)
-        self.password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль",
+        self.password = InputFields(tag: 1, labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль",
                                     textContentType: .password, validator: checkValidPassword,
                                     inputDelegate: self)
         setAuthFields()
@@ -138,7 +138,7 @@ final class SignIn: UIViewController {
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.setEditFields(state: true)
         }
-        email.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -100).isActive = true
+        email.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -80).isActive = true
         password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 30).isActive = true
 
         setAuthButtons()
