@@ -26,6 +26,7 @@ final class ProfileView: UIView, InputFieldDelegate {
     private var email: InputFields
     private var password: InputFields
     private var repeatPassword: InputFields
+    private var activeField: InputFields?
 
     private var settings: SubstrateButton?
     private var substrateLogout: SubstrateButton?
@@ -110,65 +111,77 @@ final class ProfileView: UIView, InputFieldDelegate {
                                                    inputDelegate: self)
             }
         })
+    }
+
+    // MARK: - setup view
+    func setup() {
+        setupView()
+    }
+
+    private func setupView() {
+        guard let superview = superview else {
+            Logger.log("no superview")
+            return
+        }
+
+        self.translatesAutoresizingMaskIntoConstraints = false
+        let currentWindow: UIWindow? = UIApplication.shared.keyWindow
+        currentWindow?.addSubview(self)
+
+        self.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        self.layer.cornerRadius = 20
+        self.backgroundColor = .white
+        self.layer.shadowColor = Colors.darkGray.cgColor
+        self.layer.shadowOffset = CGSize(width: 0.0, height: 5.0)
+        self.layer.shadowOpacity = 50.0
+        self.layer.shadowRadius = 1.0
+        self.layer.masksToBounds = false
+
+        let paddingtop = UIApplication.shared.windows.first?.safeAreaInsets.top
+        self.topAnchor.constraint(equalTo: superview.topAnchor, constant: paddingtop ?? 0).isActive = true
+        self.widthAnchor.constraint(equalToConstant: superview.frame.width).isActive = true
+
+        height = self.heightAnchor.constraint(equalToConstant: 420)
+
+        guard let _height = height else {
+            Logger.log("no height")
+            return
+        }
+        _height.isActive = true
+
+        guard let navigationBar = navBar else {
+            Logger.log("no navigation bar")
+            return
+        }
+
+        addSubview(scroll)
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.topAnchor.constraint(equalTo: navigationBar.bottomAnchor).isActive = true
+        scroll.widthAnchor.constraint(equalToConstant: superview.frame.width).isActive = true
+        scroll.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -30).isActive = true
+
+        let hideKey: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(taped))
+        scroll.addGestureRecognizer(hideKey)
+
+        setNoEdit()
+
+        dataState.username = username.textField.text ?? ""
+        dataState.email = email.textField.text ?? ""
+        dataState.oldAva = ava.image
 
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(keyboardWillShow(_:)),
-                                               name: UIResponder.keyboardWillShowNotification,
-                                               object: nil)
+                selector: #selector(keyboardWillShow(_:)),
+                name: UIResponder.keyboardWillShowNotification,
+                object: nil)
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(keyboardWillHide(_:)),
-                                               name: UIResponder.keyboardWillHideNotification,
-                                               object: nil)
+                selector: #selector(keyboardWillHide(_:)),
+                name: UIResponder.keyboardWillHideNotification,
+                object: nil)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    // MARK: - keyboard
-    private var activeField: InputFields?
 
-    func setActiveField(inputField: InputFields) {
-        activeField = inputField
-    }
-
-    @objc
-    func keyboardWillShow(_ notification: Notification) {
-        guard let superview = superview else {
-            Logger.log("no superview!!!")
-            return
-        }
-
-        guard let activeField = activeField else {
-            Logger.log("no active InputField")
-            return
-        }
-
-        let info = notification.userInfo!
-
-        guard let rect: CGRect = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
-            Logger.log("no keyboard size")
-            return
-        }
-        let kbSize = rect.size
-
-        let insets = UIEdgeInsets(top: 0, left: 0, bottom: kbSize.height, right: 0)
-        scroll.contentInset = insets
-        scroll.scrollIndicatorInsets = insets
-
-        let visible_screen_without_keyboard = superview.bounds.height - kbSize.height
-
-        let tr = scroll.convert(activeField.frame, to: nil)
-
-        if tr.origin.y > visible_screen_without_keyboard {
-            let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y - kbSize.height)
-            scroll.setContentOffset(scrollPoint, animated: true)
-        }
-    }
-
-    @objc
-    func keyboardWillHide(_ notification: Notification) {
-        scroll.contentInset = .zero
-        scroll.scrollIndicatorInsets = .zero
-    }
 
     @objc
     func taped() {
@@ -223,7 +236,7 @@ final class ProfileView: UIView, InputFieldDelegate {
         setPassword()
     }
 
-    // MARK: - save/not save settings
+    // MARK: - save settings
     @objc
     private func save_settings() {
         if dataState.email == email.textField.text &&
@@ -261,8 +274,8 @@ final class ProfileView: UIView, InputFieldDelegate {
             return
         }
 
-        guard let navigationBar = navBar else {
-            Logger.log("no navigtion bar")
+        guard let navigationBar = navBar, let _height = height else {
+            Logger.log("no navigtion bar and height")
             return
         }
 
@@ -322,6 +335,7 @@ final class ProfileView: UIView, InputFieldDelegate {
                 self?.repeatPassword.clearState()
 
                 loadingIndicator.stopAnimating()
+                _height.isActive = false
                 self?.setupView()
 
                 guard let a = self?.ava.image else { return }
@@ -330,6 +344,7 @@ final class ProfileView: UIView, InputFieldDelegate {
         })
     }
 
+    // MARK: - don't save settings
     @objc
     private func no_settings() {
         username.textField.text = dataState.username
@@ -370,66 +385,7 @@ final class ProfileView: UIView, InputFieldDelegate {
     }
 }
 
-// MARK: - setup view
-extension ProfileView {
-    func setup() {
-        setupView()
-    }
-
-    private func setupView() {
-        guard let superview = superview else {
-            Logger.log("no superview")
-            return
-        }
-
-        self.translatesAutoresizingMaskIntoConstraints = false
-        let currentWindow: UIWindow? = UIApplication.shared.keyWindow
-        currentWindow?.addSubview(self)
-
-        self.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        self.layer.cornerRadius = 20
-        self.backgroundColor = .white
-        self.layer.shadowColor = Colors.darkGray.cgColor
-        self.layer.shadowOffset = CGSize(width: 0.0, height: 5.0)
-        self.layer.shadowOpacity = 50.0
-        self.layer.shadowRadius = 1.0
-        self.layer.masksToBounds = false
-
-        let paddingtop = UIApplication.shared.windows.first?.safeAreaInsets.top
-        self.topAnchor.constraint(equalTo: superview.topAnchor, constant: paddingtop ?? 0).isActive = true
-        self.widthAnchor.constraint(equalToConstant: superview.frame.width).isActive = true
-
-        height = self.heightAnchor.constraint(equalToConstant: 420)
-
-        guard let _height = height else {
-            Logger.log("no height")
-            return
-        }
-        _height.isActive = true
-
-        guard let navigationBar = navBar else {
-            Logger.log("no navigation bar")
-            return
-        }
-
-        addSubview(scroll)
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.topAnchor.constraint(equalTo: navigationBar.bottomAnchor).isActive = true
-        scroll.widthAnchor.constraint(equalToConstant: superview.frame.width).isActive = true
-        scroll.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -30).isActive = true
-
-        let hideKey: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(taped))
-        scroll.addGestureRecognizer(hideKey)
-
-        setNoEdit()
-
-        dataState.username = username.textField.text ?? ""
-        dataState.email = email.textField.text ?? ""
-        dataState.oldAva = ava.image
-    }
-}
-
-// MARK: - nav
+// MARK: - navigation bar
 extension ProfileView {
     private func setNavButtons(edit_mode: Bool) {
         guard let navigationBar = navBar else { return }
@@ -588,7 +544,7 @@ extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDe
     }
 }
 
-// MARK: - bottom line, close view and logout
+// MARK: - bottom line
 extension ProfileView {
     private func renderBottomLine() {
         guard let superview = superview  else {
@@ -616,6 +572,7 @@ extension ProfileView {
         swipeView.addGestureRecognizer(swipe)
     }
 
+    // MARK: close profile
     @objc
     func closeProfile() {
         guard let _heigt = height else {
@@ -633,8 +590,51 @@ extension ProfileView {
         delegateProfile?.enableTabBarButton()
     }
 
+    // MARK: logout
     @objc
     private func logout() {
         delegateProfile?.logOut()
+    }
+}
+
+// MARK: - keyboard
+extension ProfileView {
+    func setActiveField(inputField: InputFields) {
+        activeField = inputField
+    }
+
+    @objc
+    func keyboardWillShow(_ notification: Notification) {
+        guard let activeField = activeField else {
+            Logger.log("no active InputField")
+            return
+        }
+
+        let info = notification.userInfo!
+
+        guard let rect: CGRect = info[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+            Logger.log("no keyboard size")
+            return
+        }
+        let kbSize = rect.size
+
+        let insets = UIEdgeInsets(top: 0, left: 0, bottom: kbSize.height, right: 0)
+        scroll.contentInset = insets
+        scroll.scrollIndicatorInsets = insets
+
+        let visible_screen_without_keyboard = scroll.bounds.height - kbSize.height
+
+        let tr = scroll.convert(activeField.frame, to: nil)
+
+        if tr.origin.y > visible_screen_without_keyboard {
+            let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y - kbSize.height)
+            scroll.setContentOffset(scrollPoint, animated: true)
+        }
+    }
+
+    @objc
+    func keyboardWillHide(_ notification: Notification) {
+        scroll.contentInset = .zero
+        scroll.scrollIndicatorInsets = .zero
     }
 }

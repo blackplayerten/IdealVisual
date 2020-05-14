@@ -138,7 +138,7 @@ final class SignIn: UIViewController {
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.setEditFields(state: true)
         }
-        email.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -80).isActive = true
+        email.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -150).isActive = true
         password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 30).isActive = true
 
         setAuthButtons()
@@ -208,12 +208,12 @@ final class SignIn: UIViewController {
         }
 
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 90,
-                                                                     y: 425,
+                                                                     y: 380,
                                                                      width: 50, height: 50))
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true
-        loadingIndicator.startAnimating()
         scroll.addSubview(loadingIndicator)
+        loadingIndicator.startAnimating()
 
         userViewModel?.login(email: email, password: password, completion: { [weak self] (error) in
             DispatchQueue.main.async {
@@ -227,10 +227,11 @@ final class SignIn: UIViewController {
                         Logger.log("unknown error: \(error)")
                         self?._error(text: "Упс, что-то пошло не так")
                     }
+                    loadingIndicator.stopAnimating()
                 } else {
+                    loadingIndicator.stopAnimating()
                     self?.autoLogin()
                 }
-                loadingIndicator.stopAnimating()
             }
         })
     }

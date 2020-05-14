@@ -368,6 +368,11 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
     @objc private func choose_photo() {
         let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Галерея", style: .default, handler: { _ in self.openGallery() }))
+        alert.addAction(UIAlertAction(title: "Помощь", style: .default, handler: { _ in
+            let categories = CategoriesView()
+            categories.modalPresentationStyle = .fullScreen
+            self.navigationController?.pushViewController(categories, animated: true)
+        }))
         alert.addAction(UIAlertAction(title: "Отменить", style: UIAlertAction.Style.cancel, handler: nil))
         present(alert, animated: true)
     }

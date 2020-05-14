@@ -36,6 +36,10 @@
 		18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 18AA6582237714F0004B9588 /* .swiftlint.yml */; };
 		18ACE2A42391AB78008B05B8 /* PostCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ACE2A32391AB78008B05B8 /* PostCoreData.swift */; };
 		18BD9DB323C3502B000E5FD3 /* InputFieldsDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18BD9DB223C3502A000E5FD3 /* InputFieldsDelegate.swift */; };
+		18CCB13E246827F30044E095 /* IdealVisualClassifier 1.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 18CCB13D246827F20044E095 /* IdealVisualClassifier 1.mlmodel */; };
+		18CCB14024682CAF0044E095 /* ErrorsCoreML.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CCB13F24682CAF0044E095 /* ErrorsCoreML.swift */; };
+		18CCB142246C1FB60044E095 /* CategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CCB141246C1FB60044E095 /* CategoriesView.swift */; };
+		18CCB145246C26730044E095 /* CategoryPhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CCB144246C26730044E095 /* CategoryPhotoCell.swift */; };
 		18D4EEE5236DAE6A007C16D6 /* UserCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D4EEE4236DAE6A007C16D6 /* UserCoreData.swift */; };
 		18E1554C23B40C5D0051D833 /* ProfileProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E1554B23B40C5D0051D833 /* ProfileProtocol.swift */; };
 		18E1554E23B40CA00051D833 /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E1554D23B40CA00051D833 /* UserState.swift */; };
@@ -53,6 +57,7 @@
 		18FCDFF623B0BFF3007AA3F4 /* HttpEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCDFF523B0BFF3007AA3F4 /* HttpEntity.swift */; };
 		18FCDFF823B213AF007AA3F4 /* UserCoreDataProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCDFF723B213AE007AA3F4 /* UserCoreDataProtocol.swift */; };
 		416AD9868AD428CF5A4CC80F /* libPods-IdealVisual.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0223884480607F6E632A79A /* libPods-IdealVisual.a */; };
+		632192245184F7C7C13373A5 /* CoreMLManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219D7C7886ADF7FFF33FD0 /* CoreMLManager.swift */; };
 		63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632194B70D0AC636CB2B847F /* PhotoCell.swift */; };
 		63219A4A265F4D025E33856C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219C5F3C3B40275C1AC524 /* MainView.swift */; };
 /* End PBXBuildFile section */
@@ -110,6 +115,10 @@
 		18AA6582237714F0004B9588 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		18ACE2A32391AB78008B05B8 /* PostCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCoreData.swift; sourceTree = "<group>"; };
 		18BD9DB223C3502A000E5FD3 /* InputFieldsDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputFieldsDelegate.swift; sourceTree = "<group>"; };
+		18CCB13D246827F20044E095 /* IdealVisualClassifier 1.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = "IdealVisualClassifier 1.mlmodel"; path = "../../../../IdealVisual_CoreML_model/IdealVisualClassifier 1.mlmodel"; sourceTree = "<group>"; };
+		18CCB13F24682CAF0044E095 /* ErrorsCoreML.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorsCoreML.swift; sourceTree = "<group>"; };
+		18CCB141246C1FB60044E095 /* CategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesView.swift; sourceTree = "<group>"; };
+		18CCB144246C26730044E095 /* CategoryPhotoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPhotoCell.swift; sourceTree = "<group>"; };
 		18D4EEE4236DAE6A007C16D6 /* UserCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCoreData.swift; sourceTree = "<group>"; };
 		18E1554B23B40C5D0051D833 /* ProfileProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileProtocol.swift; sourceTree = "<group>"; };
 		18E1554D23B40CA00051D833 /* UserState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserState.swift; sourceTree = "<group>"; };
@@ -128,6 +137,7 @@
 		18FCDFF723B213AE007AA3F4 /* UserCoreDataProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCoreDataProtocol.swift; sourceTree = "<group>"; };
 		632194B70D0AC636CB2B847F /* PhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCell.swift; sourceTree = "<group>"; };
 		63219C5F3C3B40275C1AC524 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		63219D7C7886ADF7FFF33FD0 /* CoreMLManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreMLManager.swift; sourceTree = "<group>"; };
 		9C268BAC885081135A8D57AD /* Pods-IdealVisual.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisual.debug.xcconfig"; path = "Target Support Files/Pods-IdealVisual/Pods-IdealVisual.debug.xcconfig"; sourceTree = "<group>"; };
 		C0223884480607F6E632A79A /* libPods-IdealVisual.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-IdealVisual.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF38FB8C9FF56CB9EF1E3D4E /* Pods-IdealVisual.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisual.release.xcconfig"; path = "Target Support Files/Pods-IdealVisual/Pods-IdealVisual.release.xcconfig"; sourceTree = "<group>"; };
@@ -328,6 +338,7 @@
 			children = (
 				1853FC4223B7B00F0015A31A /* CoreData */,
 				18AC168823A8D5BB00F83290 /* Network */,
+				632192FBD0016AD82DE0DBF8 /* CoreML */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -374,6 +385,15 @@
 			path = Network;
 			sourceTree = "<group>";
 		};
+		18CCB143246C23D30044E095 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				18CCB141246C1FB60044E095 /* CategoriesView.swift */,
+				18CCB144246C26730044E095 /* CategoryPhotoCell.swift */,
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
 		18F8EA8B23B232D20085A9BD /* Easier */ = {
 			isa = PBXGroup;
 			children = (
@@ -393,11 +413,22 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		632192FBD0016AD82DE0DBF8 /* CoreML */ = {
+			isa = PBXGroup;
+			children = (
+				63219D7C7886ADF7FFF33FD0 /* CoreMLManager.swift */,
+				18CCB13D246827F20044E095 /* IdealVisualClassifier 1.mlmodel */,
+				18CCB13F24682CAF0044E095 /* ErrorsCoreML.swift */,
+			);
+			path = CoreML;
+			sourceTree = "<group>";
+		};
 		632195CA3321E1A5988D39D1 /* View */ = {
 			isa = PBXGroup;
 			children = (
 				1853FC3C23B7AEC00015A31A /* Auth */,
 				1853FC3D23B7AECE0015A31A /* Main */,
+				18CCB143246C23D30044E095 /* Categories */,
 				1853FC3E23B7AEE70015A31A /* Profile */,
 				1853FC3F23B7AF000015A31A /* Post */,
 			);
@@ -590,6 +621,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18CCB13E246827F30044E095 /* IdealVisualClassifier 1.mlmodel in Sources */,
+				18CCB145246C26730044E095 /* CategoryPhotoCell.swift in Sources */,
 				189322B5234687CE004026FC /* CustomElements.swift in Sources */,
 				18BD9DB323C3502B000E5FD3 /* InputFieldsDelegate.swift in Sources */,
 				18F8EA8523B2246D0085A9BD /* UserViewModel.swift in Sources */,
@@ -597,6 +630,7 @@
 				18E1555223B4EF580051D833 /* PhotoNetworkManager.swift in Sources */,
 				1853FC4423BC836C0015A31A /* PostNetworkManagerProtocol.swift in Sources */,
 				180C5C6423B63DC7003538DF /* PostCoreDataProtocol.swift in Sources */,
+				18CCB142246C1FB60044E095 /* CategoriesView.swift in Sources */,
 				184EB37723971D3F00256255 /* FileManager.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
 				18F8EA9023B280820085A9BD /* UserNetworkManager.swift in Sources */,
@@ -605,6 +639,7 @@
 				18E1554C23B40C5D0051D833 /* ProfileProtocol.swift in Sources */,
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
 				18E1555423B4EF9B0051D833 /* PhotoNetworkManagerProtocol.swift in Sources */,
+				18CCB14024682CAF0044E095 /* ErrorsCoreML.swift in Sources */,
 				1853FC4623BC8A9E0015A31A /* PostNetworkManager.swift in Sources */,
 				18F8EA9423B296E20085A9BD /* view-modelErrors.swift in Sources */,
 				18F8EA8723B228780085A9BD /* UserViewModelProtocol.swift in Sources */,
@@ -630,6 +665,7 @@
 				18E1555023B40ED20051D833 /* BlockProtocol.swift in Sources */,
 				180E3CDD23A3B84A000B96D8 /* JsonModels.swift in Sources */,
 				18D4EEE5236DAE6A007C16D6 /* UserCoreData.swift in Sources */,
+				632192245184F7C7C13373A5 /* CoreMLManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -113,7 +113,7 @@ final class SignUp: UIViewController {
         titleV.adjustsFontSizeToFitWidth = true
 
         let logo = UIImageView()
-        view.addSubview(logo)
+        titleView?.addSubview(logo)
         logo.translatesAutoresizingMaskIntoConstraints = false
         logo.image = UIImage(named: "app")?.withRenderingMode(.alwaysOriginal)
         logo.widthAnchor.constraint(equalToConstant: 35).isActive = true
@@ -146,7 +146,7 @@ final class SignUp: UIViewController {
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.setEditFields(state: true)
         }
-        username.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -200).isActive = true
+        username.centerYAnchor.constraint(equalTo: scroll.topAnchor, constant: 200).isActive = true
         email.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 40).isActive = true
         password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 40).isActive = true
         repeatPassword.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 40).isActive = true
@@ -165,16 +165,11 @@ final class SignUp: UIViewController {
             $0.layer.cornerRadius = 10
         }
 
-        guard
-            let repeatPassword = repeatPassword
-        else {
-            return
-        }
+        guard let repeatPassword = repeatPassword else { return }
 
         createAccountButton.topAnchor.constraint(equalTo: repeatPassword.bottomAnchor,
                                                  constant: 50).isActive = true
         createAccountButton.widthAnchor.constraint(equalToConstant: 210).isActive = true
-        createAccountButton.setTitleColor(.white, for: .normal)
         createAccountButton.backgroundColor = Colors.blue
         createAccountButton.addTarget(self, action: #selector(createAccount), for: .touchUpInside)
 
@@ -204,7 +199,7 @@ final class SignUp: UIViewController {
     @objc
     private func createAccount() {
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 45,
-                                                                     y: 495,
+                                                                     y: 485,
                                                                      width: 50, height: 50))
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true

@@ -96,6 +96,7 @@ final class UserViewModel: UserViewModelProtocol {
                         let avaPath = self.avaFolder + ava
                         guard MyFileManager.saveFile(data: data, filePath: avaPath) != nil else {
                             // FIXME: надо ли возвращать ошибку?
+                            Logger.log("save file error")
                             return
                         }
                         user.avatar = avaPath
@@ -103,6 +104,7 @@ final class UserViewModel: UserViewModelProtocol {
                         let user = self.userCoreData.create(token: token, username: user.username,
                                                             email: user.email, ava: user.avatar)
                         self.user = user
+                        completion?(nil)
                     }.catch { (error) in
                         Logger.log(error)
                         switch error as? NetworkErr {
@@ -114,45 +116,6 @@ final class UserViewModel: UserViewModelProtocol {
                             completion?(UserViewModelErrors.unknown)
                         }
                     }
-
-//                    self.photoNetworkManager.get(path: ava, completion: { (data, error) in
-//                        DispatchQueue.main.async {
-//                            if let error = error {
-//                                switch error.name {
-//                                case ErrorsNetwork.notFound:
-//                                    // assume user nas no ava, so we will log in with data without it
-//                                    user.avatar = ""
-//                                default:
-//                                    Logger.log("cannot get avatar: \(error)")
-//                                    completion?(ErrorsUserViewModel.unknownError)
-//                                }
-//                                return
-//                            }
-//
-//                            if let data = data {
-//                                let avaPath = self.avaFolder + ava
-//                                guard MyFileManager.saveFile(data: data, filePath: avaPath) != nil else {
-//                                    completion?(ErrorsUserViewModel.filesystemSave)
-//                                    return
-//                                }
-//                                user.avatar = avaPath
-//                            } else {
-//                                Logger.log("data error: \(ErrorsUserViewModel.noData)")
-//                                completion?(ErrorsUserViewModel.noData)
-//                                return
-//                            }
-//
-//                            guard let user = self.userCoreData.create(token: token, username: user.username,
-//                                                                      email: user.email, ava: user.avatar)
-//                            else {
-//                                Logger.log("cannot create core data user")
-//                                completion?(ErrorsUserViewModel.unknownError)
-//                                return
-//                            }
-//                            self.user = user
-//                            completion?(nil)
-//                        }
-//                    })
                 }
             } else {
                 guard let user = self.userCoreData.create(token: token, username: user.username,
@@ -262,26 +225,6 @@ final class UserViewModel: UserViewModelProtocol {
                 }.catch { (error) in
                     Logger.log(error)
                 }
-
-//                photoNetworkManager.upload(token: token, data: ava, name: avaName,
-//                                           completion: { (uploadedPath, error) in
-//                    if let error = error {
-//                        switch error.name {
-//                        case ErrorsNetwork.notFound:
-//                            completion?(ErrorsUserViewModel.notFound)
-//                        default:
-//                            Logger.log("unknown error: \(error)")
-//                            completion?(ErrorsUserViewModel.unknownError)
-//                        }
-//                        return
-//                    }
-//
-//                    guard let uploadedPath = uploadedPath else { return }
-//
-//                    avaPath = uploadedPath
-//
-//                    updateServerInfo()
-//                })
             }
         } else {
             updateServerInfo()
@@ -328,11 +271,6 @@ final class UserViewModel: UserViewModelProtocol {
             Logger.log("unexpected network error")
             return
         }
-//        guard let fieldErrors = error.description as? [JsonFieldError] else {
-//            Logger.log("unknown fields")
-//            completion?(UserViewModelErrors.unknown)
-//            return
-//        }
 
         fieldErrors.forEach { (err) in
             switch err.field {

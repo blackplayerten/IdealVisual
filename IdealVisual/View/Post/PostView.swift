@@ -246,38 +246,18 @@ extension PostView: BlockProtocol {
             }.catch { (error) in
                 self.procError(error: error as? PostViewModelErrors)
             }
-
-//            viewModel?.update(post: publication, date: nil, place: nil, text: post?.textView?.text,
-//                             completion: { [weak self] (error) in
-//                                DispatchQueue.main.async {
-//                                    self?.procError(error: error)
-//                                }
-//            })
         case self.place:
             firstly {
                 viewModel.update(post: publication, date: nil, place: place?.textView?.text, text: nil)
             }.catch {  (error) in
                self.procError(error: error as? PostViewModelErrors)
             }
-//            viewModel?.update(post: publication, date: nil, place: place?.textView?.text, text: nil,
-//                             completion: { [weak self] (error) in
-//                                DispatchQueue.main.async {
-//                                    self?.procError(error: error)
-//                                }
-//                            })
         case self.date:
             firstly {
                 viewModel.update(post: publication, date: date?.datePicker?.date, place: nil, text: nil)
             }.catch { (error) in
                 self.procError(error: error as? PostViewModelErrors)
             }
-
-//            viewModel?.update(post: publication, date: date?.datePicker?.date, place: nil, text: nil,
-//                             completion: { [weak self] (error) in
-//                                DispatchQueue.main.async {
-//                                    self?.procError(error: error)
-//                                }
-//                            })
         default: break
         }
     }
@@ -289,6 +269,6 @@ extension PostView: BlockProtocol {
     func textViewShouldEndEditing(block: BlockPost) {
         // FIXME: при фокусе на новый текст филд сначала отрабатывает ShouldBegin нового,
         // а потом ShouldEnd старого, валится на guard'e activeField'а
-//        activeField = nil
+        activeField = nil
     }
 }

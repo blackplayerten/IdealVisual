@@ -10,11 +10,11 @@ import Foundation
 
 final class NetworkURLS {
 //    for debugging
-    static let apiPath = "http://127.0.0.1/api/"
-    static let staticPath = "http://127.0.0.1/static/"
+//    static let apiPath = "http://127.0.0.1/api/"
+//    static let staticPath = "http://127.0.0.1/static/"
 
-//    static let apiPath = "https://ideal-visual.ru/api/"
-//    static let staticPath = "https://ideal-visual.ru/static/"
+    static let apiPath = "https://ideal-visual.ru/api/"
+    static let staticPath = "https://ideal-visual.ru/static/"
 
     static let sessionURL = URL(string: apiPath + "session")
     static let accountURL = URL(string: apiPath + "account")
