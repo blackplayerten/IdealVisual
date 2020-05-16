@@ -11,8 +11,10 @@ import UIKit
 import Photos
 
 final class CategoriesView: UIViewController {
+    private var classificationViewModel: CoreMLViewModelProtocol?
+    private var classificationStruct: ClassificationStruct?
     private var scaningImages = [UIImage]()
-    
+
     lazy fileprivate var collectionWithCategories: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
         let sizecell = CGSize(width: cellSide, height: cellSide)
@@ -23,12 +25,18 @@ final class CategoriesView: UIViewController {
         layout.scrollDirection = .vertical
         return UICollectionView(frame: self.view.frame, collectionViewLayout: layout)
     }()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         navigationController?.navigationBar.topItem?.title = "Назад"
         navigationController?.navigationBar.tintColor = .black
+
+        self.classificationViewModel = CoreMLViewModel() as? CoreMLViewModelProtocol
+        if classificationViewModel == nil {
+            Logger.log("classification view-model is empty")
+            return
+        }
 
         let i1 = UIImage(named: "close")
         let i2 = UIImage(named: "close")
@@ -40,7 +48,7 @@ final class CategoriesView: UIViewController {
         setupCollection()
 //        getPhotos()
     }
-    
+
     private func setupCollection() {
         view.addSubview(collectionWithCategories)
         collectionWithCategories.translatesAutoresizingMaskIntoConstraints = false
@@ -50,13 +58,13 @@ final class CategoriesView: UIViewController {
         collectionWithCategories.bottomAnchor.constraint(equalTo:
             view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         collectionWithCategories.backgroundColor = .white
-        
+
         collectionWithCategories.delegate = self
         collectionWithCategories.dataSource = self
-        
+
         collectionWithCategories.register(CategoryCell.self, forCellWithReuseIdentifier: "cell")
     }
-    
+
     private func getPhotos() {
         let manager = PHImageManager.default()
         let requestOptions = PHImageRequestOptions()
@@ -89,6 +97,18 @@ final class CategoriesView: UIViewController {
     }
 }
 
+// MARK: ui error
+extension CategoriesView {
+    private func _error(text: String, color: UIColor? = Colors.red) {
+        let un = UIError(text: text, place: view, color: color)
+        view.addSubview(un)
+        un.translatesAutoresizingMaskIntoConstraints = false
+        un.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: -view.bounds.width / 2).isActive = true
+        un.centerYAnchor.constraint(equalTo: collectionWithCategories.topAnchor).isActive = true
+    }
+}
+
+// MARK: - collection data source
 extension CategoriesView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         3
@@ -104,7 +124,46 @@ extension CategoriesView: UICollectionViewDataSource {
                                       height: view.bounds.width / 3 - 1)
 
             unwrapCell.backgroundColor = .gray
-            
+
+            for image in scaningImages {
+                classificationViewModel?.makeClassificationRequest(completion: { [weak self] (identifier, error) in
+                    if let err = error {
+                        switch err {
+                        case .noResults:
+                            self?._error(text: "Нет картинок для сравнения", color: Colors.darkGray)
+                        case .emptyIdentifier:
+                            self?._error(text: "Нет заданных категорий", color: Colors.darkGray)
+                        default:
+                            self?._error(text: "Упс, что-то пошло не так")
+                        }
+                    }
+
+                    guard identifier != nil else {
+                        Logger.log("empty identifier")
+                        self?._error(text: "Нет заданных категорий")
+                        return
+                    }
+
+                    var animals_images = [UIImage]()
+                    var food_images = [UIImage]()
+                    var people_images = [UIImage]()
+
+                    switch identifier {
+                    case .animal:
+                        animals_images.append(image)
+                    case .food:
+                        food_images.append(image)
+                    case .people:
+                    people_images.append(image)
+                    default:
+                        Logger.log("unknown type")
+                        self?._error(text: "Неизвестная категория")
+                    }
+                    self?.classificationStruct = ClassificationStruct(animal: animals_images, food: food_images,
+                                                                      people: people_images)
+                })
+            }
+
             unwrapCell.picture.image = photo
         }
         return cell

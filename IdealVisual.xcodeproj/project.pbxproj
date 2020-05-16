@@ -25,6 +25,11 @@
 		1853FC4123B7AFB90015A31A /* Routing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1853FC4023B7AFB90015A31A /* Routing.swift */; };
 		1853FC4423BC836C0015A31A /* PostNetworkManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1853FC4323BC836C0015A31A /* PostNetworkManagerProtocol.swift */; };
 		1853FC4623BC8A9E0015A31A /* PostNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1853FC4523BC8A9E0015A31A /* PostNetworkManager.swift */; };
+		18618AB7247001F100A6F10E /* CoreMLManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618AB6247001F100A6F10E /* CoreMLManagerProtocol.swift */; };
+		18618ABA2470038A00A6F10E /* CoreMLViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618AB92470038A00A6F10E /* CoreMLViewModelProtocol.swift */; };
+		18618ABC2470039E00A6F10E /* CoreMLViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618ABB2470039E00A6F10E /* CoreMLViewModel.swift */; };
+		18618ABE247019AA00A6F10E /* CategoriesType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618ABD247019AA00A6F10E /* CategoriesType.swift */; };
+		18618AC0247023A700A6F10E /* ClassificationStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618ABF247023A700A6F10E /* ClassificationStruct.swift */; };
 		188B5FB02361E47E00EA3701 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PostView.swift */; };
 		188F4E3A23BE8BF100043E70 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */; };
 		188F4E3B23BE8BF100043E70 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */; };
@@ -104,6 +109,11 @@
 		1853FC4023B7AFB90015A31A /* Routing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routing.swift; sourceTree = "<group>"; };
 		1853FC4323BC836C0015A31A /* PostNetworkManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostNetworkManagerProtocol.swift; sourceTree = "<group>"; };
 		1853FC4523BC8A9E0015A31A /* PostNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostNetworkManager.swift; sourceTree = "<group>"; };
+		18618AB6247001F100A6F10E /* CoreMLManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLManagerProtocol.swift; sourceTree = "<group>"; };
+		18618AB92470038A00A6F10E /* CoreMLViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLViewModelProtocol.swift; sourceTree = "<group>"; };
+		18618ABB2470039E00A6F10E /* CoreMLViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLViewModel.swift; sourceTree = "<group>"; };
+		18618ABD247019AA00A6F10E /* CategoriesType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesType.swift; sourceTree = "<group>"; };
+		18618ABF247023A700A6F10E /* ClassificationStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassificationStruct.swift; sourceTree = "<group>"; };
 		188B5FAF2361E47E00EA3701 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
@@ -333,6 +343,15 @@
 			path = CoreData;
 			sourceTree = "<group>";
 		};
+		18618AB82470034B00A6F10E /* CoreML */ = {
+			isa = PBXGroup;
+			children = (
+				18618AB92470038A00A6F10E /* CoreMLViewModelProtocol.swift */,
+				18618ABB2470039E00A6F10E /* CoreMLViewModel.swift */,
+			);
+			path = CoreML;
+			sourceTree = "<group>";
+		};
 		188B5FB32361E68200EA3701 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -358,6 +377,7 @@
 				18F8EA9323B296E20085A9BD /* view-modelErrors.swift */,
 				1853FC3623B7ACDF0015A31A /* User */,
 				1853FC3723B7ACF40015A31A /* Post */,
+				18618AB82470034B00A6F10E /* CoreML */,
 			);
 			path = "View-Model";
 			sourceTree = "<group>";
@@ -390,6 +410,7 @@
 			children = (
 				18CCB141246C1FB60044E095 /* CategoriesView.swift */,
 				18CCB144246C26730044E095 /* CategoryPhotoCell.swift */,
+				18618ABF247023A700A6F10E /* ClassificationStruct.swift */,
 			);
 			path = Categories;
 			sourceTree = "<group>";
@@ -416,7 +437,9 @@
 		632192FBD0016AD82DE0DBF8 /* CoreML */ = {
 			isa = PBXGroup;
 			children = (
+				18618AB6247001F100A6F10E /* CoreMLManagerProtocol.swift */,
 				63219D7C7886ADF7FFF33FD0 /* CoreMLManager.swift */,
+				18618ABD247019AA00A6F10E /* CategoriesType.swift */,
 				18CCB13D246827F20044E095 /* IdealVisualClassifier 1.mlmodel */,
 				18CCB13F24682CAF0044E095 /* ErrorsCoreML.swift */,
 			);
@@ -640,15 +663,20 @@
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
 				18E1555423B4EF9B0051D833 /* PhotoNetworkManagerProtocol.swift in Sources */,
 				18CCB14024682CAF0044E095 /* ErrorsCoreML.swift in Sources */,
+				18618ABE247019AA00A6F10E /* CategoriesType.swift in Sources */,
 				1853FC4623BC8A9E0015A31A /* PostNetworkManager.swift in Sources */,
 				18F8EA9423B296E20085A9BD /* view-modelErrors.swift in Sources */,
+				18618AB7247001F100A6F10E /* CoreMLManagerProtocol.swift in Sources */,
 				18F8EA8723B228780085A9BD /* UserViewModelProtocol.swift in Sources */,
+				18618AC0247023A700A6F10E /* ClassificationStruct.swift in Sources */,
 				180C5C6823B6844E003538DF /* PostViewModelProtocol.swift in Sources */,
 				18FCDFF823B213AF007AA3F4 /* UserCoreDataProtocol.swift in Sources */,
+				18618ABA2470038A00A6F10E /* CoreMLViewModelProtocol.swift in Sources */,
 				18ACE2A42391AB78008B05B8 /* PostCoreData.swift in Sources */,
 				181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */,
 				18FCDFF623B0BFF3007AA3F4 /* HttpEntity.swift in Sources */,
 				63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */,
+				18618ABC2470039E00A6F10E /* CoreMLViewModel.swift in Sources */,
 				63219A4A265F4D025E33856C /* MainView.swift in Sources */,
 				18E8C53A237B7EE60064B4F0 /* SignUp.swift in Sources */,
 				1838C7B823718358000A32A9 /* SignIn.swift in Sources */,

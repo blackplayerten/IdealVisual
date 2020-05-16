@@ -8,8 +8,10 @@
 
 import Foundation
 
-enum CoreMLErrors {
+enum CoreMLErrorsModel: Error {
     case createModel
     case noResults
     case resultsType
+    case unknownIdentifier
+    case unknown
 }
