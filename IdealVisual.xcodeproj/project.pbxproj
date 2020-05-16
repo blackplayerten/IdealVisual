@@ -30,6 +30,7 @@
 		18618ABC2470039E00A6F10E /* CoreMLViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618ABB2470039E00A6F10E /* CoreMLViewModel.swift */; };
 		18618ABE247019AA00A6F10E /* CategoriesType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618ABD247019AA00A6F10E /* CategoriesType.swift */; };
 		18618AC0247023A700A6F10E /* ClassificationStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618ABF247023A700A6F10E /* ClassificationStruct.swift */; };
+		18618AC22470492700A6F10E /* CategoryViewSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618AC12470492700A6F10E /* CategoryViewSectionHeader.swift */; };
 		188B5FB02361E47E00EA3701 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PostView.swift */; };
 		188F4E3A23BE8BF100043E70 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */; };
 		188F4E3B23BE8BF100043E70 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */; };
@@ -114,6 +115,7 @@
 		18618ABB2470039E00A6F10E /* CoreMLViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLViewModel.swift; sourceTree = "<group>"; };
 		18618ABD247019AA00A6F10E /* CategoriesType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesType.swift; sourceTree = "<group>"; };
 		18618ABF247023A700A6F10E /* ClassificationStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassificationStruct.swift; sourceTree = "<group>"; };
+		18618AC12470492700A6F10E /* CategoryViewSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewSectionHeader.swift; sourceTree = "<group>"; };
 		188B5FAF2361E47E00EA3701 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
@@ -410,6 +412,7 @@
 			children = (
 				18CCB141246C1FB60044E095 /* CategoriesView.swift */,
 				18CCB144246C26730044E095 /* CategoryPhotoCell.swift */,
+				18618AC12470492700A6F10E /* CategoryViewSectionHeader.swift */,
 				18618ABF247023A700A6F10E /* ClassificationStruct.swift */,
 			);
 			path = Categories;
@@ -654,6 +657,7 @@
 				1853FC4423BC836C0015A31A /* PostNetworkManagerProtocol.swift in Sources */,
 				180C5C6423B63DC7003538DF /* PostCoreDataProtocol.swift in Sources */,
 				18CCB142246C1FB60044E095 /* CategoriesView.swift in Sources */,
+				18618AC22470492700A6F10E /* CategoryViewSectionHeader.swift in Sources */,
 				184EB37723971D3F00256255 /* FileManager.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
 				18F8EA9023B280820085A9BD /* UserNetworkManager.swift in Sources */,

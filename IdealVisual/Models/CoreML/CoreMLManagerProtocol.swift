@@ -13,5 +13,5 @@ import Vision
 protocol CoreMLManagerProtocol: class {
     func createCoreMLModel(completion: ((VNCoreMLModel?, CoreMLErrorsModel?) -> Void)?)
     func create_classificasionRequest(model: VNCoreMLModel,
-                                      completion: ((CategoriesType?, CoreMLErrorsModel?) -> Void)?)
+                                      completion: ((CategoriesType?, CoreMLErrorsModel?) -> Void)?) -> VNCoreMLRequest
 }

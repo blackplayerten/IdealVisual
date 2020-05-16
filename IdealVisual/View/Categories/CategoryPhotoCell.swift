@@ -11,7 +11,7 @@ import UIKit
 
 final class CategoryCell: UICollectionViewCell {
     var picture = UIImageView()
-    
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(picture)

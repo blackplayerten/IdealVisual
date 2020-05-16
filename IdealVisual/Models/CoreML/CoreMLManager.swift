@@ -6,6 +6,7 @@
 import Foundation
 import CoreML
 import Vision
+import UIKit
 
 final class CoreMLManager: CoreMLManagerProtocol {
     // MARK: create ML model
@@ -21,7 +22,7 @@ final class CoreMLManager: CoreMLManagerProtocol {
 
     // MARK: classification request
     func create_classificasionRequest(model: VNCoreMLModel,
-                                      completion: ((CategoriesType?, CoreMLErrorsModel?) -> Void)?) {
+                                      completion: ((CategoriesType?, CoreMLErrorsModel?) -> Void)?) -> VNCoreMLRequest {
         let request = VNCoreMLRequest(model: model, completionHandler: { (request, error) in
             if let err = error as? CoreMLErrorsModel {
                 switch err {
@@ -55,11 +56,11 @@ final class CoreMLManager: CoreMLManagerProtocol {
                     _ = topClassifications.map { classification in
                         let identidier = String(classification.identifier)
                         switch identidier {
-                        case "Животное":
+                        case "animals":
                             completion?(CategoriesType.animal, nil)
-                        case "Еда":
+                        case "food":
                             completion?(CategoriesType.food, nil)
-                        case "Человек":
+                        case "people":
                             completion?(CategoriesType.people, nil)
                         default:
                             Logger.log("unknown identifier: \(identidier)")
@@ -70,36 +71,46 @@ final class CoreMLManager: CoreMLManagerProtocol {
             }
         })
         request.imageCropAndScaleOption = .centerCrop
+        return request
     }
 
-//    func kek(request: VNRequest, completion: ((VNRequest?, Error?) -> Void)?) {
-//        DispatchQueue.main.async {
-//            guard let results = request.results else {
-//                Logger.log("unable to classify image")
-//                completion?(nil, CoreMLErrorsModel.noResults)
-//                return
-//            }
-//
-//            guard let classifications = results as? [VNClassificationObservation] else {
-//                Logger.log("non-vnclassificationobservation type results")
-//                completion?(nil, CoreMLErrorsModel.resultsType)
-//                return
-//            }
-//
-//            if classifications.isEmpty {
-//                Logger.log("nothing recognized")
-//                completion?(nil, CoreMLErrorsModel.noResults)
-//            } else {
-//                // Display top classifications ranked by confidence in the UI.
-//                let topClassifications = classifications.prefix(2)
-//                let descriptions = topClassifications.map { classification in
-//                    // Formats the classification for display; e.g. "(0.37) cliff, drop, drop-off".
-//                   return String(format: "  (%.2f) %@", classification.confidence, classification.identifier)
-//                }
-//                Logger.log("Classification:\n" + descriptions.joined(separator: "\n"))
-////                request.imageCropAndScaleOption = .centerCrop
-//                completion?(request, nil)
-//            }
-//        }
-//    }
+    func kek(request: VNRequest, completion: ((CategoriesType?, Error?) -> Void)?) {
+        DispatchQueue.main.async {
+            guard let results = request.results else {
+                Logger.log("unable to classify image")
+                completion?(nil, CoreMLErrorsModel.noResults)
+                return
+            }
+
+            guard let classifications = results as? [VNClassificationObservation] else {
+                Logger.log("non-vnclassificationobservation type results")
+                completion?(nil, CoreMLErrorsModel.resultsType)
+                return
+            }
+
+            if classifications.isEmpty {
+                Logger.log("nothing recognized")
+                completion?(nil, CoreMLErrorsModel.noResults)
+            } else {
+                let topClassifications = classifications
+                _ = topClassifications.map { classification in
+                    let identidier = String(classification.identifier)
+                    switch identidier {
+                    case "animals":
+                        completion?(CategoriesType.animal, nil)
+                        return
+                    case "food":
+                        completion?(CategoriesType.food, nil)
+                        return
+                    case "people":
+                        completion?(CategoriesType.people, nil)
+                        return
+                    default:
+                        Logger.log("unknown identifier: \(identidier)")
+                        completion?(CategoriesType.another, nil)
+                    }
+                }
+            }
+        }
+    }
 }

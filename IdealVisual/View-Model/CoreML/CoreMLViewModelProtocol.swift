@@ -7,7 +7,8 @@
 //
 
 import Foundation
+import UIKit
 
 protocol CoreMLViewModelProtocol: class {
-    func makeClassificationRequest(completion: ((CategoriesType?, CoreMLViewModelErrors?) -> Void)?)
+    func makeClassificationRequest(image: UIImage, completion: ((CategoriesType?, CoreMLViewModelErrors?) -> Void)?)
 }
