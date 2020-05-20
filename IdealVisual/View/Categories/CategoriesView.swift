@@ -12,12 +12,8 @@ import Photos
 
 final class CategoriesView: UIViewController {
     private var classificationViewModel: CoreMLViewModelProtocol?
-    private var classificationStruct: ClassificationStruct?
+    private var classificationStruct = ClassificationStruct(animal: [UIImage](), food: [UIImage](), people: [UIImage]())
     private var scaningImages = [UIImage]()
-    
-    private var animals_images = [UIImage]()
-    private var food_images = [UIImage]()
-    private var people_images = [UIImage]()
 
     lazy fileprivate var collectionWithCategories: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -48,24 +44,29 @@ final class CategoriesView: UIViewController {
         let i4 = UIImage(named: "4")
         let i5 = UIImage(named: "5")
         let i6 = UIImage(named: "6")
-//        scaningImages.append(i1!)
-//        scaningImages.append(i2!)
-//        scaningImages.append(i3!)
+         let i7 = UIImage(named: "7")
+         let i8 = UIImage(named: "8")
+         let i9 = UIImage(named: "9")
+
+        scaningImages.append(i1!)
+        scaningImages.append(i2!)
+        scaningImages.append(i3!)
         scaningImages.append(i4!)
-//        scaningImages.append(i5!)
-//        scaningImages.append(i6!)
-        
+        scaningImages.append(i5!)
+        scaningImages.append(i6!)
+        scaningImages.append(i7!)
+        scaningImages.append(i8!)
+        scaningImages.append(i9!)
+
         fillStruct()
-        
-        setupCollection()
 //        getPhotos()
-        
     }
-    
+
     private func fillStruct() {
-        for image in scaningImages {
-            classificationViewModel?.makeClassificationRequest(image: image,
+        for (i, image) in self.scaningImages.enumerated() {
+            self.classificationViewModel?.makeClassificationRequest(image: image,
                                                                completion: { [weak self] (identifier, error) in
+            DispatchQueue.main.async {
                 if let err = error {
                     switch err {
                     case .noResults:
@@ -85,24 +86,32 @@ final class CategoriesView: UIViewController {
 
                 switch identifier {
                 case .animal:
-                    print("a")
-                    self?.animals_images.append(image)
+                    self?.classificationStruct.animal.append(image)
                 case .food:
-                    print("f")
-                    self?.food_images.append(image)
+                    self?.classificationStruct.food.append(image)
                 case .people:
-                    print("p")
-                    self?.people_images.append(image)
+                    self?.classificationStruct.people.append(image)
                 default:
                     Logger.log("unknown type")
                     self?._error(text: "Неизвестная категория")
                 }
+
+                let alert = UIAlertController(title: nil, message: "Распознавание...", preferredStyle: .alert)
+                let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 10, y: 5, width: 50, height: 50))
+                loadingIndicator.color = Colors.lightBlue
+                loadingIndicator.hidesWhenStopped = true
+                loadingIndicator.startAnimating()
+
+                alert.view.addSubview(loadingIndicator)
+                self?.present(alert, animated: true, completion: nil)
+
+                if i == (self?.scaningImages.count)! - 1 {
+                    self?.setupCollection()
+                    self?.dismiss(animated: true, completion: nil)
+                }
+                }
             })
         }
-
-        self.classificationStruct = ClassificationStruct(animal: animals_images, food: food_images,
-                                                         people: people_images)
-        print("STRUCT: ", self.classificationStruct!)
     }
 
     private func setupCollection() {
@@ -170,11 +179,6 @@ extension CategoriesView {
 // MARK: - collection data source
 extension CategoriesView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard let classificationStruct = classificationStruct else {
-            Logger.log("no categories struct")
-            return 0
-        }
-
         switch section {
         case 0:
             return classificationStruct.animal.count
@@ -198,11 +202,11 @@ extension CategoriesView: UICollectionViewDataSource {
 
             switch indexPath.section {
             case 0:
-                unwrapCell.picture.image = classificationStruct?.animal[indexPath.item]
+                unwrapCell.picture.image = classificationStruct.animal[indexPath.item]
             case 1:
-                unwrapCell.picture.image = classificationStruct?.food[indexPath.item]
+                unwrapCell.picture.image = classificationStruct.food[indexPath.item]
             case 2:
-                unwrapCell.picture.image = classificationStruct?.people[indexPath.item]
+                unwrapCell.picture.image = classificationStruct.people[indexPath.item]
             default:
                 Logger.log("unknown category")
                 unwrapCell.picture.image = UIImage()
@@ -215,6 +219,11 @@ extension CategoriesView: UICollectionViewDataSource {
 extension CategoriesView: UICollectionViewDelegate {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 3
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
+                        referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: self.view.frame.width, height: 50)
     }
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String,

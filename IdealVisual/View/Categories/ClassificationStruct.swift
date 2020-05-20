@@ -10,9 +10,9 @@ import Foundation
 import UIKit
 
 struct ClassificationStruct {
-    let animal: [UIImage]
-    let food: [UIImage]
-    let people: [UIImage]
+    var animal: [UIImage]
+    var food: [UIImage]
+    var people: [UIImage]
     
     init(animal: [UIImage], food: [UIImage], people: [UIImage]) {
         self.animal = animal

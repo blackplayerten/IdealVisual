@@ -229,7 +229,7 @@ final class MainView: UIViewController {
     @objc private func doSync(_ sender: UIRefreshControl) {
         guard let viewModel = postViewModel else { return }
         do {
-            try viewModel.sync()
+            _ = try viewModel.sync()
         } catch {
             if let err = error as? PostViewModelErrors {
                 switch err {
@@ -245,8 +245,9 @@ final class MainView: UIViewController {
                     self._error(text: "Ошибка синхронизации", color: Colors.red)
                 }
             }
-            sender.endRefreshing()
         }
+
+        sender.endRefreshing()
 
 //        postViewModel?.sync(completion: { [weak self] (error) in
 //            DispatchQueue.main.async {

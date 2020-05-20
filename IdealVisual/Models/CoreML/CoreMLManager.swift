@@ -52,8 +52,7 @@ final class CoreMLManager: CoreMLManagerProtocol {
                     Logger.log("nothing recognized")
                     completion?(nil, CoreMLErrorsModel.noResults)
                 } else {
-                    let topClassifications = classifications
-                    _ = topClassifications.map { classification in
+                    classifications.first.map { classification in
                         let identidier = String(classification.identifier)
                         switch identidier {
                         case "animals":
@@ -72,45 +71,5 @@ final class CoreMLManager: CoreMLManagerProtocol {
         })
         request.imageCropAndScaleOption = .centerCrop
         return request
-    }
-
-    func kek(request: VNRequest, completion: ((CategoriesType?, Error?) -> Void)?) {
-        DispatchQueue.main.async {
-            guard let results = request.results else {
-                Logger.log("unable to classify image")
-                completion?(nil, CoreMLErrorsModel.noResults)
-                return
-            }
-
-            guard let classifications = results as? [VNClassificationObservation] else {
-                Logger.log("non-vnclassificationobservation type results")
-                completion?(nil, CoreMLErrorsModel.resultsType)
-                return
-            }
-
-            if classifications.isEmpty {
-                Logger.log("nothing recognized")
-                completion?(nil, CoreMLErrorsModel.noResults)
-            } else {
-                let topClassifications = classifications
-                _ = topClassifications.map { classification in
-                    let identidier = String(classification.identifier)
-                    switch identidier {
-                    case "animals":
-                        completion?(CategoriesType.animal, nil)
-                        return
-                    case "food":
-                        completion?(CategoriesType.food, nil)
-                        return
-                    case "people":
-                        completion?(CategoriesType.people, nil)
-                        return
-                    default:
-                        Logger.log("unknown identifier: \(identidier)")
-                        completion?(CategoriesType.another, nil)
-                    }
-                }
-            }
-        }
     }
 }

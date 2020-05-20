@@ -35,17 +35,18 @@ final class CoreMLViewModel: CoreMLViewModelProtocol {
             }
             self?.model = model
         })
-        
+
         let orientation = CGImagePropertyOrientation(rawValue: UInt32(image.imageOrientation.rawValue))!
         guard let ciImage = CIImage(image: image) else {
             fatalError("Unable to create \(CIImage.self) from \(image).")
         }
-        
+
         DispatchQueue.global(qos: .userInitiated).async {
             let handler = VNImageRequestHandler(ciImage: ciImage, orientation: orientation)
             do {
                 try handler.perform([
-                    self.coreMLModelManager.create_classificasionRequest(model: self.model!, completion: { (identifier, error) in
+                    self.coreMLModelManager.create_classificasionRequest(model: self.model!,
+                                                                         completion: { (identifier, error) in
                         if let err = error {
                             switch err {
                             case .noResults:
