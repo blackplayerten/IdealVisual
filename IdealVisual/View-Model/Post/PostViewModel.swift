@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 import PromiseKit
 
-final class PostViewModel: NSObject, PostViewModelProtocol {
+final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDelegate {
     private var user: User?
     private var postCoreData: PostCoreDataProtocol
     private var postNetworkManager: PostNetworkManagerProtocol

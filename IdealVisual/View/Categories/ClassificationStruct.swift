@@ -9,6 +9,11 @@
 import Foundation
 import UIKit
 
+struct ImageWithNameStruct {
+    var imageName: String
+    var image: UIImage
+}
+
 struct ClassificationStruct {
     var animal: [UIImage]
     var food: [UIImage]

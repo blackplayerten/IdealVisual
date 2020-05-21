@@ -22,10 +22,10 @@ final class CoreMLViewModel: CoreMLViewModelProtocol {
         coreMLModelManager.createCoreMLModel(completion: { [weak self] (model, error) in
             if let err = error {
                 switch err {
-                case .createModel:
-                    completion?(nil, CoreMLViewModelErrors.createModel)
-                default:
-                    completion?(nil, CoreMLViewModelErrors.unknown)
+                    case .createModel:
+                        completion?(nil, CoreMLViewModelErrors.createModel)
+                    default:
+                        completion?(nil, CoreMLViewModelErrors.unknown)
                 }
             }
             guard let model = model else {
@@ -35,13 +35,13 @@ final class CoreMLViewModel: CoreMLViewModelProtocol {
             }
             self?.model = model
         })
-
-        let orientation = CGImagePropertyOrientation(rawValue: UInt32(image.imageOrientation.rawValue))!
+        
+        let orientation = UIImageOrientationToCGImagePropertyOrientation(orientation: image.imageOrientation)
         guard let ciImage = CIImage(image: image) else {
             fatalError("Unable to create \(CIImage.self) from \(image).")
         }
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        //DispatchQueue.main.async {
             let handler = VNImageRequestHandler(ciImage: ciImage, orientation: orientation)
             do {
                 try handler.perform([
@@ -75,6 +75,27 @@ final class CoreMLViewModel: CoreMLViewModelProtocol {
                  */
                 print("Failed to perform classification.\n\(error.localizedDescription)")
             }
-        }
+        //}
+    }
+}
+
+func UIImageOrientationToCGImagePropertyOrientation(orientation: UIImage.Orientation) -> CGImagePropertyOrientation {
+    switch orientation {
+    case .up:
+        return .up
+    case .upMirrored:
+        return .upMirrored
+    case .down:
+        return .down
+    case .downMirrored:
+        return .downMirrored
+    case .leftMirrored:
+        return .leftMirrored
+    case .right:
+        return .right
+    case .rightMirrored:
+        return .rightMirrored
+    case .left:
+        return .left
     }
 }

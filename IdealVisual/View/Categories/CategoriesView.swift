@@ -14,6 +14,9 @@ final class CategoriesView: UIViewController {
     private var classificationViewModel: CoreMLViewModelProtocol?
     private var classificationStruct = ClassificationStruct(animal: [UIImage](), food: [UIImage](), people: [UIImage]())
     private var scaningImages = [UIImage]()
+    private var scaningMutex = NSLock()
+
+    private weak var delegateCreatePosts: MainViewAddPostsDelegate?
 
     lazy fileprivate var collectionWithCategories: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -26,11 +29,19 @@ final class CategoriesView: UIViewController {
         return UICollectionView(frame: self.view.frame, collectionViewLayout: layout)
     }()
 
+    init(postscreateDelegate: MainViewAddPostsDelegate?) {
+        self.delegateCreatePosts = postscreateDelegate
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        navigationController?.navigationBar.topItem?.title = "Назад"
-        navigationController?.navigationBar.tintColor = .black
+        setupNavItems()
 
         self.classificationViewModel = CoreMLViewModel()
         if classificationViewModel == nil {
@@ -38,28 +49,63 @@ final class CategoriesView: UIViewController {
             return
         }
 
-        let i1 = UIImage(named: "1")
-        let i2 = UIImage(named: "2")
-        let i3 = UIImage(named: "3")
-        let i4 = UIImage(named: "4")
-        let i5 = UIImage(named: "5")
-        let i6 = UIImage(named: "6")
-         let i7 = UIImage(named: "7")
-         let i8 = UIImage(named: "8")
-         let i9 = UIImage(named: "9")
+        getPhotos()
+    }
 
-        scaningImages.append(i1!)
-        scaningImages.append(i2!)
-        scaningImages.append(i3!)
-        scaningImages.append(i4!)
-        scaningImages.append(i5!)
-        scaningImages.append(i6!)
-        scaningImages.append(i7!)
-        scaningImages.append(i8!)
-        scaningImages.append(i9!)
+    // MARK: - navbar and swipe back
+    private func setupNavItems() {
+        navigationController?.navigationBar.isTranslucent = true
+        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        navigationController?.navigationBar.shadowImage = UIImage()
+        navigationController?.navigationBar.backgroundColor = .none
 
-        fillStruct()
-//        getPhotos()
+        navigationItem.setHidesBackButton(true, animated: false)
+        guard let buttonBack = UIImage(named: "previous_gray")?.withRenderingMode(.alwaysOriginal) else { return }
+        let myBackButton = SubstrateButton(image: buttonBack, side: 35, target: self, action: #selector(back),
+                                           substrateColor: nil)
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: myBackButton)
+
+        if let selectedCells = collectionWithCategories.indexPathsForSelectedItems {
+            if !(selectedCells.count == 0) {
+                guard let markYes = UIImage(named: "yes_yellow") else { return }
+                navigationItem.rightBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: markYes,
+                                                                                           side: 33,
+                                                                                           target: self,
+                                                                                           action: #selector(save)
+                ))
+            } else {
+                navigationItem.rightBarButtonItem = nil
+            }
+        }
+
+        let swipeBack = UISwipeGestureRecognizer(target: self, action: #selector(back))
+        swipeBack.direction = .right
+        view.addGestureRecognizer(swipeBack)
+    }
+
+    @objc
+    private func back() {
+        navigationController?.popViewController(animated: true)
+    }
+
+    @objc
+    private func save() {
+        if let selectedCells = collectionWithCategories.indexPathsForSelectedItems {
+            if selectedCells.count == 0 {
+                setupNavItems()
+                return
+            }
+
+            selectedCells.forEach {
+                guard let cell = collectionWithCategories.cellForItem(at: $0) as? PhotoCell else { return }
+                cell.selectedImage.isHidden = true
+                delegateCreatePosts?.create(photoName: "photoName",
+                                            photoData: cell.picture.image!.jpegData(compressionQuality: 1.0),
+                                            date: Date(timeIntervalSince1970: 0), place: "", text: "")
+            }
+
+            self.close_controller()
+        }
     }
 
     private func fillStruct() {
@@ -67,6 +113,7 @@ final class CategoriesView: UIViewController {
             self.classificationViewModel?.makeClassificationRequest(image: image,
                                                                completion: { [weak self] (identifier, error) in
             DispatchQueue.main.async {
+                print(i)
                 if let err = error {
                     switch err {
                     case .noResults:
@@ -104,8 +151,10 @@ final class CategoriesView: UIViewController {
 
                 alert.view.addSubview(loadingIndicator)
                 self?.present(alert, animated: true, completion: nil)
+                
+                print(image)
 
-                if i == (self?.scaningImages.count)! - 1 {
+                if i == (self?.scaningImages.count)! - 1 { // FIXME: unwrap with guard
                     self?.setupCollection()
                     self?.dismiss(animated: true, completion: nil)
                 }
@@ -127,10 +176,11 @@ final class CategoriesView: UIViewController {
         collectionWithCategories.delegate = self
         collectionWithCategories.dataSource = self
 
-        collectionWithCategories.register(CategoryCell.self, forCellWithReuseIdentifier: "cell")
+        collectionWithCategories.register(PhotoCell.self, forCellWithReuseIdentifier: "cell")
         collectionWithCategories.register(CategoryViewSectionHeader.self,
                                           forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                                           withReuseIdentifier: "header")
+        collectionWithCategories.allowsMultipleSelection = true
     }
 
     private func getPhotos() {
@@ -139,9 +189,6 @@ final class CategoriesView: UIViewController {
         requestOptions.isSynchronous = false
         requestOptions.isNetworkAccessAllowed = false
         requestOptions.deliveryMode = .highQualityFormat
-        // .highQualityFormat will return better quality photos
-//        let fetchOptions = PHFetchOptions()
-//        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
 
         let results: PHFetchResult = PHAsset.fetchAssets(with: .image, options: nil)
         if results.count > 0 {
@@ -151,17 +198,21 @@ final class CategoriesView: UIViewController {
                 manager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill,
                                      options: requestOptions) { (image, _) in
                     if let image = image {
+                        self.scaningMutex.lock()
                         self.scaningImages.append(image)
-    //                    self.collectionView.reloadData()
+                        self.scaningMutex.unlock()
                     } else {
                         print("error asset to image")
+                    }
+                    if self.scaningImages.count == 500 { // FIXME: careful!
+                        print("scaning", self.scaningImages.count)
+                        self.fillStruct()
                     }
                 }
             }
         } else {
             print("no photos to display")
         }
-        print(scaningImages)
     }
 }
 
@@ -195,7 +246,7 @@ extension CategoriesView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt
         indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
-        if let unwrapCell = cell as? CategoryCell {
+        if let unwrapCell = cell as? PhotoCell {
             unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
                                       height: view.bounds.width / 3 - 1)
             unwrapCell.backgroundColor = .gray
@@ -216,7 +267,7 @@ extension CategoriesView: UICollectionViewDataSource {
     }
 }
 
-extension CategoriesView: UICollectionViewDelegate {
+extension CategoriesView: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 3
     }
@@ -244,6 +295,15 @@ extension CategoriesView: UICollectionViewDelegate {
             }
         }
         return reusableview
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let cell = collectionView.cellForItem(at: indexPath)
+        if let selectCell = cell as? PhotoCell {
+            selectCell.selectedImage.isHidden = false
+
+            setupNavItems()
+        }
     }
 }
 

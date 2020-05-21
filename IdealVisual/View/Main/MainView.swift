@@ -16,6 +16,7 @@ final class MainView: UIViewController {
     private var profileV: ProfileView?
     private var userViewModel: UserViewModelProtocol?
     private var postViewModel: PostViewModelProtocol?
+    private var helpCategories: MainViewAddPostsDelegate?
 
     private let refreshOnSwipeView: UIScrollView = UIScrollView()
     private let helpText: UILabel = UILabel()
@@ -48,7 +49,9 @@ final class MainView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.userViewModel = UserViewModel()
-        self.postViewModel = PostViewModel(delegat: self)
+        let postVM = PostViewModel(delegat: self)
+        self.postViewModel = postVM
+        self.helpCategories = postVM
         view.backgroundColor = .white
 
         self.tabBarController?.delegate = self
@@ -370,7 +373,7 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
         let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Галерея", style: .default, handler: { _ in self.openGallery() }))
         alert.addAction(UIAlertAction(title: "Помощь", style: .default, handler: { _ in
-            let categories = CategoriesView()
+            let categories = CategoriesView(postscreateDelegate: self.helpCategories)
             categories.modalPresentationStyle = .fullScreen
             self.navigationController?.pushViewController(categories, animated: true)
         }))

@@ -35,7 +35,7 @@ final class CoreMLManager: CoreMLManagerProtocol {
                 }
             }
 
-            DispatchQueue.main.async {
+            //DispatchQueue.main.async {
                 guard let results = request.results else {
                     Logger.log("unable to classify image")
                     completion?(nil, CoreMLErrorsModel.noResults)
@@ -53,22 +53,26 @@ final class CoreMLManager: CoreMLManagerProtocol {
                     completion?(nil, CoreMLErrorsModel.noResults)
                 } else {
                     classifications.first.map { classification in
-                        let identidier = String(classification.identifier)
-                        switch identidier {
-                        case "animals":
-                            completion?(CategoriesType.animal, nil)
-                        case "food":
-                            completion?(CategoriesType.food, nil)
-                        case "people":
-                            completion?(CategoriesType.people, nil)
-                        default:
-                            Logger.log("unknown identifier: \(identidier)")
-                            completion?(CategoriesType.another, nil)
+                        print(classification.confidence)
+                        if classification.confidence >= 0.8 {
+                            let identidier = String(classification.identifier)
+                            switch identidier {
+                            case "animals":
+                                completion?(CategoriesType.animal, nil)
+                            case "food":
+                                completion?(CategoriesType.food, nil)
+                            case "people":
+                                completion?(CategoriesType.people, nil)
+                            default:
+                                Logger.log("unknown identifier: \(identidier)")
+                                completion?(CategoriesType.another, nil)
+                            }
                         }
                     }
                 }
             }
-        })
+        //}
+        )
         request.imageCropAndScaleOption = .centerCrop
         return request
     }
