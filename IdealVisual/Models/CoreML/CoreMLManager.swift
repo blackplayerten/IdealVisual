@@ -35,44 +35,41 @@ final class CoreMLManager: CoreMLManagerProtocol {
                 }
             }
 
-            //DispatchQueue.main.async {
-                guard let results = request.results else {
-                    Logger.log("unable to classify image")
-                    completion?(nil, CoreMLErrorsModel.noResults)
-                    return
-                }
+            guard let results = request.results else {
+                Logger.log("unable to classify image")
+                completion?(nil, CoreMLErrorsModel.noResults)
+                return
+            }
 
-                guard let classifications = results as? [VNClassificationObservation] else {
-                    Logger.log("non-vnclassificationobservation type results")
-                    completion?(nil, CoreMLErrorsModel.resultsType)
-                    return
-                }
+            guard let classifications = results as? [VNClassificationObservation] else {
+                Logger.log("non-vnclassificationobservation type results")
+                completion?(nil, CoreMLErrorsModel.resultsType)
+                return
+            }
 
-                if classifications.isEmpty {
-                    Logger.log("nothing recognized")
-                    completion?(nil, CoreMLErrorsModel.noResults)
-                } else {
-                    classifications.first.map { classification in
-                        print(classification.confidence)
-                        if classification.confidence >= 0.8 {
-                            let identidier = String(classification.identifier)
-                            switch identidier {
-                            case "animals":
-                                completion?(CategoriesType.animal, nil)
-                            case "food":
-                                completion?(CategoriesType.food, nil)
-                            case "people":
-                                completion?(CategoriesType.people, nil)
-                            default:
-                                Logger.log("unknown identifier: \(identidier)")
-                                completion?(CategoriesType.another, nil)
-                            }
+            if classifications.isEmpty {
+                Logger.log("nothing recognized")
+                completion?(nil, CoreMLErrorsModel.noResults)
+            } else {
+                classifications.first.map { classification in
+                    if classification.confidence >= 0.8 {
+                        let identidier = String(classification.identifier)
+                        switch identidier {
+                        case "animals":
+                            completion?(CategoriesType.animal, nil)
+                        case "food":
+                            completion?(CategoriesType.food, nil)
+                        case "people":
+                            completion?(CategoriesType.people, nil)
+                        default:
+                            Logger.log("unknown identifier: \(identidier)")
+                            completion?(CategoriesType.another, nil)
                         }
                     }
                 }
             }
-        //}
-        )
+        })
+
         request.imageCropAndScaleOption = .centerCrop
         return request
     }

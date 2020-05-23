@@ -9,7 +9,7 @@
 import Foundation
 import PromiseKit
 
-protocol PostViewModelProtocol {
+protocol PostViewModelProtocol: class {
     var posts: [Post] { get }
     func create(photoName: String, photoData: Data?, date: Date?, place: String?,
                 text: String?) -> Promise<Void>

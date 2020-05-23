@@ -11,5 +11,5 @@ import PromiseKit
 
 protocol MainViewAddPostsDelegate: class {
     func create(photoName: String, photoData: Data?, date: Date?, place: String?,
-    text: String?) -> Promise<Void>
+                text: String?) -> Promise<Void>
 }

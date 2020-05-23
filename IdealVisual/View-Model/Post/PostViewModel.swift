@@ -219,7 +219,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                 return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
             }
         }
-        return self.promise
+        return promise
     }
 
     // MARK: - create post

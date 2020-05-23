@@ -15,8 +15,8 @@ import PromiseKit
 final class MainView: UIViewController {
     private var profileV: ProfileView?
     private var userViewModel: UserViewModelProtocol?
-    private var postViewModel: PostViewModelProtocol?
-    private var helpCategories: MainViewAddPostsDelegate?
+    private weak var postViewModel: PostViewModelProtocol?
+    private weak var helpCategories: MainViewAddPostsDelegate?
 
     private let refreshOnSwipeView: UIScrollView = UIScrollView()
     private let helpText: UILabel = UILabel()
@@ -369,11 +369,13 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
 
     func chooseAvatar(picker: UIImagePickerController) { present(picker, animated: true, completion: nil) }
 
+    // MARK: - alerts
     @objc private func choose_photo() {
         let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Галерея", style: .default, handler: { _ in self.openGallery() }))
         alert.addAction(UIAlertAction(title: "Помощь", style: .default, handler: { _ in
-            let categories = CategoriesView(postscreateDelegate: self.helpCategories)
+            let categories = CategoriesView(postscreateDelegate: self.helpCategories,
+                                            disableTabBarDelegate: self)
             categories.modalPresentationStyle = .fullScreen
             self.navigationController?.pushViewController(categories, animated: true)
         }))
@@ -694,12 +696,14 @@ extension MainView {
 }
 
 // MARK: - tab bar
-extension MainView: UITabBarControllerDelegate {
+extension MainView: UITabBarControllerDelegate, DisableTabBarDelegate {
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         if self.tabBarController?.selectedIndex == 0 { self.choose_photo() }
     }
 
-    private func disableTabBarButton() {
+    internal func disableTabBarButton() { grayTabBarButton() }
+
+    private func grayTabBarButton() {
         guard let markBlockTB = UIImage(named: "block_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
         tabBarItem = UITabBarItem(title: nil, image: markBlockTB, selectedImage: markBlockTB)
         tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
