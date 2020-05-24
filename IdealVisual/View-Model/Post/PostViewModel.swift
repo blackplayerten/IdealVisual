@@ -8,14 +8,12 @@
 
 import Foundation
 import CoreData
-import PromiseKit
 
 final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDelegate {
     private var user: User?
     private var postCoreData: PostCoreDataProtocol
     private var postNetworkManager: PostNetworkManagerProtocol
     private var photoNetworkManager: PhotoNetworkManagerProtocol
-    private var promise = Promise()
 
     private var notif_posts = [(PostViewModelProtocol) -> Void]()
 
@@ -51,239 +49,293 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
         posts = fetched
     }
 
-// MARK: - sync posts
-
-    // MARK: - checking field differences in posts
-    private func differentFieldsPosts(post: Post, jspost: JsonPostModel) -> Bool {
-        if post.date != jspost.date || post.place != jspost.place || post.text != jspost.text ||
-            post.indexPhoto != jspost.photoIndex ||
-            post.lastUpdated ?? Date(timeIntervalSince1970: 0) != jspost.lastUpdated {
-            return post.lastUpdated != nil && post.lastUpdated! <= jspost.lastUpdated
-        }
-        return false
-    }
-
-    // MARK: - if UUID not null update core data or server
-    private func uuidNotNull(jsposts: [JsonPostModel], post: Post) -> Promise<Any> {
-        var foundArray: [UUID] = [UUID]() // массив айдишек для синка постов (разница постов в бд и на сервере)
-
-        var converted = convertDBModelToJSON(post: post)
-        converted.photo = ""
-
-        guard let user = self.user, let token = user.token else {
-            return Promise(error: PostViewModelErrors.notFound)
-        }
-
-        // Search for post and return promise with action depending on difference
-        for jspost in jsposts where post.id == jspost.id {
-            foundArray.append(jspost.id)
-
-            if self.differentFieldsPosts(post: post, jspost: jspost) {
-                var photoIndex: Int?
-                if let jsPhotoIndex = jspost.photoIndex {
-                    photoIndex = Int(jsPhotoIndex)
-                }
-
-                return Promise<Any> { _ in
-                    try self.postCoreData.update(post: post, id: jspost.id, date: jspost.date, place: jspost.place,
-                                                 text: jspost.text, indexPhoto: photoIndex,
-                                                 lastUpdated: jspost.lastUpdated)
-                }
-            } else {
-                firstly {
-                    self.postNetworkManager.update(token: token, post: converted)
-                }.done { _ in
-                }.catch { (error) in
-                    guard let error = error as? NetworkErr else {
-                        return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
-                    }
-                    switch error {
-                    case .noData:
-                        return self.promise = Promise { seal in seal.reject(PostViewModelErrors.noData) }
-                    case .unauthorized:
-                        return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unauthorized) }
-                    default:
-                        Logger.log("unknown error: \(error)")
-                        return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
-                    }
-                }
-            }
-        }
-
-        return Promise<Any> { _ in
-           try self.postCoreData.delete(post: post)
-        }
-    }
-
-    // MARK: - if uuid is null create post on server and update id photo core data
-    private func uuidIsNull(jsposts: [JsonPostModel], post: Post) -> Promise<Any> {
-        var promise: Promise<Any> = Promise<Any> { _ in }
-
-        guard let ph = post.photo, let dataPhoto = MyFileManager.getFile(filePath: ph),
-            let namePhoto = URL(string: ph)?.lastPathComponent
-        else {
-            promise = Promise(error: PostViewModelErrors.noData)
-            return promise
-        }
-
-        guard let user = self.user, let token = user.token else {
-            return Promise<Any> { seal in seal.reject(UserViewModelErrors.notFound) }
-        }
-
-        firstly {
-            self.photoNetworkManager.upload(token: token, data: dataPhoto, name: namePhoto)
-        }.then { (uploaded: String) -> Promise<JsonPostModel> in
-            var converted = self.convertDBModelToJSON(post: post)
-            converted.photo = uploaded
-            return Promise<JsonPostModel> { seal in seal.fulfill(converted) }
-        }.then { (converted: JsonPostModel) -> Promise<JsonPostModel> in
-            return self.postNetworkManager.create(token: token, post: converted)
-        }.done { (created: JsonPostModel) in
-            try self.postCoreData.update(post: post, id: created.id, date: nil, place: nil, text: nil,
-                                         indexPhoto: nil, lastUpdated: created.lastUpdated)
-        }.catch { (error) in
-            guard let error = error as? NetworkErr else {
-                return promise = Promise<Any> { seal in seal.reject(PostViewModelErrors.unknown) }
-            }
-            switch error {
-            case .noConnection:
-                return promise = Promise<Any> { seal in seal.reject(PostViewModelErrors.noConnection) }
-            case .unauthorized:
-                return promise = Promise<Any> { seal in seal.reject(UserViewModelErrors.unauthorized) }
-            case .notFound:
-                return promise = Promise<Any> { seal in seal.reject(PostViewModelErrors.notFound) }
-            default:
-                return promise = Promise<Any> { seal in seal.reject(PostViewModelErrors.unknown) }
-            }
-        }
-        print(promise)
-        return promise
-    }
-
-    private func foundPosts(jsposts: [JsonPostModel]) -> [Promise<Any>] {
-        let posts = self.posts // make a copy, because posts will change
-
-        var postActions: [Promise<Any>] = []
-
-        posts.forEach {
-            if $0.id != UUID(uuid: UUID_NULL) {
-                postActions.append(self.uuidNotNull(jsposts: jsposts, post: $0))
-            } else {
-                postActions.append(self.uuidIsNull(jsposts: jsposts, post: $0))
-            }
-        }
-
-        return postActions
-    }
-
-    // FIXME: что в ошибках?
-
-    func sync() -> Promise<Void> {
-        guard let user = self.user, let token = user.token else {
+    // swiftlint:disable cyclomatic_complexity
+    func sync(completion: ((PostViewModelErrors?) -> Void)?) {
+        guard let user = user, let token = user.token else {
             Logger.log("token in coredata is nil")
-            return Promise(error: PostViewModelErrors.unknown)
+            completion?(PostViewModelErrors.unauthorized)
+            return
         }
 
-        firstly {
-            postNetworkManager.get(token: token)
-        }.then { (jsposts: [JsonPostModel]) -> Promise<[JsonPostModel]> in
-            if jsposts.count == 0 {
-                try self.posts.forEach {
-                    try self.postCoreData.delete(post: $0)
+        postNetworkManager.get(token: token, completion: { (jsposts, error) in
+            if let err = error {
+                switch err {
+                case .unauthorized:
+                    completion?(PostViewModelErrors.unauthorized)
+                case .noConnection:
+                    completion?(PostViewModelErrors.noConnection)
+                default:
+                    Logger.log("unknown: \(String(describing: err))")
+                    completion?(PostViewModelErrors.unknown)
                 }
-                return Promise<[JsonPostModel]> { seal in seal.reject(PostViewModelErrors.notFound) }
+
+                return
             }
 
-            let sorted_posts = jsposts.sorted(by: { (first, second) in
-                first.photoIndex ?? 0 < second.photoIndex ?? 0
+            guard var jsposts = jsposts else { return }
+
+            if jsposts.count == 0 {
+                self.posts.forEach {
+                    do {
+                        try self.postCoreData.delete(post: $0)
+                    } catch {
+                        completion?(PostViewModelErrors.unknown)
+                    }
+                }
+
+                completion?(PostViewModelErrors.notFound)
+                return
+            }
+
+            jsposts = jsposts.sorted(by: { (first, second) in
+                return first.photoIndex ?? 0 < second.photoIndex ?? 0
             })
 
-            return Promise<[JsonPostModel]> { seal in seal.fulfill(sorted_posts) }
+            var foundArray: [UUID] = [UUID]() // массив айдишек для синка постов (разница постов в бд и на сервере)
+            let posts = self.posts // make a copy, because posts will change
+            for post in posts {
+                if post.id != UUID(uuid: UUID_NULL) {
+                    var found = false
+                    for jspost in jsposts where post.id == jspost.id {
+                        foundArray.append(jspost.id)
+                        found = true
+                        if post.date != jspost.date || post.place != jspost.place || post.text != jspost.text ||
+                            post.indexPhoto != jspost.photoIndex ||
+                            post.lastUpdated ?? Date(timeIntervalSince1970: 0) != jspost.lastUpdated {
+                            if post.lastUpdated != nil && post.lastUpdated! <= jspost.lastUpdated {
+                                // our post is old: sync in
+                                var photoIndex: Int?
+                                if let jsPhotoIndex = jspost.photoIndex {
+                                    photoIndex = Int(jsPhotoIndex)
+                                }
+                                do {
+                                    try self.postCoreData.update(post: post,
+                                                             id: jspost.id, date: jspost.date,
+                                                             place: jspost.place, text: jspost.text,
+                                                             indexPhoto: photoIndex,
+                                                             lastUpdated: jspost.lastUpdated)
+                                } catch {
+                                    completion?(PostViewModelErrors.unknown)
+                                }
+                            } else {
+                                // post on server is old: sync out
+                                var converted = self.convertDBModelToJSON(post: post)
+                                converted.photo = ""
+                                self.postNetworkManager.update(token: token, post: converted,
+                                                          completion: { (_, error) in
+                                    if let err = error {
+                                        switch err {
+                                        case .noData:
+                                            completion?(PostViewModelErrors.noData)
+                                        case .unauthorized:
+                                            completion?(PostViewModelErrors.unauthorized)
+                                        default:
+                                            Logger.log("unknown error: \(err)")
+                                            completion?(PostViewModelErrors.unknown)
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                        break
+                    }
+                    if !found {
+                        do {
+                            try self.postCoreData.delete(post: post)
+                        } catch {
+                            completion?(PostViewModelErrors.unknown)
+                        }
+                    }
+                } else { // если есть посты с 0 айди, значит они есть у нас, но их нет на сервере
+                    guard let ph = post.photo,
+                            let dataPhoto = MyFileManager.getFile(filePath: ph),
+                            let namePhoto = URL(string: ph)?.lastPathComponent
+                    else {
+                        completion?(PostViewModelErrors.noData)
+                        return
+                    }
 
-        }.then { (jsposts: [JsonPostModel]) -> Promise<[Any]> in
-            when(fulfilled: self.foundPosts(jsposts: jsposts)) // TODO: выпилить ретерн промиса от жспостов
-        }.done { (_: [Any]) in
-        }.catch { (error) in
-            guard let err = error as? NetworkErr else {
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
+                    self.photoNetworkManager.upload(token: token, data: dataPhoto, name: namePhoto,
+                                                    completion: { (uploaded, error) in
+                        if let err = error {
+                            switch err {
+                            case .unauthorized:
+                                completion?(PostViewModelErrors.unauthorized)
+                            default:
+                                Logger.log("unknown error: \(error)")
+                                completion?(PostViewModelErrors.unknown)
+                            }
+                        }
+
+                        guard let uploaded = uploaded else {
+                            completion?(PostViewModelErrors.noData)
+                            return
+                        }
+
+                        var converted = self.convertDBModelToJSON(post: post)
+                        converted.photo = uploaded
+
+                        self.postNetworkManager.create(token: token, post: converted, completion: { (created, error) in
+                            if let err = error {
+                                switch err {
+                                case .notFound:
+                                    completion?(PostViewModelErrors.notFound)
+                                case .unauthorized:
+                                    completion?(PostViewModelErrors.unauthorized)
+                                default:
+                                    Logger.log("unknown error: \(error)")
+                                    completion?(PostViewModelErrors.unknown)
+                                }
+                            }
+
+                            guard let created = created else {
+                                Logger.log("data error: \(PostViewModelErrors.noData)")
+                                completion?(PostViewModelErrors.noData)
+                                return
+                            }
+
+                            // меняем айди на айди поста сервера
+                            do {
+                                try self.postCoreData.update(post: post, id: created.id, date: nil, place: nil,
+                                                         text: nil, indexPhoto: nil,
+                                                         lastUpdated: created.lastUpdated)
+                            } catch {
+                                completion?(PostViewModelErrors.unknown)
+                            }
+                        })
+                    })
+                }
             }
-            switch err {
-            case .unauthorized:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unauthorized)}
-            case .notFound:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.notFound) }
-            case .noConnection:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.noConnection) }
-            default:
-                Logger.log(error)
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
+
+            for jspost in jsposts {
+                if foundArray.contains(jspost.id) {
+                    continue
+                }
+                self.photoNetworkManager.get(path: jspost.photo, completion: { (photoData, error) in
+                    if let err = error {
+                        switch err {
+                        case .unauthorized:
+                            completion?(PostViewModelErrors.unauthorized)
+                        case .notFound:
+                            Logger.log("photo not found")
+                            // skip this post
+                        case .noData:
+                            completion?(PostViewModelErrors.noData)
+                        default:
+                            Logger.log("unknown error: \(error)")
+                            completion?(PostViewModelErrors.unknown)
+                        }
+                        return
+                    }
+
+                    guard let photoData = photoData else {
+                        Logger.log("200 OK, but got nil photoData")
+                        return
+                    }
+
+                    guard let photoName = URL(string: jspost.photo)?.lastPathComponent else {
+                        Logger.log("can't get photo name with extension: \(jspost.photo)")
+                        return
+                    }
+
+                    let photoPath: String = self.photoFolder + photoName
+                    _ = MyFileManager.saveFile(data: photoData, filePath: photoPath)
+                    _ = self.postCoreData.create(user: user, id: jspost.id,
+                                                 photo: photoPath, date: jspost.date, place: jspost.place,
+                                                 text: jspost.text, indexPhoto: Int(jspost.photoIndex ?? 0),
+                                                 lastUpdated: jspost.date)
+                })
+            }
+            if self.posts.count != 0 {
+                completion?(nil)
+            } else {
+                completion?(PostViewModelErrors.notFound)
             }
         }
-        return promise
-    }
-
-    // MARK: - create post
+    )
+}
+    // swiftlint:enable cyclomatic_complexity
     func create(photoName: String, photoData: Data?, date: Date? = nil, place: String? = nil,
-                text: String? = nil) -> Promise<Void> {
-//        guard promise.isResolved else { return promise }
-
+                text: String? = nil, completion: ((PostViewModelErrors?) -> Void)?) {
         let photoPath: String = photoFolder + photoName
+        _ = MyFileManager.saveFile(data: photoData!, filePath: photoPath)
 
         guard let photoData = photoData, let date = date, let place = place, let text = text else {
-            return Promise(error: PostViewModelErrors.noData)
+            completion?(PostViewModelErrors.noData)
+            return
         }
-
-        _ = MyFileManager.saveFile(data: photoData, filePath: photoPath)
 
         // for core data
         let indexPhoto = posts.count
 
         guard let user = user, let token = user.token else {
             Logger.log("error unautorized: \(PostViewModelErrors.cannotCreate)")
-            return Promise(error: PostViewModelErrors.unauthorized)
+            completion?(PostViewModelErrors.unauthorized)
+            return
         }
 
         guard let created = postCoreData.create(user: user, id: nil, photo: photoPath, date: date, place: place,
                                                 text: text, indexPhoto: indexPhoto, lastUpdated: nil)
         else {
             Logger.log("error on create: \(PostViewModelErrors.cannotCreate)")
-            return Promise(error: PostViewModelErrors.cannotCreate)
+            completion?(PostViewModelErrors.cannotCreate)
+            return
         }
 
-        firstly {
-            self.photoNetworkManager.upload(token: token, data: photoData, name: photoName)
-        }.then { (path: String) -> Promise<JsonPostModel> in
+        photoNetworkManager.upload(token: token, data: photoData, name: photoName,
+                                   completion: { (path, error) in
+            if let err = error {
+                switch err {
+                case .unauthorized:
+                    completion?(PostViewModelErrors.unauthorized)
+                case .notFound:
+                    completion?(PostViewModelErrors.notFound)
+                default:
+                    Logger.log(error)
+                    completion?(PostViewModelErrors.unknown)
+                }
+                return
+            }
+
+            guard let path = path else {
+                Logger.log("data error: \(PostViewModelErrors.noData)")
+                return
+            }
+
             var jsonPost = self.convertDBModelToJSON(post: created)
             jsonPost.photo = path
-            return Promise<JsonPostModel> { seal in seal.fulfill(jsonPost) }
-        }.then { (jsonPost: JsonPostModel) -> Promise<JsonPostModel> in
-            return self.postNetworkManager.create(token: token, post: jsonPost)
-        }.done { (post: JsonPostModel) in
-            try self.postCoreData.update(post: created, id: post.id, date: nil, place: nil, text: nil,
-                                         indexPhoto: nil, lastUpdated: post.lastUpdated)
-        }.catch { (error) in
-            guard let error = error as? NetworkErr else {
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
-            }
-            switch error {
-            case .noConnection:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.noConnection) }
-            case .unauthorized:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unauthorized) }
-            case .notFound:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.notFound) }
-            case .noData:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.noData) }
-            default:
-                Logger.log("unknown error")
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
-            }
-        }
 
-        return Promise()
+            self.postNetworkManager.create(token: token, post: jsonPost, completion: { (post, error) in
+                if let err = error {
+                    switch err {
+                    case .unauthorized:
+                        completion?(PostViewModelErrors.unauthorized)
+                    default:
+                        Logger.log("\(PostViewModelErrors.unknown)")
+                        completion?(PostViewModelErrors.unknown)
+                    }
+                    return
+                }
+
+                guard let post = post else {
+                    Logger.log("data error: \(PostViewModelErrors.noData)")
+                    completion?(PostViewModelErrors.noData)
+                    return
+                }
+
+                do {
+                _ = try self.postCoreData.update(post: created, id: post.id, date: nil, place: nil, text: nil,
+                                             indexPhoto: nil,
+                                             lastUpdated: post.lastUpdated)
+                } catch {
+                    completion?(PostViewModelErrors.unknown)
+                }
+                completion?(nil)
+            })
+        })
+
     }
 
-    // MARK: - convert to json to upload on server
     private func convertDBModelToJSON(post: Post) -> JsonPostModel {
         return JsonPostModel(
             id: post.id ?? UUID(uuid: UUID_NULL),
@@ -299,55 +351,46 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
         return MyFileManager.resolveAbsoluteFilePath(filePath: path).path
     }
 
-    // MARK: - update
-    func update(post: Post, date: Date? = nil, place: String? = nil, text: String? = nil) -> Promise<Void> {
-        guard promise.isResolved else { return promise }
-
+    func update(post: Post,
+                date: Date? = nil, place: String? = nil, text: String? = nil,
+                completion: ((PostViewModelErrors?) -> Void)?) {
         do {
-            try self.postCoreData.update(post: post, id: post.id, date: date, place: place, text: text,
-                                         indexPhoto: nil, lastUpdated: Date())
+            try postCoreData.update(post: post, id: post.id, date: date, place: place, text: text,
+                            indexPhoto: nil, lastUpdated: Date())
         } catch {
-            Logger.log("error")
-            return Promise(error: PostViewModelErrors.unknown)
+            completion?(PostViewModelErrors.unknown)
         }
 
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
-            return Promise(error: PostViewModelErrors.unauthorized)
+            completion?(PostViewModelErrors.unauthorized)
+            return
         }
         var jsonPost = convertDBModelToJSON(post: post)
         jsonPost.photo = "" // don't update photo on server
-
-        print("update vm")
-        firstly {
-            postNetworkManager.update(token: token, post: jsonPost)
-        }.catch { (error) in
-            Logger.log(error)
-            guard let error = error as? NetworkErr else {
-                self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
-                return
+        postNetworkManager.update(token: token, post: jsonPost,
+            completion: { (_, error) in
+                if let err = error {
+                    switch err {
+                    case .noData:
+                        completion?(PostViewModelErrors.noData)
+                    case .unauthorized:
+                        completion?(PostViewModelErrors.unauthorized)
+                    default:
+                        Logger.log("unknown error: \(error)")
+                        completion?(PostViewModelErrors.unknown)
+                    }
+                }
+                completion?(nil)
             }
-            switch error {
-            case .noData:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.noData) }
-            case .unauthorized:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unauthorized) }
-            default:
-                Logger.log("unknown error: \(error)")
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
-            }
-        }
-
-        return self.promise
+        )
     }
 
     func subscribe(completion: @escaping (PostViewModelProtocol) -> Void) {
         notif_posts.append(completion)
     }
 
-    // MARK: - delete
-    func delete(atIndices: [Int]) -> Promise<Void> {
-        guard promise.isResolved else { return promise }
+    func delete(atIndices: [Int], completion: ((PostViewModelErrors?) -> Void)?) {
         var uuids = [UUID]()
         for index in atIndices {
             let delPost = posts[index]
@@ -355,10 +398,9 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
             MyFileManager.deleteFile(filePath: delPost.photo!)
 
             do {
-                try self.postCoreData.delete(post: delPost)
+                try postCoreData.delete(post: delPost)
             } catch {
-                Logger.log("error delete")
-                return Promise(error: PostViewModelErrors.unknown)
+                completion?(PostViewModelErrors.unknown)
             }
         }
 
@@ -366,53 +408,58 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
 
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
-            return Promise(error: PostViewModelErrors.unauthorized)
+            completion?(PostViewModelErrors.unauthorized)
+            return
         }
-
-        firstly {
-            self.postNetworkManager.delete(token: token, ids: uuids)
-        }.catch { (error) in
-            guard let error = error as? NetworkErr else {
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
+        postNetworkManager.delete(token: token, ids: uuids, completion: { (error) in
+            if let err = error {
+                switch err {
+                case .notFound:
+                    completion?(PostViewModelErrors.notFound)
+                case .unauthorized:
+                    completion?(PostViewModelErrors.unauthorized)
+                default:
+                    Logger.log("\(PostViewModelErrors.unknown)")
+                    completion?(PostViewModelErrors.unknown)
+                }
+                return
             }
-            switch error {
-            case .noConnection:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.noConnection) }
-            case .unauthorized:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unauthorized) }
-            case .notFound:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.notFound) }
-            default:
-                return self.promise = Promise { seal in seal.reject(PostViewModelErrors.unknown) }
-            }
-        }
-        return self.promise
+            completion?(nil)
+        })
     }
 
-    // MARK: - swap
-    func swap(source: Int, dest: Int) {
+    func swap(source: Int, dest: Int, completion: ((PostViewModelErrors?) -> Void)?) {
         postCoreData.swap(posts, source: source, dest: dest)
 
-        guard let token = user?.token else { return }
+        guard let token = user?.token else {
+            completion?(PostViewModelErrors.unauthorized)
+            return
+        }
 
         var forChange: ArraySlice<Post>
-
         if source < dest {
             forChange = posts[source...dest]
         } else {
             forChange = posts[dest...source]
         }
-
         forChange.forEach {
-            var jsonPost: JsonPostModel
-            jsonPost = convertDBModelToJSON(post: $0)
+            var jsonPost = convertDBModelToJSON(post: $0)
             jsonPost.photo = "" // don't update photo on server
-
-            firstly {
-                self.postNetworkManager.update(token: token, post: jsonPost)
-            }.catch { (error) in
-                Logger.log(error)
-            }
+            postNetworkManager.update(token: token, post: jsonPost, completion: { (_, error) in
+                if let err = error {
+                    switch err {
+                    case .unauthorized:
+                        completion?(PostViewModelErrors.unauthorized)
+                    case .noData:
+                        completion?(PostViewModelErrors.noData)
+                    case .notFound:
+                        completion?(PostViewModelErrors.notFound)
+                    default:
+                        completion?(PostViewModelErrors.unknown)
+                    }
+                    Logger.log(error)
+                }
+            })
         }
     }
 }

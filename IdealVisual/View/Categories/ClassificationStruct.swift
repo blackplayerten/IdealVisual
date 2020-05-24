@@ -12,14 +12,19 @@ import UIKit
 struct ImageWithNameStruct {
     var imageName: String
     var image: UIImage
+
+    init(imageName: String, image: UIImage) {
+        self.imageName = imageName
+        self.image = image
+    }
 }
 
 struct ClassificationStruct {
-    var animal: [UIImage]
-    var food: [UIImage]
-    var people: [UIImage]
-    
-    init(animal: [UIImage], food: [UIImage], people: [UIImage]) {
+    var animal: [ImageWithNameStruct]
+    var food: [ImageWithNameStruct]
+    var people: [ImageWithNameStruct]
+
+    init(animal: [ImageWithNameStruct], food: [ImageWithNameStruct], people: [ImageWithNameStruct]) {
         self.animal = animal
         self.food = food
         self.people = people

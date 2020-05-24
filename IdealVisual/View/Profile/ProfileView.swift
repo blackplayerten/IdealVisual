@@ -169,19 +169,17 @@ final class ProfileView: UIView, InputFieldDelegate {
         dataState.email = email.textField.text ?? ""
         dataState.oldAva = ava.image
 
-        NotificationCenter.default.addObserver(self,
-                selector: #selector(keyboardWillShow(_:)),
-                name: UIResponder.keyboardWillShowNotification,
-                object: nil)
-        NotificationCenter.default.addObserver(self,
-                selector: #selector(keyboardWillHide(_:)),
-                name: UIResponder.keyboardWillHideNotification,
-                object: nil)
+//        NotificationCenter.default.addObserver(self,
+//                selector: #selector(keyboardWillShow(_:)),
+//                name: UIResponder.keyboardWillShowNotification,
+//                object: nil)
+//        NotificationCenter.default.addObserver(self,
+//                selector: #selector(keyboardWillHide(_:)),
+//                name: UIResponder.keyboardWillHideNotification,
+//                object: nil)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
-
 
     @objc
     func taped() {
@@ -283,7 +281,7 @@ final class ProfileView: UIView, InputFieldDelegate {
             return
         }
 
-        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: navigationBar.frame.width / 2 + 70,
+        let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: navigationBar.frame.width / 2 + 90,
                                                                      y: 0,
                                                                      width: 50, height: 50))
         loadingIndicator.color = Colors.blue
@@ -508,13 +506,16 @@ extension ProfileView {
 extension ProfileView: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController,
                                didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
-            if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-                dataState.oldAva = ava.image
-                ava.image = selected
+        if let selected = info[.originalImage] as? UIImage {
+            dataState.oldAva = ava.image
+            ava.image = selected
+            avaContent = selected.jpegData(compressionQuality: 1.0)
 
+            if let url = info[.imageURL] as? URL {
                 avaName = url.lastPathComponent
-                avaContent = selected.jpegData(compressionQuality: 1.0)
+            }
+            if picker.sourceType == .camera {
+                avaName = UUID().uuidString
             }
         }
         delegateProfile?.dismissAlert()

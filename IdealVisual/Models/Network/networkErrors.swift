@@ -18,7 +18,7 @@ struct WrongFieldsNetworkEror: Error {
     }
 }
 
-enum NetworkErr: Error {
+enum NetworkError: Error {
     case noConnection
     case ok
     case noData

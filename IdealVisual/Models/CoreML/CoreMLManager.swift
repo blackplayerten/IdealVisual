@@ -23,7 +23,7 @@ final class CoreMLManager: CoreMLManagerProtocol {
     // MARK: classification request
     func create_classificasionRequest(model: VNCoreMLModel,
                                       completion: ((CategoriesType?, CoreMLErrorsModel?) -> Void)?) -> VNCoreMLRequest {
-        let request = VNCoreMLRequest(model: model, completionHandler: { (request, error) in
+        let request = VNCoreMLRequest(model: model) { (request, error) in
             if let err = error as? CoreMLErrorsModel {
                 switch err {
                 case .noResults:
@@ -68,7 +68,7 @@ final class CoreMLManager: CoreMLManagerProtocol {
                     }
                 }
             }
-        })
+        }
 
         request.imageCropAndScaleOption = .centerCrop
         return request

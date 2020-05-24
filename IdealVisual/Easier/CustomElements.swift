@@ -435,18 +435,18 @@ final class UIError: UIView {
 }
 
 // show alert always on top
-public extension UIAlertController {
-    func show() {
-        // create new window on top main window
-        let window = UIWindow(frame: UIScreen.main.bounds)
-        let vc = UIViewController()
-        vc.view.backgroundColor = .clear
-        window.rootViewController = vc
-        window.windowLevel = UIWindow.Level.alert + 1
-        window.makeKeyAndVisible()
-        vc.present(self, animated: true, completion: nil)
-    }
-}
+//public extension UIAlertController {
+//    func show() {
+//        // create new window on top main window
+//        let window = UIWindow(frame: UIScreen.main.bounds)
+//        let vc = UIViewController()
+//        vc.view.backgroundColor = .clear
+//        window.rootViewController = vc
+//        window.windowLevel = UIWindow.Level.alert + 1
+//        window.makeKeyAndVisible()
+//        vc.present(self, animated: true, completion: nil)
+//    }
+//}
 
 extension UIScrollView {
     func updateContentView() {

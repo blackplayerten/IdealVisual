@@ -7,11 +7,10 @@
 //
 
 import Foundation
-import PromiseKit
 
 protocol PostNetworkManagerProtocol {
-    func create(token: String, post: JsonPostModel) -> Promise<JsonPostModel>
-    func get(token: String) -> Promise<[JsonPostModel]>
-    func update(token: String, post: JsonPostModel) -> Promise<Any>
-    func delete(token: String, ids: [UUID]) -> Promise<NetworkErr>
+    func create(token: String, post: JsonPostModel, completion: ((JsonPostModel?, NetworkError?) -> Void)?)
+    func get(token: String, completion: (([JsonPostModel]?, NetworkError?) -> Void)?)
+    func update(token: String, post: JsonPostModel, completion: ((JsonPostModel?, NetworkError?) -> Void)?)
+    func delete(token: String, ids: [UUID], completion: ((NetworkError?) -> Void)?)
 }

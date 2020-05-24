@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-import PromiseKit
 
 final class UserViewModel: UserViewModelProtocol {
     private var userCoreData: UserCoreDataProtocol
@@ -63,8 +62,8 @@ final class UserViewModel: UserViewModelProtocol {
     func login(email: String, password: String, completion: ((UserViewModelErrors?) -> Void)?) {
         userNetworkManager.login(user: JsonUserModel(email: email, password: password),
                                      completion: { (user, error) in
-            if let error = error {
-                switch error {
+            if let err = error {
+                switch err {
                 case .forbidden:
                     completion?(UserViewModelErrors.wrongCredentials)
                 case .noConnection:
@@ -90,32 +89,44 @@ final class UserViewModel: UserViewModelProtocol {
 
             if let ava = user.avatar {
                 if ava != "" {
-                    firstly {
-                        self.photoNetworkManager.get(path: ava)
-                    }.done { (data: Data) in
-                        let avaPath = self.avaFolder + ava
-                        guard MyFileManager.saveFile(data: data, filePath: avaPath) != nil else {
-                            // FIXME: надо ли возвращать ошибку?
-                            Logger.log("save file error")
-                            return
-                        }
-                        user.avatar = avaPath
+                    self.photoNetworkManager.get(path: ava, completion: { (data, error) in
+                        DispatchQueue.main.async {
+                            if let err = error {
+                                switch err {
+                                case .notFound:
+                                    // assume user nas no ava, so we will log in with data without it
+                                    user.avatar = ""
+                                default:
+                                    Logger.log("cannot get avatar: \(error)")
+                                    completion?(UserViewModelErrors.unknown)
+                                }
+                                return
+                            }
 
-                        let user = self.userCoreData.create(token: token, username: user.username,
-                                                            email: user.email, ava: user.avatar)
-                        self.user = user
-                        completion?(nil)
-                    }.catch { (error) in
-                        Logger.log(error)
-                        switch error as? NetworkErr {
-                        case .noData:
-                            Logger.log("data error")
-                            completion?(UserViewModelErrors.noData)
-                        default:
-                            Logger.log("cannot create core data user")
-                            completion?(UserViewModelErrors.unknown)
+                            if let data = data {
+                                let avaPath = self.avaFolder + ava
+                                guard MyFileManager.saveFile(data: data, filePath: avaPath) != nil else {
+                                    completion?(UserViewModelErrors.filesystemSave)
+                                    return
+                                }
+                                user.avatar = avaPath
+                            } else {
+                                Logger.log("data error: \(UserViewModelErrors.noData)")
+                                completion?(UserViewModelErrors.noData)
+                                return
+                            }
+
+                            guard let user = self.userCoreData.create(token: token, username: user.username,
+                                                                      email: user.email, ava: user.avatar)
+                            else {
+                                Logger.log("cannot create core data user")
+                                completion?(UserViewModelErrors.unknown)
+                                return
+                            }
+                            self.user = user
+                            completion?(nil)
                         }
-                    }
+                    })
                 }
             } else {
                 guard let user = self.userCoreData.create(token: token, username: user.username,
@@ -189,10 +200,10 @@ final class UserViewModel: UserViewModelProtocol {
                                             user: JsonUserModel(username: username ?? "", email: email ?? "",
                                                                 password: password ?? "", avatar: avaPath ?? ""),
                                             completion: { (user, error) in
-                if let error = error {
-                    switch error {
+                if let err = error {
+                    switch err {
                     case .wrongFields:
-                        self.processWrongFields(error: error, completion: completion)
+                        self.processWrongFields(error: err, completion: completion)
                     case .unauthorized:
                         completion?(UserViewModelErrors.unauthorized)
                     case .notFound:
@@ -200,7 +211,7 @@ final class UserViewModel: UserViewModelProtocol {
                     case .noConnection:
                         completion?(UserViewModelErrors.noConnection)
                     default:
-                        Logger.log("unknown")
+                        Logger.log("\(UserViewModelErrors.unknown)")
                         completion?(UserViewModelErrors.unknown)
                     }
                     return
@@ -209,7 +220,7 @@ final class UserViewModel: UserViewModelProtocol {
                 if user != nil {
                     completion?(nil)
                 } else {
-                    Logger.log("no data")
+                    Logger.log("no data: \(UserViewModelErrors.noData)")
                     completion?(UserViewModelErrors.noData)
                 }
             })
@@ -217,14 +228,25 @@ final class UserViewModel: UserViewModelProtocol {
 
         if let ava = ava {
             if let avaName = avaName {
-                firstly {
-                    self.photoNetworkManager.upload(token: token, data: ava, name: avaName)
-                }.done { (uploadedPath: String) in
+                photoNetworkManager.upload(token: token, data: ava, name: avaName,
+                                           completion: { (uploadedPath, error) in
+                    if let err = error {
+                        switch err {
+                        case .notFound:
+                            completion?(UserViewModelErrors.notFound)
+                        default:
+                            Logger.log("unknown error: \(error)")
+                            completion?(UserViewModelErrors.unknown)
+                        }
+                        return
+                    }
+
+                    guard let uploadedPath = uploadedPath else { return }
+
                     avaPath = uploadedPath
+
                     updateServerInfo()
-                }.catch { (error) in
-                    Logger.log(error)
-                }
+                })
             }
         } else {
             updateServerInfo()
@@ -257,7 +279,7 @@ final class UserViewModel: UserViewModelProtocol {
         })
     }
 
-    private func processWrongFields(error: NetworkErr, completion: ((UserViewModelErrors?) -> Void)?) {
+    private func processWrongFields(error: NetworkError, completion: ((UserViewModelErrors?) -> Void)?) {
         let fieldErrors: [JsonFieldError]
         switch error {
         case .wrongFields(let st):

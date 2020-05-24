@@ -10,19 +10,14 @@ import Foundation
 import UIKit
 import Photos
 
-protocol DisableTabBarDelegate: class {
-    func enableTabBarButton()
-    func disableTabBarButton()
-}
-
 final class CategoriesView: UIViewController {
     private var classificationViewModel: CoreMLViewModelProtocol?
-    private var classificationStruct = ClassificationStruct(animal: [UIImage](), food: [UIImage](), people: [UIImage]())
-    private var scaningImages = [UIImage]()
-    private var scaningMutex = NSLock()
+    private var classificationOneImageStruct = ImageWithNameStruct(imageName: "", image: UIImage())
+    private var classificationStruct = ClassificationStruct(animal: [ImageWithNameStruct](),
+                                                            food: [ImageWithNameStruct](),
+                                                            people: [ImageWithNameStruct]())
 
     private weak var delegateCreatePosts: MainViewAddPostsDelegate?
-    private weak var disableTabBar: DisableTabBarDelegate?
 
     lazy fileprivate var collectionWithCategories: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -49,9 +44,8 @@ final class CategoriesView: UIViewController {
         return alert
     }()
 
-    init(postscreateDelegate: MainViewAddPostsDelegate?, disableTabBarDelegate: DisableTabBarDelegate?) {
+    init(postscreateDelegate: MainViewAddPostsDelegate?) {
         self.delegateCreatePosts = postscreateDelegate
-        self.disableTabBar = disableTabBarDelegate
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -59,25 +53,46 @@ final class CategoriesView: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - view did load
+    // MARK: - view did load, ask permissions
     override func viewDidLoad() {
         super.viewDidLoad()
+        let status = PHPhotoLibrary.authorizationStatus()
         view.backgroundColor = .white
 
-        disableTabBar?.disableTabBarButton()
+        self.tabBarController?.tabBar.isHidden = true
         setupNavItems()
 
-        self.classificationViewModel = CoreMLViewModel()
-        if classificationViewModel == nil {
-            Logger.log("classification view-model is empty")
-            return
+        switch status {
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization { status in
+                DispatchQueue.main.async {
+                    if status == .authorized {
+                        self.initModel()
+                    } else {
+                        self.noPermissionsAlert()
+                    }
+                }
+            }
+        case .authorized:
+            initModel()
+        case .denied, .restricted:
+            noPermissionsAlert()
         }
+    }
 
-        classificationViewModel?.createMLModel(completion: { [weak self] (model, error) in
+    // MARK: - create ML model
+    private func initModel() {
+        self.classificationViewModel = CoreMLViewModel()
+            if classificationViewModel == nil {
+                Logger.log("classification view-model is empty")
+                return
+            }
+
+            classificationViewModel?.createMLModel(completion: { [weak self] (model, error) in
             if let err = error {
                 switch err {
                 case .createModel:
-                    self?._error(text: "Внутренняя ошибка")
+                   self?._error(text: "Внутренняя ошибка")
                 default:
                     self?._error(text: "Упс, что-то пошло не так")
                 }
@@ -98,12 +113,11 @@ final class CategoriesView: UIViewController {
         navigationController?.navigationBar.isTranslucent = true
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
-        navigationController?.navigationBar.backgroundColor = .none
 
         navigationItem.setHidesBackButton(true, animated: false)
         guard let buttonBack = UIImage(named: "previous_gray")?.withRenderingMode(.alwaysOriginal) else { return }
-        let myBackButton = SubstrateButton(image: buttonBack, side: 35, target: self, action: #selector(back),
-                                           substrateColor: nil)
+        let myBackButton = SubstrateButton(image: buttonBack, side: 35, target: self,
+                                           action: #selector(close_controller), substrateColor: nil)
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: myBackButton)
 
         if let selectedCells = collectionWithCategories.indexPathsForSelectedItems {
@@ -124,11 +138,6 @@ final class CategoriesView: UIViewController {
         view.addGestureRecognizer(swipeBack)
     }
 
-    @objc
-    private func back() {
-        navigationController?.popViewController(animated: true)
-    }
-
      // MARK: - get photos from gallery
     private func getPhotos() {
         let manager = PHImageManager.default()
@@ -137,29 +146,34 @@ final class CategoriesView: UIViewController {
         requestOptions.isNetworkAccessAllowed = false
         requestOptions.deliveryMode = .highQualityFormat
 
+        var scaningImages = [ImageWithNameStruct]()
+        let scaningMutex = NSLock()
+
         let results: PHFetchResult = PHAsset.fetchAssets(with: .image, options: nil)
         if results.count > 0 {
             self.present(loader, animated: true, completion: nil)
             var counterLoader = 0
-            for i in 0..<1237 {
+            for i in 0..<500 {
                 let asset = results.object(at: i)
                 let size = CGSize(width: 700, height: 700)
                 manager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill,
                                      options: requestOptions) { (image, _) in
                     if let image = image {
-                        self.scaningMutex.lock()
-                        self.scaningImages.append(image)
-                        self.scaningMutex.unlock()
+                        scaningMutex.lock()
+                        scaningImages.append(ImageWithNameStruct(imageName: UUID().uuidString, image: image))
+                        scaningMutex.unlock()
                     } else {
                         Logger.log("error asset to image")
                     }
+
                     counterLoader += 1
+                    DispatchQueue.main.async {
+                        self.updateLoaderInfo(tag: .scanning, currentImage: counterLoader, allImages: 500)
+                    }
 
-                    self.updateLoaderInfo(currentImage: counterLoader, allImages: 1237)
-
-                    if counterLoader == 1237 {
-                        print("scaning", self.scaningImages.count)
-                        self.fillStruct()
+                    if counterLoader == 500 {
+                        print("scaning", scaningImages.count)
+                        self.fillStruct(scaningImages: scaningImages)
                     }
                 }
             }
@@ -170,52 +184,53 @@ final class CategoriesView: UIViewController {
     }
 
     // MARK: - Request to core ml
-    private func fillStruct() {
-        for (i, image) in self.scaningImages.enumerated() {
-            self.classificationViewModel?.makeClassificationRequest(image: image,
-                                                               completion: { [weak self] (identifier, error) in
-            DispatchQueue.main.async {
-                if let err = error {
-                    switch err {
-                    case .noResults:
-                        self?._error(text: "Нет картинок для сравнения", color: Colors.darkGray)
-                    case .emptyIdentifier:
-                        self?._error(text: "Нет заданных категорий", color: Colors.darkGray)
+    private func fillStruct(scaningImages: [ImageWithNameStruct]) {
+        var counterLoader = 0
+        DispatchQueue.global().async {
+            for (i, imageWithName) in scaningImages.enumerated() {
+                self.classificationViewModel?.makeClassificationRequest(image: imageWithName.image,
+                                                                   completion: { [weak self] (identifier, error) in
+                    counterLoader += 1
+                    DispatchQueue.main.async {
+                    if let err = error {
+                        switch err {
+                        case .noResults:
+                            self?._error(text: "Нет картинок для сравнения", color: Colors.darkGray)
+                        case .emptyIdentifier:
+                            self?._error(text: "Нет заданных категорий", color: Colors.darkGray)
+                        default:
+                            self?._error(text: "Упс, что-то пошло не так")
+                        }
+                    }
+
+                    guard identifier != nil else {
+                        Logger.log("empty identifier")
+                        self?._error(text: "Нет заданных категорий")
+                        return
+                    }
+
+                    switch identifier {
+                    case .animal:
+                        self?.classificationStruct.animal.append(imageWithName)
+                    case .food:
+                        self?.classificationStruct.food.append(imageWithName)
+                    case .people:
+                        self?.classificationStruct.people.append(imageWithName)
                     default:
-                        self?._error(text: "Упс, что-то пошло не так")
+                        Logger.log("unknown type")
+                        self?._error(text: "Неизвестная категория")
+                    }
+
+                    self?.updateLoaderInfo(tag: .classifier, currentImage: counterLoader,
+                                           allImages: scaningImages.count)
+
+                    if i == scaningImages.count - 1 {
+                        self?.dismiss(animated: true, completion: nil)
+                        self?.setupCollection()
                     }
                 }
-
-                guard identifier != nil else {
-                    Logger.log("empty identifier")
-                    self?._error(text: "Нет заданных категорий")
-                    return
-                }
-
-                switch identifier {
-                case .animal:
-                    self?.classificationStruct.animal.append(image)
-                case .food:
-                    self?.classificationStruct.food.append(image)
-                case .people:
-                    self?.classificationStruct.people.append(image)
-                default:
-                    Logger.log("unknown type")
-                    self?._error(text: "Неизвестная категория")
-                }
-
-                guard let allPhotos = self?.scaningImages.count else {
-                    Logger.log("NO SCANING PHOTOS")
-                    self?._error(text: "Нет фотографий")
-                    return
-                }
-
-                if i == allPhotos - 1 {
-                    self?.dismiss(animated: true, completion: nil)
-                    self?.setupCollection()
-                }
-                }
             })
+        }
         }
     }
 
@@ -226,8 +241,7 @@ final class CategoriesView: UIViewController {
         collectionWithCategories.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         collectionWithCategories.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         collectionWithCategories.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        collectionWithCategories.bottomAnchor.constraint(equalTo:
-            view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        collectionWithCategories.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         collectionWithCategories.backgroundColor = .white
 
         collectionWithCategories.delegate = self
@@ -250,13 +264,48 @@ final class CategoriesView: UIViewController {
             }
 
             selectedCells.forEach {
-                guard let cell = collectionWithCategories.cellForItem(at: $0) as? PhotoCell else { return }
-                cell.selectedImage.isHidden = true
-                delegateCreatePosts?.create(photoName: "photoName",
-                                            photoData: cell.picture.image!.jpegData(compressionQuality: 1.0),
-                                            date: Date(timeIntervalSince1970: 0), place: "", text: "")
-            }
+                collectionWithCategories.deselectItem(at: $0, animated: true)
 
+                var imageWithName: ImageWithNameStruct
+                switch $0.section {
+                case 0:
+                    imageWithName = classificationStruct.animal[$0.item]
+                case 1:
+                    imageWithName = classificationStruct.food[$0.item]
+                case 2:
+                    imageWithName = classificationStruct.people[$0.item]
+                default:
+                    Logger.log("unknown section: \($0.section)")
+                    return
+                }
+
+                _ = delegateCreatePosts?.create(photoName: imageWithName.imageName,
+                                                photoData: imageWithName.image.jpegData(compressionQuality: 1.0),
+                                                date: Date(timeIntervalSince1970: 0), place: "", text: "",
+                completion: { [weak self] (error) in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            switch error {
+                            case .unauthorized:
+                                Logger.log(error)
+                                self?._error(text: "Вы не авторизованы")
+                            case .notFound:
+                                Logger.log(error)
+                                self?._error(text: "Такого пользователя нет")
+                            case .cannotCreate:
+                                Logger.log(error)
+                                self?._error(text: "Невозможно создать пост", color: Colors.darkGray)
+                            case .noData:
+                                Logger.log(error)
+                                self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
+                            default:
+                                Logger.log(error)
+                                self?._error(text: "Упс, что-то пошло не так.")
+                            }
+                        }
+                    }
+                })
+            }
             self.close_controller()
         }
     }
@@ -304,11 +353,11 @@ extension CategoriesView: UICollectionViewDelegate, UICollectionViewDelegateFlow
 
             switch indexPath.section {
             case 0:
-                unwrapCell.picture.image = classificationStruct.animal[indexPath.item]
+                unwrapCell.picture.image = classificationStruct.animal[indexPath.item].image
             case 1:
-                unwrapCell.picture.image = classificationStruct.food[indexPath.item]
+                unwrapCell.picture.image = classificationStruct.food[indexPath.item].image
             case 2:
-                unwrapCell.picture.image = classificationStruct.people[indexPath.item]
+                unwrapCell.picture.image = classificationStruct.people[indexPath.item].image
             default:
                 Logger.log("unknown category")
                 unwrapCell.picture.image = UIImage()
@@ -318,19 +367,11 @@ extension CategoriesView: UICollectionViewDelegate, UICollectionViewDelegateFlow
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let cell = collectionView.cellForItem(at: indexPath)
-        if let selectCell = cell as? PhotoCell {
-            selectCell.selectedImage.isHidden = false
-            setupNavItems()
-        }
+        setupNavItems()
     }
 
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        let cell = collectionView.cellForItem(at: indexPath)
-        if let selectCell = cell as? PhotoCell {
-            selectCell.selectedImage.isHidden = true
-            setupNavItems()
-        }
+        setupNavItems()
     }
 }
 
@@ -352,10 +393,22 @@ extension CategoriesView: UICollectionViewDataSource {
 }
 
 // MARK: - update loader info
+enum StateLoader {
+    case scanning
+    case classifier
+}
+
 extension CategoriesView {
-    private func updateLoaderInfo(currentImage: Int? = 0, allImages: Int? = 0) {
-        updateInfo.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        updateInfo.text = "Сканирование \(currentImage!) / \(allImages!)"
+    private func updateLoaderInfo(tag: StateLoader, currentImage: Int? = 0, allImages: Int? = 0) {
+        var stateName: String
+        switch tag {
+        case .scanning:
+            stateName = "Сканирование"
+        case .classifier:
+            stateName = "Распознавание"
+        }
+        updateInfo.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .bold)
+        updateInfo.text = "\(stateName): \(currentImage!) / \(allImages!)"
     }
 }
 
@@ -370,10 +423,19 @@ extension CategoriesView {
     }
 }
 
+// MARK: exit
 extension CategoriesView {
     @objc
     private func close_controller() {
-        disableTabBar?.enableTabBarButton()
         navigationController?.popViewController(animated: true)
+    }
+
+    private func noPermissionsAlert() {
+        let alert = UIAlertController(title: nil, message: "Нет доступа к галерее",
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default,
+                                      handler: {_ in self.close_controller() }
+        ))
+        self.present(alert, animated: true)
     }
 }

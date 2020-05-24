@@ -54,6 +54,7 @@ final class CoreMLViewModel: CoreMLViewModelProtocol {
         }
 
         let handler = VNImageRequestHandler(ciImage: ciImage, orientation: orientation)
+        //DispatchQueue.global(qos: .userInitiated).async {
         do {
             try handler.perform([
                 self.coreMLModelManager.create_classificasionRequest(model: model,
@@ -98,6 +99,7 @@ final class CoreMLViewModel: CoreMLViewModelProtocol {
                 completion?(nil, CoreMLViewModelErrors.unknown)
             }
         }
+        //}
     }
 }
 

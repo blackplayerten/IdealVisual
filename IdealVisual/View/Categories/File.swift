@@ -7,9 +7,8 @@
 //
 
 import Foundation
-import PromiseKit
 
 protocol MainViewAddPostsDelegate: class {
-    func create(photoName: String, photoData: Data?, date: Date?, place: String?,
-                text: String?) -> Promise<Void>
+    func create(photoName: String, photoData: Data?, date: Date?, place: String?, text: String?,
+                completion: ((PostViewModelErrors?) -> Void)?)
 }

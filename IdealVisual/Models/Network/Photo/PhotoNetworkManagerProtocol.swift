@@ -8,9 +8,8 @@
 
 import Foundation
 import Alamofire
-import PromiseKit
 
 protocol PhotoNetworkManagerProtocol {
-    func get(path: String) -> Promise<Data>
-    func upload(token: String, data: Data, name: String) -> Promise<String>
+    func get(path: String, completion: ((Data?, NetworkError?) -> Void)?)
+    func upload(token: String, data: Data, name: String, completion: ((String?, NetworkError?) -> Void)?)
 }
