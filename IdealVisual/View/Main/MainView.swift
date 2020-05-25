@@ -448,7 +448,7 @@ extension MainView: UICollectionViewDropDelegate {
                 let viewModel = postViewModel
             else { return }
 
-            postViewModel?.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item,
+            viewModel.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item,
                                 completion: { [weak self] (error) in
                 DispatchQueue.main.async {
                     if let error = error {
@@ -459,8 +459,6 @@ extension MainView: UICollectionViewDropDelegate {
                             self?.logOut()
                         case .notFound:
                             self?._error(text: "Ошибка синхронизации", color: Colors.darkGray)
-                        case .notFound:
-                            self?._error(text: "Невозможно отобразить данные", color: Colors.darkGray)
                         default:
                             self?._error(text: "Упс, что-то пошло не так.")
                         }

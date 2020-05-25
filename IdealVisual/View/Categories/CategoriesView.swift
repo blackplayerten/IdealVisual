@@ -19,8 +19,11 @@ final class CategoriesView: UIViewController {
 
     private weak var delegateCreatePosts: MainViewAddPostsDelegate?
 
+    private var reusableview: UICollectionReusableView?
+    private let countingChoosing = UILabel()
+
     lazy fileprivate var collectionWithCategories: UICollectionView = {
-        let cellSide = view.bounds.width / 3 - 1
+        let cellSide = view.bounds.width / 6 - 1
         let sizecell = CGSize(width: cellSide, height: cellSide)
         let layout = UICollectionViewFlowLayout()
         layout.itemSize = sizecell
@@ -56,6 +59,11 @@ final class CategoriesView: UIViewController {
     // MARK: - view did load, ask permissions
     override func viewDidLoad() {
         super.viewDidLoad()
+        collectionWithCategories.register(PhotoCell.self, forCellWithReuseIdentifier: "cell")
+        collectionWithCategories.register(CategoryViewSectionHeader.self,
+                                          forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                          withReuseIdentifier: "header")
+
         let status = PHPhotoLibrary.authorizationStatus()
         view.backgroundColor = .white
 
@@ -110,7 +118,7 @@ final class CategoriesView: UIViewController {
 
     // MARK: - navbar and swipe back
     private func setupNavItems() {
-        navigationController?.navigationBar.isTranslucent = true
+        navigationController?.navigationBar.isTranslucent = false
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
 
@@ -128,8 +136,22 @@ final class CategoriesView: UIViewController {
                                                                                            target: self,
                                                                                            action: #selector(save)
                 ))
+                countingChoosing.isHidden = false
+                countingChoosing.textColor = Colors.darkGray
+                countingChoosing.font = UIFont(name: "PingFang-SC-SemiBold", size: 14)
+                countingChoosing.translatesAutoresizingMaskIntoConstraints = false
+                navigationController?.navigationBar.addSubview(countingChoosing)
+                countingChoosing.centerYAnchor.constraint(
+                    equalTo: (navigationController?.navigationBar.centerYAnchor)!).isActive = true
+                countingChoosing.rightAnchor.constraint(equalTo: (navigationController?.navigationBar.rightAnchor)!,
+                                                       constant: -50).isActive = true
+                countingChoosing.widthAnchor.constraint(equalToConstant: 30).isActive = true
+                countingChoosing.heightAnchor.constraint(equalToConstant: 30).isActive = true
+                countingChoosing.text = String(describing:
+                    (collectionWithCategories.indexPathsForSelectedItems?.count)!)
             } else {
                 navigationItem.rightBarButtonItem = nil
+                countingChoosing.isHidden = true
             }
         }
 
@@ -247,10 +269,6 @@ final class CategoriesView: UIViewController {
         collectionWithCategories.delegate = self
         collectionWithCategories.dataSource = self
 
-        collectionWithCategories.register(PhotoCell.self, forCellWithReuseIdentifier: "cell")
-        collectionWithCategories.register(CategoryViewSectionHeader.self,
-                                          forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-                                          withReuseIdentifier: "header")
         collectionWithCategories.allowsMultipleSelection = true
     }
 
@@ -324,10 +342,11 @@ extension CategoriesView: UICollectionViewDelegate, UICollectionViewDelegateFlow
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String,
                         at indexPath: IndexPath) -> UICollectionReusableView {
-        let reusableview = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+        self.reusableview = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
                                                                            withReuseIdentifier: "header",
                                                                            for: indexPath)
         if let unwrapReusableView = reusableview as? CategoryViewSectionHeader {
+            unwrapReusableView.sectionHeader.font = UIFont(name: "PingFang-SC-SemiBold", size: 18)
             switch indexPath.section {
             case 0:
                 unwrapReusableView.sectionHeader.text = "Животные"
@@ -339,7 +358,23 @@ extension CategoriesView: UICollectionViewDelegate, UICollectionViewDelegateFlow
                 unwrapReusableView.sectionHeader.text="Неизвестная секция"
             }
         }
-        return reusableview
+
+        return self.reusableview!
+    }
+
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell,
+                        forItemAt indexPath: IndexPath) {
+        let header = UILabel()
+        header.font = UIFont(name: "PingFang-SC-SemiBold", size: 18)
+        header.textColor = Colors.lightBlue
+        if let unw = reusableview as? CategoryViewSectionHeader {
+            if indexPath.item > 12 {
+                header.text = unw.sectionHeader.text
+                navigationItem.titleView = header
+            } else {
+                navigationItem.titleView = nil
+            }
+        }
     }
 
     // MARK: - cell for item at
@@ -347,8 +382,8 @@ extension CategoriesView: UICollectionViewDelegate, UICollectionViewDelegateFlow
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
         if let unwrapCell = cell as? PhotoCell {
-            unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
-                                      height: view.bounds.width / 3 - 1)
+            unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 5 - 1,
+                                      height: view.bounds.width / 5 - 1)
             unwrapCell.backgroundColor = .gray
 
             switch indexPath.section {
@@ -427,6 +462,7 @@ extension CategoriesView {
 extension CategoriesView {
     @objc
     private func close_controller() {
+        countingChoosing.isHidden = true
         navigationController?.popViewController(animated: true)
     }
 
