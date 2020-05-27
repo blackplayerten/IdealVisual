@@ -12,7 +12,7 @@ final class CoreMLManager: CoreMLManagerProtocol {
     // MARK: create ML model
     func createCoreMLModel(completion: ((VNCoreMLModel?, CoreMLErrorsModel?) -> Void)?) {
         do {
-            let model = try VNCoreMLModel(for: IdealVisualClassifier_1().model)
+            let model = try VNCoreMLModel(for: IdealVisualClassifier_2().model)
             completion?(model, nil)
         } catch {
             Logger.log("can't create model")

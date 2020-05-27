@@ -1,11 +1,3 @@
-//
-//  PhotoViewModel.swift
-//  IdealVisual
-//
-//  Created by a.kurganova on 27.12.2019.
-//  Copyright © 2019 a.kurganova. All rights reserved.
-//
-
 import Foundation
 import CoreData
 
@@ -110,10 +102,10 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                                 }
                                 do {
                                     try self.postCoreData.update(post: post,
-                                                             id: jspost.id, date: jspost.date,
-                                                             place: jspost.place, text: jspost.text,
-                                                             indexPhoto: photoIndex,
-                                                             lastUpdated: jspost.lastUpdated)
+                                                                 id: jspost.id, date: jspost.date,
+                                                                 place: jspost.place, text: jspost.text,
+                                                                 indexPhoto: photoIndex,
+                                                                 lastUpdated: jspost.lastUpdated)
                                 } catch {
                                     completion?(PostViewModelErrors.unknown)
                                 }
@@ -125,6 +117,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                                                           completion: { (_, error) in
                                     if let err = error {
                                         switch err {
+                                        case .noConnection:
+                                            completion?(PostViewModelErrors.noConnection)
                                         case .noData:
                                             completion?(PostViewModelErrors.noData)
                                         case .unauthorized:
@@ -159,6 +153,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                                                     completion: { (uploaded, error) in
                         if let err = error {
                             switch err {
+                            case .noConnection:
+                                completion?(PostViewModelErrors.noConnection)
                             case .unauthorized:
                                 completion?(PostViewModelErrors.unauthorized)
                             default:
@@ -178,6 +174,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                         self.postNetworkManager.create(token: token, post: converted, completion: { (created, error) in
                             if let err = error {
                                 switch err {
+                                case .noConnection:
+                                    completion?(PostViewModelErrors.noConnection)
                                 case .notFound:
                                     completion?(PostViewModelErrors.notFound)
                                 case .unauthorized:
@@ -197,8 +195,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                             // меняем айди на айди поста сервера
                             do {
                                 try self.postCoreData.update(post: post, id: created.id, date: nil, place: nil,
-                                                         text: nil, indexPhoto: nil,
-                                                         lastUpdated: created.lastUpdated)
+                                                             text: nil, indexPhoto: nil,
+                                                             lastUpdated: created.lastUpdated)
                             } catch {
                                 completion?(PostViewModelErrors.unknown)
                             }
@@ -214,6 +212,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                 self.photoNetworkManager.get(path: jspost.photo, completion: { (photoData, error) in
                     if let err = error {
                         switch err {
+                        case .noConnection:
+                            completion?(PostViewModelErrors.noConnection)
                         case .unauthorized:
                             completion?(PostViewModelErrors.unauthorized)
                         case .notFound:
@@ -222,7 +222,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                         case .noData:
                             completion?(PostViewModelErrors.noData)
                         default:
-                            Logger.log("unknown error: \(error)")
+                            Logger.log("unknown error: \(err)")
                             completion?(PostViewModelErrors.unknown)
                         }
                         return
@@ -255,6 +255,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
     )
 }
     // swiftlint:enable cyclomatic_complexity
+
     func create(photoName: String, photoData: Data?, date: Date? = nil, place: String? = nil,
                 text: String? = nil, completion: ((PostViewModelErrors?) -> Void)?) {
         let photoPath: String = photoFolder + photoName
@@ -286,6 +287,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                                    completion: { (path, error) in
             if let err = error {
                 switch err {
+                case .noConnection:
+                    completion?(PostViewModelErrors.noConnection)
                 case .unauthorized:
                     completion?(PostViewModelErrors.unauthorized)
                 case .notFound:
@@ -308,6 +311,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
             self.postNetworkManager.create(token: token, post: jsonPost, completion: { (post, error) in
                 if let err = error {
                     switch err {
+                    case .noConnection:
+                        completion?(PostViewModelErrors.noConnection)
                     case .unauthorized:
                         completion?(PostViewModelErrors.unauthorized)
                     default:
@@ -322,15 +327,14 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                     completion?(PostViewModelErrors.noData)
                     return
                 }
-
                 do {
-                _ = try self.postCoreData.update(post: created, id: post.id, date: nil, place: nil, text: nil,
-                                             indexPhoto: nil,
-                                             lastUpdated: post.lastUpdated)
+                    _ = try self.postCoreData.update(post: created, id: post.id, date: nil, place: nil, text: nil,
+                                                     indexPhoto: nil,
+                                                     lastUpdated: post.lastUpdated)
+                    completion?(nil)
                 } catch {
                     completion?(PostViewModelErrors.unknown)
                 }
-                completion?(nil)
             })
         })
 
@@ -356,11 +360,10 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                 completion: ((PostViewModelErrors?) -> Void)?) {
         do {
             try postCoreData.update(post: post, id: post.id, date: date, place: place, text: text,
-                            indexPhoto: nil, lastUpdated: Date())
+                                    indexPhoto: nil, lastUpdated: Date())
         } catch {
             completion?(PostViewModelErrors.unknown)
         }
-
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
             completion?(PostViewModelErrors.unauthorized)
@@ -372,12 +375,14 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
             completion: { (_, error) in
                 if let err = error {
                     switch err {
+                    case .noConnection:
+                        completion?(PostViewModelErrors.noConnection)
                     case .noData:
                         completion?(PostViewModelErrors.noData)
                     case .unauthorized:
                         completion?(PostViewModelErrors.unauthorized)
                     default:
-                        Logger.log("unknown error: \(error)")
+                        Logger.log("unknown error: \(err)")
                         completion?(PostViewModelErrors.unknown)
                     }
                 }
@@ -414,6 +419,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
         postNetworkManager.delete(token: token, ids: uuids, completion: { (error) in
             if let err = error {
                 switch err {
+                case .noConnection:
+                    completion?(PostViewModelErrors.noConnection)
                 case .notFound:
                     completion?(PostViewModelErrors.notFound)
                 case .unauthorized:
@@ -448,6 +455,8 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
             postNetworkManager.update(token: token, post: jsonPost, completion: { (_, error) in
                 if let err = error {
                     switch err {
+                    case .noConnection:
+                        completion?(PostViewModelErrors.noConnection)
                     case .unauthorized:
                         completion?(PostViewModelErrors.unauthorized)
                     case .noData:
@@ -457,7 +466,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDele
                     default:
                         completion?(PostViewModelErrors.unknown)
                     }
-                    Logger.log(error)
+                    Logger.log(err)
                 }
             })
         }

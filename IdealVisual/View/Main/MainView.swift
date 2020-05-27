@@ -250,6 +250,9 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
                     DispatchQueue.main.async {
                         if let error = error {
                             switch error {
+                            case .noConnection:
+                                Logger.log(error)
+                                self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                             case .unauthorized:
                                 Logger.log(error)
                                 self?._error(text: "Вы не авторизованы")
@@ -307,7 +310,7 @@ extension MainView: UICollectionViewDelegate {
             content.indexPathsForSelectedItems?.forEach {
                 content.deselectItem(at: $0, animated: true)
             }
-            
+
             guard let postViewModel = postViewModel else { return }
             let post = postViewModel.posts[indexPath.item]
 
@@ -413,8 +416,9 @@ extension MainView: UICollectionViewDataSource {
             showHelp()
             helpText.text = """
             Здесь будут размещены Ваши фото \n
-            Чтобы начать свой путь к созданию идеальной ленты или блога \
-            добавьте свою первую фотографию нажав на +
+            По нажатию на кнопку + Вам будет предложено выбрать фотографии \n
+            Если Вам понадобиться помощь в выборе фотографий, \t
+            то выберите вкладку "Помощь" и следуйте инструкции
             """
         }
     }
@@ -453,6 +457,9 @@ extension MainView: UICollectionViewDropDelegate {
                 DispatchQueue.main.async {
                     if let error = error {
                         switch error {
+                        case .noConnection:
+                            Logger.log(error)
+                            self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                         case .unauthorized:
                             self?._error(text: "Вы не авторизованы")
                             sleep(3)
@@ -522,6 +529,9 @@ extension MainView {
                     DispatchQueue.main.async {
                         if let error = error {
                             switch error {
+                            case .noConnection:
+                                Logger.log(error)
+                                self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                             case .unauthorized:
                                 Logger.log(error)
                                 self?._error(text: "Вы не авторизованы")

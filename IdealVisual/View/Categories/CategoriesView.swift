@@ -30,6 +30,7 @@ final class CategoriesView: UIViewController {
         layout.minimumInteritemSpacing = 1
         layout.minimumLineSpacing = 1
         layout.scrollDirection = .vertical
+        layout.sectionHeadersPinToVisibleBounds = true
         return UICollectionView(frame: self.view.frame, collectionViewLayout: layout)
     }()
 
@@ -70,6 +71,7 @@ final class CategoriesView: UIViewController {
         self.tabBarController?.tabBar.isHidden = true
         setupNavItems()
 
+        // MARK: permissions
         switch status {
         case .notDetermined:
             PHPhotoLibrary.requestAuthorization { status in
@@ -118,7 +120,8 @@ final class CategoriesView: UIViewController {
 
     // MARK: - navbar and swipe back
     private func setupNavItems() {
-        navigationController?.navigationBar.isTranslucent = false
+        navigationController?.navigationBar.isTranslucent = true
+        navigationController?.navigationBar.backgroundColor = .clear
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
 
@@ -175,7 +178,7 @@ final class CategoriesView: UIViewController {
         if results.count > 0 {
             self.present(loader, animated: true, completion: nil)
             var counterLoader = 0
-            for i in 0..<500 {
+            for i in 0..<results.count {
                 let asset = results.object(at: i)
                 let size = CGSize(width: 700, height: 700)
                 manager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill,
@@ -190,10 +193,10 @@ final class CategoriesView: UIViewController {
 
                     counterLoader += 1
                     DispatchQueue.main.async {
-                        self.updateLoaderInfo(tag: .scanning, currentImage: counterLoader, allImages: 500)
+                        self.updateLoaderInfo(tag: .scanning, currentImage: counterLoader, allImages: results.count)
                     }
 
-                    if counterLoader == 500 {
+                    if counterLoader == results.count {
                         print("scaning", scaningImages.count)
                         self.fillStruct(scaningImages: scaningImages)
                     }
@@ -248,6 +251,7 @@ final class CategoriesView: UIViewController {
 
                     if i == scaningImages.count - 1 {
                         self?.dismiss(animated: true, completion: nil)
+                        self?.setHelpTextAlert()
                         self?.setupCollection()
                     }
                 }
@@ -256,11 +260,25 @@ final class CategoriesView: UIViewController {
         }
     }
 
+    // MARK: - help alert
+    private func setHelpTextAlert() {
+        let textHelp = """
+            \n Здесь будут отображаться фотографии с вашего телефона,
+            разделенные на три категории: \n
+            Животные Еда Люди \n
+            Выберите понравившиеся фотографии и нажмите \u{2713},\t
+            чтобы добавить их в ленту.
+        """
+        let helpAlert = UIAlertController(title: "Инструкция", message: textHelp, preferredStyle: .alert)
+        helpAlert.addAction(UIAlertAction(title: "Понятно", style: .cancel, handler: nil))
+        self.present(helpAlert, animated: true)
+    }
+
     // MARK: - setup collection
     private func setupCollection() {
         view.addSubview(collectionWithCategories)
         collectionWithCategories.translatesAutoresizingMaskIntoConstraints = false
-        collectionWithCategories.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        collectionWithCategories.topAnchor.constraint(equalTo: view.topAnchor, constant: -100).isActive = true
         collectionWithCategories.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
         collectionWithCategories.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
         collectionWithCategories.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
@@ -337,7 +355,7 @@ extension CategoriesView: UICollectionViewDelegate, UICollectionViewDelegateFlow
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: self.view.frame.width, height: 50)
+        return CGSize(width: self.view.frame.width, height: 100)
     }
 
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String,
@@ -346,6 +364,7 @@ extension CategoriesView: UICollectionViewDelegate, UICollectionViewDelegateFlow
                                                                            withReuseIdentifier: "header",
                                                                            for: indexPath)
         if let unwrapReusableView = reusableview as? CategoryViewSectionHeader {
+
             unwrapReusableView.sectionHeader.font = UIFont(name: "PingFang-SC-SemiBold", size: 18)
             switch indexPath.section {
             case 0:
@@ -360,21 +379,6 @@ extension CategoriesView: UICollectionViewDelegate, UICollectionViewDelegateFlow
         }
 
         return self.reusableview!
-    }
-
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell,
-                        forItemAt indexPath: IndexPath) {
-        let header = UILabel()
-        header.font = UIFont(name: "PingFang-SC-SemiBold", size: 18)
-        header.textColor = Colors.lightBlue
-        if let unw = reusableview as? CategoryViewSectionHeader {
-            if indexPath.item > 12 {
-                header.text = unw.sectionHeader.text
-                navigationItem.titleView = header
-            } else {
-                navigationItem.titleView = nil
-            }
-        }
     }
 
     // MARK: - cell for item at

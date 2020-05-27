@@ -203,6 +203,9 @@ final class PostView: UIViewController {
     private func procError(error: PostViewModelErrors?) {
         if let error = error {
             switch error {
+            case .noConnection:
+                Logger.log(error)
+                unErr(text: "Нет соединения с интернетом", color: Colors.darkGray)
             case .unauthorized:
                 unErr(text: "Вы не авторизованы")
             case .noData:
@@ -214,8 +217,8 @@ final class PostView: UIViewController {
     }
 
      // MARK: ui error
-       private func unErr(text: String) {
-        self.un = UIError(text: text, place: view, color: Colors.red)
+    private func unErr(text: String, color: UIColor? = Colors.red) {
+        self.un = UIError(text: text, place: view, color: color)
         view.addSubview(un!)
         un!.translatesAutoresizingMaskIntoConstraints = false
         un!.topAnchor.constraint(equalTo: (navigationController?.navigationBar.bottomAnchor)!).isActive = true

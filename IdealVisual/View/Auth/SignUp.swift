@@ -199,12 +199,11 @@ final class SignUp: UIViewController {
     @objc
     private func createAccount() {
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 45,
-                                                                     y: 485,
+                                                                     y: 515,
                                                                      width: 50, height: 50))
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true
         scroll.addSubview(loadingIndicator)
-        loadingIndicator.startAnimating()
 
         if !checkValidInputs() {
             return
@@ -216,6 +215,7 @@ final class SignUp: UIViewController {
             let password = password?.textField.text
         else { return }
 
+        loadingIndicator.startAnimating()
         userViewModel?.create(username: username, email: email, password: password,
                               completion: { [weak self] (error) in
             DispatchQueue.main.async {

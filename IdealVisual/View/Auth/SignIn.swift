@@ -28,7 +28,6 @@ final class SignIn: UIViewController {
         self.titleView = UIView(frame: CGRect(x: 0, y: UIApplication.shared.keyWindow!.safeAreaInsets.top,
                                               width: self.view.bounds.width, height: 80))
         view.addSubview(titleView!)
-
         setNav()
         setScroll()
 
@@ -96,6 +95,17 @@ final class SignIn: UIViewController {
 
     // MARK: - navigation
     private func setNav() {
+        let fon = UIImageView()
+        view.addSubview(fon)
+        fon.translatesAutoresizingMaskIntoConstraints = false
+        fon.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        fon.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60).isActive = true
+        fon.widthAnchor.constraint(equalToConstant: 330).isActive = true
+        fon.heightAnchor.constraint(equalToConstant: 300).isActive = true
+        fon.alpha = 0.55
+
+        fon.image = UIImage(named: "login_fon2")
+
         let titleV = UILabel()
         titleV.backgroundColor = .white
         titleView?.addSubview(titleV)
@@ -138,7 +148,7 @@ final class SignIn: UIViewController {
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.setEditFields(state: true)
         }
-        email.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -150).isActive = true
+        email.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -50).isActive = true
         password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 30).isActive = true
 
         setAuthButtons()
@@ -208,7 +218,7 @@ final class SignIn: UIViewController {
         }
 
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 90,
-                                                                     y: 380,
+                                                                     y: 480,
                                                                      width: 50, height: 50))
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true

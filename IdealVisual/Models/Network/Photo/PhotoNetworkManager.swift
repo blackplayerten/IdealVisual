@@ -20,6 +20,14 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
         AF.download(url).responseData { response in
             if let error = response.error {
                 if let status = response.response?.statusCode {
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError.noConnection)
+                        return
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError.unknown)
+                    }
+
                     switch status {
                     case HTTPCodes.notFound:
                         completion?(nil, NetworkError.notFound)
@@ -30,10 +38,6 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
                         return
                     }
                 }
-
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(nil, NetworkError.unknown)
-                return
             }
 
             if let status = response.response?.statusCode {
@@ -85,9 +89,14 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
                         }
                     }
 
-                    Logger.log("unknown error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError.unknown)
-                    return
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError.noConnection)
+                        return
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError.unknown)
+                        return
+                    }
                 }
 
                 guard let uploadedPath = response.value else {
