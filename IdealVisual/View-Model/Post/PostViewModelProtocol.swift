@@ -11,12 +11,12 @@ import Foundation
 protocol PostViewModelProtocol {
     var posts: [Post] { get }
     func create(photoName: String, photoData: Data?, date: Date?, place: String?, text: String?,
-                completion: ((ErrorViewModel?) -> Void)?)
+                completion: ((PostViewModelErrors?) -> Void)?)
     func getPhoto(path: String) -> String
     func update(post: Post, date: Date?, place: String?, text: String?,
-                completion: ((ErrorViewModel?) -> Void)?)
+                completion: ((PostViewModelErrors?) -> Void)?)
     func subscribe(completion: @escaping (PostViewModelProtocol) -> Void)
-    func delete(atIndices: [Int], completion: ((ErrorViewModel?) -> Void)?)
-    func swap(source: Int, dest: Int, completion: ((ErrorViewModel?) -> Void)?)
-    func sync(completion: ((ErrorViewModel?) -> Void)?)
+    func delete(atIndices: [Int], completion: ((PostViewModelErrors?) -> Void)?)
+    func swap(source: Int, dest: Int, completion: ((PostViewModelErrors?) -> Void)?)
+    func sync(completion: ((PostViewModelErrors?) -> Void)?)
 }

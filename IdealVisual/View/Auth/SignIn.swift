@@ -28,16 +28,15 @@ final class SignIn: UIViewController {
         self.titleView = UIView(frame: CGRect(x: 0, y: UIApplication.shared.keyWindow!.safeAreaInsets.top,
                                               width: self.view.bounds.width, height: 80))
         view.addSubview(titleView!)
-
         setNav()
         setScroll()
 
         self.userViewModel = UserViewModel()
 
-        self.email = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
+        self.email = InputFields(tag: 0, labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
                                  textContentType: .emailAddress, keyboardType: .emailAddress,
                                  validator: checkValidEmail, inputDelegate: self)
-        self.password = InputFields(labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль",
+        self.password = InputFields(tag: 1, labelImage: UIImage(named: "password"), text: nil, placeholder: "Пароль",
                                     textContentType: .password, validator: checkValidPassword,
                                     inputDelegate: self)
         setAuthFields()
@@ -78,8 +77,14 @@ final class SignIn: UIViewController {
 
         guard let activeField = activeField else { return }
 
-        let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y-kbSize.height)
-        scroll.setContentOffset(scrollPoint, animated: true)
+        let visible_screen_without_keyboard = scroll.bounds.height - kbSize.height
+
+        let tr = scroll.convert(activeField.frame, to: nil)
+
+        if tr.origin.y + tr.height > visible_screen_without_keyboard {
+            let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y - kbSize.height)
+            scroll.setContentOffset(scrollPoint, animated: true)
+        }
     }
 
     @objc
@@ -90,6 +95,17 @@ final class SignIn: UIViewController {
 
     // MARK: - navigation
     private func setNav() {
+        let fon = UIImageView()
+        view.addSubview(fon)
+        fon.translatesAutoresizingMaskIntoConstraints = false
+        fon.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        fon.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60).isActive = true
+        fon.widthAnchor.constraint(equalToConstant: 330).isActive = true
+        fon.heightAnchor.constraint(equalToConstant: 300).isActive = true
+        fon.alpha = 0.55
+
+        fon.image = UIImage(named: "login_fon2")
+
         let titleV = UILabel()
         titleV.backgroundColor = .white
         titleView?.addSubview(titleV)
@@ -132,7 +148,7 @@ final class SignIn: UIViewController {
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.setEditFields(state: true)
         }
-        email.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -100).isActive = true
+        email.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -50).isActive = true
         password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 30).isActive = true
 
         setAuthButtons()
@@ -202,29 +218,30 @@ final class SignIn: UIViewController {
         }
 
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 90,
-                                                                     y: 425,
+                                                                     y: 480,
                                                                      width: 50, height: 50))
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true
-        loadingIndicator.startAnimating()
         scroll.addSubview(loadingIndicator)
+        loadingIndicator.startAnimating()
 
         userViewModel?.login(email: email, password: password, completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.noConnection:
+                    case .noConnection:
                         self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
-                    case ErrorsUserViewModel.wrongCredentials:
+                    case .wrongCredentials:
                         self?.password?.setError(text: "Неправильная почта или пароль")
                     default:
                         Logger.log("unknown error: \(error)")
                         self?._error(text: "Упс, что-то пошло не так")
                     }
+                    loadingIndicator.stopAnimating()
                 } else {
+                    loadingIndicator.stopAnimating()
                     self?.autoLogin()
                 }
-                loadingIndicator.stopAnimating()
             }
         })
     }

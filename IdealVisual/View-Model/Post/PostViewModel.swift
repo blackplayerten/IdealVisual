@@ -1,15 +1,7 @@
-//
-//  PhotoViewModel.swift
-//  IdealVisual
-//
-//  Created by a.kurganova on 27.12.2019.
-//  Copyright © 2019 a.kurganova. All rights reserved.
-//
-
 import Foundation
 import CoreData
 
-final class PostViewModel: NSObject, PostViewModelProtocol {
+final class PostViewModel: NSObject, PostViewModelProtocol, MainViewAddPostsDelegate {
     private var user: User?
     private var postCoreData: PostCoreDataProtocol
     private var postNetworkManager: PostNetworkManagerProtocol
@@ -50,23 +42,23 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
     }
 
     // swiftlint:disable cyclomatic_complexity
-    func sync(completion: ((ErrorViewModel?) -> Void)?) {
+    func sync(completion: ((PostViewModelErrors?) -> Void)?) {
         guard let user = user, let token = user.token else {
             Logger.log("token in coredata is nil")
-            completion?(ErrorsPostViewModel.unauthorized)
+            completion?(PostViewModelErrors.unauthorized)
             return
         }
 
         postNetworkManager.get(token: token, completion: { (jsposts, error) in
-            if let error = error {
-                switch error.name {
-                case ErrorsNetwork.unauthorized:
-                    completion?(ErrorsPostViewModel.unauthorized)
-                case ErrorsNetwork.noConnection:
-                    completion?(ErrorsPostViewModel.noConnection)
+            if let err = error {
+                switch err {
+                case .unauthorized:
+                    completion?(PostViewModelErrors.unauthorized)
+                case .noConnection:
+                    completion?(PostViewModelErrors.noConnection)
                 default:
-                    Logger.log("unknown: \(String(describing: error.name))")
-                    completion?(ErrorsPostViewModel.unknownError)
+                    Logger.log("unknown: \(String(describing: err))")
+                    completion?(PostViewModelErrors.unknown)
                 }
 
                 return
@@ -76,10 +68,14 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
             if jsposts.count == 0 {
                 self.posts.forEach {
-                    self.postCoreData.delete(post: $0)
+                    do {
+                        try self.postCoreData.delete(post: $0)
+                    } catch {
+                        completion?(PostViewModelErrors.unknown)
+                    }
                 }
 
-                completion?(ErrorsPostViewModel.notFound)
+                completion?(PostViewModelErrors.notFound)
                 return
             }
 
@@ -104,26 +100,32 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                                 if let jsPhotoIndex = jspost.photoIndex {
                                     photoIndex = Int(jsPhotoIndex)
                                 }
-                                self.postCoreData.update(post: post,
-                                                         id: jspost.id, date: jspost.date,
-                                                         place: jspost.place, text: jspost.text,
-                                                         indexPhoto: photoIndex,
-                                                         lastUpdated: jspost.lastUpdated)
+                                do {
+                                    try self.postCoreData.update(post: post,
+                                                                 id: jspost.id, date: jspost.date,
+                                                                 place: jspost.place, text: jspost.text,
+                                                                 indexPhoto: photoIndex,
+                                                                 lastUpdated: jspost.lastUpdated)
+                                } catch {
+                                    completion?(PostViewModelErrors.unknown)
+                                }
                             } else {
                                 // post on server is old: sync out
                                 var converted = self.convertDBModelToJSON(post: post)
                                 converted.photo = ""
                                 self.postNetworkManager.update(token: token, post: converted,
                                                           completion: { (_, error) in
-                                    if let error = error {
-                                        switch error.name {
-                                        case ErrorsNetwork.noData:
-                                            completion?(ErrorsPostViewModel.noData)
-                                        case ErrorsNetwork.unauthorized:
-                                            completion?(ErrorsPostViewModel.unauthorized)
+                                    if let err = error {
+                                        switch err {
+                                        case .noConnection:
+                                            completion?(PostViewModelErrors.noConnection)
+                                        case .noData:
+                                            completion?(PostViewModelErrors.noData)
+                                        case .unauthorized:
+                                            completion?(PostViewModelErrors.unauthorized)
                                         default:
-                                            Logger.log("unknown error: \(error)")
-                                            completion?(ErrorsPostViewModel.unknownError)
+                                            Logger.log("unknown error: \(err)")
+                                            completion?(PostViewModelErrors.unknown)
                                         }
                                     }
                                 })
@@ -132,31 +134,37 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                         break
                     }
                     if !found {
-                        self.postCoreData.delete(post: post)
+                        do {
+                            try self.postCoreData.delete(post: post)
+                        } catch {
+                            completion?(PostViewModelErrors.unknown)
+                        }
                     }
                 } else { // если есть посты с 0 айди, значит они есть у нас, но их нет на сервере
                     guard let ph = post.photo,
                             let dataPhoto = MyFileManager.getFile(filePath: ph),
                             let namePhoto = URL(string: ph)?.lastPathComponent
                     else {
-                        completion?(ErrorsPostViewModel.noData)
+                        completion?(PostViewModelErrors.noData)
                         return
                     }
 
                     self.photoNetworkManager.upload(token: token, data: dataPhoto, name: namePhoto,
                                                     completion: { (uploaded, error) in
-                        if let error = error {
-                            switch error.name {
-                            case ErrorsNetwork.unauthorized:
-                                completion?(ErrorsPostViewModel.unauthorized)
+                        if let err = error {
+                            switch err {
+                            case .noConnection:
+                                completion?(PostViewModelErrors.noConnection)
+                            case .unauthorized:
+                                completion?(PostViewModelErrors.unauthorized)
                             default:
                                 Logger.log("unknown error: \(error)")
-                                completion?(ErrorsPostViewModel.unknownError)
+                                completion?(PostViewModelErrors.unknown)
                             }
                         }
 
                         guard let uploaded = uploaded else {
-                            completion?(ErrorsPostViewModel.noData)
+                            completion?(PostViewModelErrors.noData)
                             return
                         }
 
@@ -164,28 +172,34 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                         converted.photo = uploaded
 
                         self.postNetworkManager.create(token: token, post: converted, completion: { (created, error) in
-                            if let error = error {
-                                switch error.name {
-                                case ErrorsNetwork.notFound:
-                                    completion?(ErrorsUserViewModel.notFound)
-                                case ErrorsNetwork.unauthorized:
-                                    completion?(ErrorsPostViewModel.unauthorized)
+                            if let err = error {
+                                switch err {
+                                case .noConnection:
+                                    completion?(PostViewModelErrors.noConnection)
+                                case .notFound:
+                                    completion?(PostViewModelErrors.notFound)
+                                case .unauthorized:
+                                    completion?(PostViewModelErrors.unauthorized)
                                 default:
                                     Logger.log("unknown error: \(error)")
-                                    completion?(ErrorsPostViewModel.unknownError)
+                                    completion?(PostViewModelErrors.unknown)
                                 }
                             }
 
                             guard let created = created else {
-                                Logger.log("data error: \(ErrorsPostViewModel.noData)")
-                                completion?(ErrorsPostViewModel.noData)
+                                Logger.log("data error: \(PostViewModelErrors.noData)")
+                                completion?(PostViewModelErrors.noData)
                                 return
                             }
 
                             // меняем айди на айди поста сервера
-                            self.postCoreData.update(post: post, id: created.id, date: nil, place: nil, text: nil,
-                                                     indexPhoto: nil,
-                                                     lastUpdated: created.lastUpdated)
+                            do {
+                                try self.postCoreData.update(post: post, id: created.id, date: nil, place: nil,
+                                                             text: nil, indexPhoto: nil,
+                                                             lastUpdated: created.lastUpdated)
+                            } catch {
+                                completion?(PostViewModelErrors.unknown)
+                            }
                         })
                     })
                 }
@@ -196,18 +210,20 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
                     continue
                 }
                 self.photoNetworkManager.get(path: jspost.photo, completion: { (photoData, error) in
-                    if let error = error {
-                        switch error.name {
-                        case ErrorsNetwork.unauthorized:
-                            completion?(ErrorsPostViewModel.unauthorized)
-                        case ErrorsNetwork.notFound:
+                    if let err = error {
+                        switch err {
+                        case .noConnection:
+                            completion?(PostViewModelErrors.noConnection)
+                        case .unauthorized:
+                            completion?(PostViewModelErrors.unauthorized)
+                        case .notFound:
                             Logger.log("photo not found")
                             // skip this post
-                        case ErrorsNetwork.noData:
-                            completion?(ErrorsPostViewModel.noData)
+                        case .noData:
+                            completion?(PostViewModelErrors.noData)
                         default:
-                            Logger.log("unknown error: \(error)")
-                            completion?(ErrorsPostViewModel.unknownError)
+                            Logger.log("unknown error: \(err)")
+                            completion?(PostViewModelErrors.unknown)
                         }
                         return
                     }
@@ -233,7 +249,7 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
             if self.posts.count != 0 {
                 completion?(nil)
             } else {
-                completion?(ErrorsPostViewModel.notFound)
+                completion?(PostViewModelErrors.notFound)
             }
         }
     )
@@ -241,12 +257,12 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
     // swiftlint:enable cyclomatic_complexity
 
     func create(photoName: String, photoData: Data?, date: Date? = nil, place: String? = nil,
-                text: String? = nil, completion: ((ErrorViewModel?) -> Void)?) {
+                text: String? = nil, completion: ((PostViewModelErrors?) -> Void)?) {
         let photoPath: String = photoFolder + photoName
         _ = MyFileManager.saveFile(data: photoData!, filePath: photoPath)
 
         guard let photoData = photoData, let date = date, let place = place, let text = text else {
-            completion?(ErrorsPostViewModel.noData)
+            completion?(PostViewModelErrors.noData)
             return
         }
 
@@ -254,36 +270,38 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
         let indexPhoto = posts.count
 
         guard let user = user, let token = user.token else {
-            Logger.log("error unautorized: \(ErrorsPostViewModel.cannotCreate)")
-            completion?(ErrorsPostViewModel.unauthorized)
+            Logger.log("error unautorized: \(PostViewModelErrors.cannotCreate)")
+            completion?(PostViewModelErrors.unauthorized)
             return
         }
 
         guard let created = postCoreData.create(user: user, id: nil, photo: photoPath, date: date, place: place,
                                                 text: text, indexPhoto: indexPhoto, lastUpdated: nil)
         else {
-            Logger.log("error on create: \(ErrorsPostViewModel.cannotCreate)")
-            completion?(ErrorsPostViewModel.cannotCreate)
+            Logger.log("error on create: \(PostViewModelErrors.cannotCreate)")
+            completion?(PostViewModelErrors.cannotCreate)
             return
         }
 
         photoNetworkManager.upload(token: token, data: photoData, name: photoName,
                                    completion: { (path, error) in
-            if let error = error {
-                switch error.name {
-                case ErrorsNetwork.unauthorized:
-                    completion?(ErrorsPostViewModel.unauthorized)
-                case ErrorsNetwork.notFound:
-                    completion?(ErrorsUserViewModel.notFound)
+            if let err = error {
+                switch err {
+                case .noConnection:
+                    completion?(PostViewModelErrors.noConnection)
+                case .unauthorized:
+                    completion?(PostViewModelErrors.unauthorized)
+                case .notFound:
+                    completion?(PostViewModelErrors.notFound)
                 default:
                     Logger.log(error)
-                    completion?(ErrorsPostViewModel.unknownError)
+                    completion?(PostViewModelErrors.unknown)
                 }
                 return
             }
 
             guard let path = path else {
-                Logger.log("data error: \(ErrorsPostViewModel.noData)")
+                Logger.log("data error: \(PostViewModelErrors.noData)")
                 return
             }
 
@@ -291,27 +309,32 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
             jsonPost.photo = path
 
             self.postNetworkManager.create(token: token, post: jsonPost, completion: { (post, error) in
-                if let error = error {
-                    switch error.name {
-                    case ErrorsNetwork.unauthorized:
-                        completion?(ErrorsPostViewModel.unauthorized)
+                if let err = error {
+                    switch err {
+                    case .noConnection:
+                        completion?(PostViewModelErrors.noConnection)
+                    case .unauthorized:
+                        completion?(PostViewModelErrors.unauthorized)
                     default:
-                        Logger.log("\(ErrorsPostViewModel.unknownError)")
-                        completion?(ErrorsPostViewModel.unknownError)
+                        Logger.log("\(PostViewModelErrors.unknown)")
+                        completion?(PostViewModelErrors.unknown)
                     }
                     return
                 }
 
                 guard let post = post else {
-                    Logger.log("data error: \(ErrorsPostViewModel.noData)")
-                    completion?(ErrorsPostViewModel.noData)
+                    Logger.log("data error: \(PostViewModelErrors.noData)")
+                    completion?(PostViewModelErrors.noData)
                     return
                 }
-
-                _ = self.postCoreData.update(post: created, id: post.id, date: nil, place: nil, text: nil,
-                                             indexPhoto: nil,
-                                             lastUpdated: post.lastUpdated)
-                completion?(nil)
+                do {
+                    _ = try self.postCoreData.update(post: created, id: post.id, date: nil, place: nil, text: nil,
+                                                     indexPhoto: nil,
+                                                     lastUpdated: post.lastUpdated)
+                    completion?(nil)
+                } catch {
+                    completion?(PostViewModelErrors.unknown)
+                }
             })
         })
 
@@ -334,28 +357,33 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
 
     func update(post: Post,
                 date: Date? = nil, place: String? = nil, text: String? = nil,
-                completion: ((ErrorViewModel?) -> Void)?) {
-        postCoreData.update(post: post, id: post.id, date: date, place: place, text: text,
-                            indexPhoto: nil, lastUpdated: Date())
-
+                completion: ((PostViewModelErrors?) -> Void)?) {
+        do {
+            try postCoreData.update(post: post, id: post.id, date: date, place: place, text: text,
+                                    indexPhoto: nil, lastUpdated: Date())
+        } catch {
+            completion?(PostViewModelErrors.unknown)
+        }
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
-            completion?(ErrorsPostViewModel.unauthorized)
+            completion?(PostViewModelErrors.unauthorized)
             return
         }
         var jsonPost = convertDBModelToJSON(post: post)
         jsonPost.photo = "" // don't update photo on server
         postNetworkManager.update(token: token, post: jsonPost,
             completion: { (_, error) in
-                if let error = error {
-                    switch error.name {
-                    case ErrorsNetwork.noData:
-                        completion?(ErrorsPostViewModel.noData)
-                    case ErrorsNetwork.unauthorized:
-                        completion?(ErrorsPostViewModel.unauthorized)
+                if let err = error {
+                    switch err {
+                    case .noConnection:
+                        completion?(PostViewModelErrors.noConnection)
+                    case .noData:
+                        completion?(PostViewModelErrors.noData)
+                    case .unauthorized:
+                        completion?(PostViewModelErrors.unauthorized)
                     default:
-                        Logger.log("unknown error: \(error)")
-                        completion?(ErrorsPostViewModel.unknownError)
+                        Logger.log("unknown error: \(err)")
+                        completion?(PostViewModelErrors.unknown)
                     }
                 }
                 completion?(nil)
@@ -367,33 +395,39 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
         notif_posts.append(completion)
     }
 
-    func delete(atIndices: [Int], completion: ((ErrorViewModel?) -> Void)?) {
+    func delete(atIndices: [Int], completion: ((PostViewModelErrors?) -> Void)?) {
         var uuids = [UUID]()
         for index in atIndices {
             let delPost = posts[index]
             uuids.append(delPost.id!)
             MyFileManager.deleteFile(filePath: delPost.photo!)
 
-            postCoreData.delete(post: delPost)
+            do {
+                try postCoreData.delete(post: delPost)
+            } catch {
+                completion?(PostViewModelErrors.unknown)
+            }
         }
 
         postCoreData.reinitIndices(posts: posts)
 
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
-            completion?(ErrorsPostViewModel.unauthorized)
+            completion?(PostViewModelErrors.unauthorized)
             return
         }
         postNetworkManager.delete(token: token, ids: uuids, completion: { (error) in
-            if let error = error {
-                switch error.name {
-                case ErrorsNetwork.notFound:
-                    completion?(ErrorsPostViewModel.notFound)
-                case ErrorsNetwork.unauthorized:
-                    completion?(ErrorsPostViewModel.unauthorized)
+            if let err = error {
+                switch err {
+                case .noConnection:
+                    completion?(PostViewModelErrors.noConnection)
+                case .notFound:
+                    completion?(PostViewModelErrors.notFound)
+                case .unauthorized:
+                    completion?(PostViewModelErrors.unauthorized)
                 default:
-                    Logger.log("\(ErrorsPostViewModel.unknownError)")
-                    completion?(ErrorsPostViewModel.unknownError)
+                    Logger.log("\(PostViewModelErrors.unknown)")
+                    completion?(PostViewModelErrors.unknown)
                 }
                 return
             }
@@ -401,11 +435,11 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
         })
     }
 
-    func swap(source: Int, dest: Int, completion: ((ErrorViewModel?) -> Void)?) {
+    func swap(source: Int, dest: Int, completion: ((PostViewModelErrors?) -> Void)?) {
         postCoreData.swap(posts, source: source, dest: dest)
 
         guard let token = user?.token else {
-            completion?(ErrorsPostViewModel.unauthorized)
+            completion?(PostViewModelErrors.unauthorized)
             return
         }
 
@@ -419,18 +453,20 @@ final class PostViewModel: NSObject, PostViewModelProtocol {
             var jsonPost = convertDBModelToJSON(post: $0)
             jsonPost.photo = "" // don't update photo on server
             postNetworkManager.update(token: token, post: jsonPost, completion: { (_, error) in
-                if let error = error {
-                    switch error.name {
-                    case ErrorsNetwork.unauthorized:
-                        completion?(ErrorsPostViewModel.unauthorized)
-                    case ErrorsNetwork.noData:
-                        completion?(ErrorsPostViewModel.noData)
-                    case ErrorsNetwork.notFound:
-                        completion?(ErrorsPostViewModel.notFound)
+                if let err = error {
+                    switch err {
+                    case .noConnection:
+                        completion?(PostViewModelErrors.noConnection)
+                    case .unauthorized:
+                        completion?(PostViewModelErrors.unauthorized)
+                    case .noData:
+                        completion?(PostViewModelErrors.noData)
+                    case .notFound:
+                        completion?(PostViewModelErrors.notFound)
                     default:
-                        completion?(ErrorsPostViewModel.unknownError)
+                        completion?(PostViewModelErrors.unknown)
                     }
-                    Logger.log(error)
+                    Logger.log(err)
                 }
             })
         }

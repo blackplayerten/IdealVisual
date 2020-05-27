@@ -13,27 +13,31 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
     func get(path: String, completion: ((Data?, NetworkError?) -> Void)?) {
         guard let url = NetworkURLS.staticURL?.appendingPathComponent(path) else {
             Logger.log("invalid static url '\(String(describing: NetworkURLS.staticURL))' and append path '\(path)'")
-            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+            completion?(nil, NetworkError.noData)
             return
         }
 
         AF.download(url).responseData { response in
             if let error = response.error {
                 if let status = response.response?.statusCode {
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError.noConnection)
+                        return
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError.unknown)
+                    }
+
                     switch status {
                     case HTTPCodes.notFound:
-                        completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                        completion?(nil, NetworkError.notFound)
                         return
                     default:
                         Logger.log("unknown status code: \(status)")
-                        completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                        completion?(nil, NetworkError.unknown)
                         return
                     }
                 }
-
-                Logger.log("unknown error: \(error.localizedDescription)")
-                completion?(nil, NetworkError(name: error.localizedDescription))
-                return
             }
 
             if let status = response.response?.statusCode {
@@ -41,18 +45,18 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
                 case HTTPCodes.okay:
                     break
                 case HTTPCodes.notFound:
-                    completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                    completion?(nil, NetworkError.notFound)
                     return
                 default:
                     Logger.log("unknown status code: \(status)")
-                    completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                    completion?(nil, NetworkError.unknown)
                     return
                 }
             }
 
             guard let data = response.value else {
-                Logger.log("data error: \(ErrorsNetwork.noData)")
-                completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                Logger.log("data error: \(NetworkError.noData)")
+                completion?(nil, NetworkError.noData)
                 return
             }
             completion?(data, nil)
@@ -62,7 +66,7 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
     func upload(token: String, data: Data, name: String, completion: ((String?, NetworkError?) -> Void)?) {
         guard let url = NetworkURLS.upload else {
             Logger.log("invalid static url: \(String(describing: NetworkURLS.upload))")
-            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+            completion?(nil, NetworkError.noData)
             return
         }
 
@@ -76,23 +80,28 @@ final class PhotoNetworkManager: PhotoNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.unauthorized:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                            completion?(nil, NetworkError.unauthorized)
                             return
                         default:
                             Logger.log("unknown status code: \(status)")
-                            completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                            completion?(nil, NetworkError.unknown)
                             return
                         }
                     }
 
-                    Logger.log("unknown error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
-                    return
+                    if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
+                        completion?(nil, NetworkError.noConnection)
+                        return
+                    } else {
+                        Logger.log("unknown error: \(error.localizedDescription)")
+                        completion?(nil, NetworkError.unknown)
+                        return
+                    }
                 }
 
                 guard let uploadedPath = response.value else {
-                    Logger.log("data error: \(ErrorsNetwork.noData)")
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("data error: \(NetworkError.noData)")
+                    completion?(nil, NetworkError.noData)
                     return
                 }
                 completion?(uploadedPath.path, nil)

@@ -15,6 +15,7 @@ final class MainView: UIViewController {
     private var profileV: ProfileView?
     private var userViewModel: UserViewModelProtocol?
     private var postViewModel: PostViewModelProtocol?
+    private var helpCategories: MainViewAddPostsDelegate?
 
     private let refreshOnSwipeView: UIScrollView = UIScrollView()
     private let helpText: UILabel = UILabel()
@@ -47,7 +48,9 @@ final class MainView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.userViewModel = UserViewModel()
-        self.postViewModel = PostViewModel(delegat: self)
+        let postVM = PostViewModel(delegat: self)
+        self.postViewModel = postVM
+        self.helpCategories = postVM
         view.backgroundColor = .white
 
         self.tabBarController?.delegate = self
@@ -61,13 +64,14 @@ final class MainView: UIViewController {
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.startAnimating()
+        self.navigationController?.navigationBar.barTintColor = .white
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: loadingIndicator)
 
         userViewModel?.getAvatar(completion: { [weak self] (avatar, error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.noData:
+                    case .noData:
                         Logger.log(error)
                         self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
                     default:
@@ -94,24 +98,24 @@ final class MainView: UIViewController {
         checkPhotos()
 
         self.postViewModel?.subscribe(completion: { [weak self] (_) in
-            DispatchQueue.main.async {
-                self?.checkPhotos()
-                self?.setNavItems()
-            }
-        })
+                DispatchQueue.main.async {
+                    self?.checkPhotos()
+                    self?.setNavItems()
+                }
+            })
 
         postViewModel?.sync(completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsPostViewModel.unauthorized:
+                    case .unauthorized:
                         self?._error(text: "Вы не авторизованы", color: Colors.red)
                         sleep(3)
                         self?.logOut()
-                    case ErrorsPostViewModel.notFound:
+                    case .notFound:
                         // only manual sync triggers alert
                         break
-                    case ErrorsPostViewModel.noConnection:
+                    case .noConnection:
                         self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                     default:
                         self?._error(text: "Ошибка синхронизации", color: Colors.red)
@@ -121,6 +125,7 @@ final class MainView: UIViewController {
             }
         })
     }
+
 
     // MARK: ui error
     private func _error(text: String, color: UIColor? = Colors.red) {
@@ -143,6 +148,7 @@ final class MainView: UIViewController {
     private func setNavItems() {
         profileB.translatesAutoresizingMaskIntoConstraints = false
         profileB.clipsToBounds = true
+        profileB.contentMode = .center
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: profileB)
 
         profileB.setBackgroundImage(avaUser, for: .normal) //ava from cache
@@ -206,13 +212,13 @@ final class MainView: UIViewController {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsPostViewModel.unauthorized:
+                    case .unauthorized:
                         self?._error(text: "Вы не авторизованы")
                         sleep(3)
                         self?.logOut()
-                    case ErrorsPostViewModel.notFound:
+                    case .notFound:
                         self?._error(text: "Посты не найдены", color: Colors.darkGray)
-                    case ErrorsPostViewModel.noConnection:
+                    case .noConnection:
                         self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                     default:
                         self?._error(text: "Ошибка синхронизации")
@@ -237,38 +243,43 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
             if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 let photoName = url.lastPathComponent
                 postViewModel?.create(photoName: photoName,
-                                      photoData: selected.jpegData(compressionQuality: 1.0),
-                                      date: Date(timeIntervalSince1970: 0),
-                                      place: "", text: "",
-                    completion: { [weak self] (error) in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                switch error {
-                                case ErrorsPostViewModel.unauthorized:
-                                    Logger.log(error)
-                                    self?._error(text: "Вы не авторизованы")
-                                    sleep(3)
-                                    self?.logOut()
-                                case ErrorsUserViewModel.notFound:
-                                    Logger.log(error)
-                                    self?._error(text: "Такого пользователя нет")
-                                    sleep(3)
-                                    self?.logOut()
-                                case ErrorsPostViewModel.cannotCreate:
-                                    Logger.log(error)
-                                    self?._error(text: "Невозможно создать пост", color: Colors.darkGray)
-                                case ErrorsPostViewModel.noData:
-                                    Logger.log(error)
-                                    self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
-                                default:
-                                    Logger.log(error)
-                                    self?._error(text: "Упс, что-то пошло не так.")
-                                }
+                                  photoData: selected.jpegData(compressionQuality: 1.0),
+                                  date: Date(timeIntervalSince1970: 0),
+                                  place: "", text: "",
+                completion: { [weak self] (error) in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            switch error {
+                            case .noConnection:
+                                Logger.log(error)
+                                self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
+                            case .unauthorized:
+                                Logger.log(error)
+                                self?._error(text: "Вы не авторизованы")
+                                sleep(3)
+                                self?.logOut()
+                            case .notFound:
+                                Logger.log(error)
+                                self?._error(text: "Такого пользователя нет")
+                                sleep(3)
+                                self?.logOut()
+                            case .cannotCreate:
+                                Logger.log(error)
+                                self?._error(text: "Невозможно создать пост", color: Colors.darkGray)
+                            case .noData:
+                                Logger.log(error)
+                                self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
+                            default:
+                                Logger.log(error)
+                                self?._error(text: "Упс, что-то пошло не так.")
                             }
-                            self?.setNavItems()
-                            self?.checkPhotos()
                         }
-                })
+                        self?.setNavItems()
+                        self?.checkPhotos()
+                    }
+            })
+            self.setNavItems()
+            self.checkPhotos()
             }
         }
         dismissAlert()
@@ -278,9 +289,15 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
 
     func chooseAvatar(picker: UIImagePickerController) { present(picker, animated: true, completion: nil) }
 
+    // MARK: - alerts
     @objc private func choose_photo() {
         let alert = UIAlertController(title: "Выберите изображение", message: nil, preferredStyle: .actionSheet)
         alert.addAction(UIAlertAction(title: "Галерея", style: .default, handler: { _ in self.openGallery() }))
+        alert.addAction(UIAlertAction(title: "Помощь", style: .default, handler: { _ in
+            let categories = CategoriesView(postscreateDelegate: self.helpCategories)
+            categories.modalPresentationStyle = .fullScreen
+            self.navigationController?.pushViewController(categories, animated: true)
+        }))
         alert.addAction(UIAlertAction(title: "Отменить", style: UIAlertAction.Style.cancel, handler: nil))
         present(alert, animated: true)
     }
@@ -289,12 +306,11 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
 // MARK: - delegate
 extension MainView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if editMode == true {
-            let cell = collectionView.cellForItem(at: indexPath)
-            if let selectCell = cell as? PhotoCell {
-                selectCell.selectedImage.isHidden = false
+        if editMode == false {
+            content.indexPathsForSelectedItems?.forEach {
+                content.deselectItem(at: $0, animated: true)
             }
-        } else {
+
             guard let postViewModel = postViewModel else { return }
             let post = postViewModel.posts[indexPath.item]
 
@@ -309,15 +325,6 @@ extension MainView: UICollectionViewDelegate {
             detailPhoto.publication = post
 
             self.navigationController?.pushViewController(detailPhoto, animated: true)
-        }
-    }
-
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        if editMode == true {
-            let cell = collectionView.cellForItem(at: indexPath)
-            if let selectCell = cell as? PhotoCell {
-                selectCell.selectedImage.isHidden = true
-            }
         }
     }
 }
@@ -409,8 +416,9 @@ extension MainView: UICollectionViewDataSource {
             showHelp()
             helpText.text = """
             Здесь будут размещены Ваши фото \n
-            Чтобы начать свой путь к созданию идеальной ленты или блога \
-            добавьте свою первую фотографию нажав на +
+            По нажатию на кнопку + Вам будет предложено выбрать фотографии \n
+            Если Вам понадобиться помощь в выборе фотографий, \t
+            то выберите вкладку "Помощь" и следуйте инструкции
             """
         }
     }
@@ -440,22 +448,24 @@ extension MainView: UICollectionViewDropDelegate {
         let items = coordinator.items
         for item in items {
             guard let sourceIndexPath = item.sourceIndexPath,
-                let destinationIndexPath = coordinator.destinationIndexPath
+                let destinationIndexPath = coordinator.destinationIndexPath,
+                let viewModel = postViewModel
             else { return }
 
-            postViewModel?.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item,
+            viewModel.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item,
                                 completion: { [weak self] (error) in
                 DispatchQueue.main.async {
                     if let error = error {
                         switch error {
-                        case ErrorsPostViewModel.unauthorized:
+                        case .noConnection:
+                            Logger.log(error)
+                            self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
+                        case .unauthorized:
                             self?._error(text: "Вы не авторизованы")
                             sleep(3)
                             self?.logOut()
-                        case ErrorsPostViewModel.notFound:
+                        case .notFound:
                             self?._error(text: "Ошибка синхронизации", color: Colors.darkGray)
-                        case ErrorsPostViewModel.notFound:
-                            self?._error(text: "Невозможно отобразить данные", color: Colors.darkGray)
                         default:
                             self?._error(text: "Упс, что-то пошло не так.")
                         }
@@ -488,8 +498,6 @@ extension MainView {
         checkPhotos()
 
         content.indexPathsForSelectedItems?.forEach {
-            guard let cell = content.cellForItem(at: $0) as? PhotoCell else { return }
-            cell.selectedImage.isHidden = true
             content.deselectItem(at: $0, animated: true)
         }
 
@@ -513,24 +521,26 @@ extension MainView {
 
                 let items = selectedCells.map { $0.item }.sorted().reversed()
                 content.indexPathsForSelectedItems?.forEach {
-                    guard let cell = content.cellForItem(at: $0) as? PhotoCell else { return }
-                    cell.selectedImage.isHidden = true
                     content.deselectItem(at: $0, animated: true)
                 }
+
                 postViewModel?.delete(atIndices: [Int](items),
                                       completion: { [weak self] (error) in
                     DispatchQueue.main.async {
                         if let error = error {
                             switch error {
-                            case ErrorsPostViewModel.unauthorized:
+                            case .noConnection:
+                                Logger.log(error)
+                                self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
+                            case .unauthorized:
                                 Logger.log(error)
                                 self?._error(text: "Вы не авторизованы")
                                 sleep(3)
                                 self?.logOut()
-                            case ErrorsUserViewModel.noData:
+                            case .noData:
                                 Logger.log(error)
                                 self?._error(text: "Невозможно загрузить данные", color: Colors.darkGray)
-                            case ErrorsPostViewModel.notFound:
+                            case .notFound:
                                 Logger.log(error)
                                 self?._error(text: "Пост для удаления не найден", color: Colors.darkGray)
                             default:
@@ -556,7 +566,9 @@ extension MainView: UITabBarControllerDelegate {
         if self.tabBarController?.selectedIndex == 0 { self.choose_photo() }
     }
 
-    private func disableTabBarButton() {
+    internal func disableTabBarButton() { grayTabBarButton() }
+
+    private func grayTabBarButton() {
         guard let markBlockTB = UIImage(named: "block_tabbar")?.withRenderingMode(.alwaysOriginal) else { return }
         tabBarItem = UITabBarItem(title: nil, image: markBlockTB, selectedImage: markBlockTB)
         tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
@@ -615,7 +627,7 @@ extension MainView: ProfileDelegate {
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.noConnection:
+                    case .noConnection:
                         self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
                     default:
                         Logger.log(error)

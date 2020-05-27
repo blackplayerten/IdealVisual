@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Alamofire
 
 protocol PhotoNetworkManagerProtocol {
     func get(path: String, completion: ((Data?, NetworkError?) -> Void)?)

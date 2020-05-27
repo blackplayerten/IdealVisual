@@ -33,6 +33,17 @@ final class PhotoCell: UICollectionViewCell {
         selectedImage.isHidden = true
     }
 
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        isSelected = false
+    }
+
+    override var isSelected: Bool {
+        didSet {
+            selectedImage.isHidden = !isSelected
+        }
+    }
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

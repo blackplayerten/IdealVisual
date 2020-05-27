@@ -25,6 +25,12 @@
 		1853FC4123B7AFB90015A31A /* Routing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1853FC4023B7AFB90015A31A /* Routing.swift */; };
 		1853FC4423BC836C0015A31A /* PostNetworkManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1853FC4323BC836C0015A31A /* PostNetworkManagerProtocol.swift */; };
 		1853FC4623BC8A9E0015A31A /* PostNetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1853FC4523BC8A9E0015A31A /* PostNetworkManager.swift */; };
+		18618AB7247001F100A6F10E /* CoreMLManagerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618AB6247001F100A6F10E /* CoreMLManagerProtocol.swift */; };
+		18618ABA2470038A00A6F10E /* CoreMLViewModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618AB92470038A00A6F10E /* CoreMLViewModelProtocol.swift */; };
+		18618ABC2470039E00A6F10E /* CoreMLViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618ABB2470039E00A6F10E /* CoreMLViewModel.swift */; };
+		18618ABE247019AA00A6F10E /* CategoriesType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618ABD247019AA00A6F10E /* CategoriesType.swift */; };
+		18618AC0247023A700A6F10E /* ClassificationStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618ABF247023A700A6F10E /* ClassificationStruct.swift */; };
+		18618AC22470492700A6F10E /* CategoryViewSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18618AC12470492700A6F10E /* CategoryViewSectionHeader.swift */; };
 		188B5FB02361E47E00EA3701 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 188B5FAF2361E47E00EA3701 /* PostView.swift */; };
 		188F4E3A23BE8BF100043E70 /* PingFang-SC-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */; };
 		188F4E3B23BE8BF100043E70 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */; };
@@ -36,6 +42,10 @@
 		18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 18AA6582237714F0004B9588 /* .swiftlint.yml */; };
 		18ACE2A42391AB78008B05B8 /* PostCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ACE2A32391AB78008B05B8 /* PostCoreData.swift */; };
 		18BD9DB323C3502B000E5FD3 /* InputFieldsDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18BD9DB223C3502A000E5FD3 /* InputFieldsDelegate.swift */; };
+		18C2D90F247E31780001ABED /* IdealVisualClassifier 2.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 18C2D90E247E31770001ABED /* IdealVisualClassifier 2.mlmodel */; };
+		18C4C2D82476B3300054EE00 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18C4C2D72476B3300054EE00 /* File.swift */; };
+		18CCB14024682CAF0044E095 /* ErrorsCoreML.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CCB13F24682CAF0044E095 /* ErrorsCoreML.swift */; };
+		18CCB142246C1FB60044E095 /* CategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CCB141246C1FB60044E095 /* CategoriesView.swift */; };
 		18D4EEE5236DAE6A007C16D6 /* UserCoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D4EEE4236DAE6A007C16D6 /* UserCoreData.swift */; };
 		18E1554C23B40C5D0051D833 /* ProfileProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E1554B23B40C5D0051D833 /* ProfileProtocol.swift */; };
 		18E1554E23B40CA00051D833 /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E1554D23B40CA00051D833 /* UserState.swift */; };
@@ -53,6 +63,7 @@
 		18FCDFF623B0BFF3007AA3F4 /* HttpEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCDFF523B0BFF3007AA3F4 /* HttpEntity.swift */; };
 		18FCDFF823B213AF007AA3F4 /* UserCoreDataProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCDFF723B213AE007AA3F4 /* UserCoreDataProtocol.swift */; };
 		416AD9868AD428CF5A4CC80F /* libPods-IdealVisual.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0223884480607F6E632A79A /* libPods-IdealVisual.a */; };
+		632192245184F7C7C13373A5 /* CoreMLManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219D7C7886ADF7FFF33FD0 /* CoreMLManager.swift */; };
 		63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632194B70D0AC636CB2B847F /* PhotoCell.swift */; };
 		63219A4A265F4D025E33856C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219C5F3C3B40275C1AC524 /* MainView.swift */; };
 /* End PBXBuildFile section */
@@ -99,6 +110,12 @@
 		1853FC4023B7AFB90015A31A /* Routing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routing.swift; sourceTree = "<group>"; };
 		1853FC4323BC836C0015A31A /* PostNetworkManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostNetworkManagerProtocol.swift; sourceTree = "<group>"; };
 		1853FC4523BC8A9E0015A31A /* PostNetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostNetworkManager.swift; sourceTree = "<group>"; };
+		18618AB6247001F100A6F10E /* CoreMLManagerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLManagerProtocol.swift; sourceTree = "<group>"; };
+		18618AB92470038A00A6F10E /* CoreMLViewModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLViewModelProtocol.swift; sourceTree = "<group>"; };
+		18618ABB2470039E00A6F10E /* CoreMLViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLViewModel.swift; sourceTree = "<group>"; };
+		18618ABD247019AA00A6F10E /* CategoriesType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesType.swift; sourceTree = "<group>"; };
+		18618ABF247023A700A6F10E /* ClassificationStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassificationStruct.swift; sourceTree = "<group>"; };
+		18618AC12470492700A6F10E /* CategoryViewSectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryViewSectionHeader.swift; sourceTree = "<group>"; };
 		188B5FAF2361E47E00EA3701 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		188F4E3823BE8BF100043E70 /* PingFang-SC-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PingFang-SC-Regular.ttf"; sourceTree = "<group>"; };
 		188F4E3923BE8BF100043E70 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
@@ -110,6 +127,10 @@
 		18AA6582237714F0004B9588 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		18ACE2A32391AB78008B05B8 /* PostCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCoreData.swift; sourceTree = "<group>"; };
 		18BD9DB223C3502A000E5FD3 /* InputFieldsDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputFieldsDelegate.swift; sourceTree = "<group>"; };
+		18C2D90E247E31770001ABED /* IdealVisualClassifier 2.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = "IdealVisualClassifier 2.mlmodel"; path = "../../../../IdealVisual_CoreML_model/IdealVisualClassifier 2.mlmodel"; sourceTree = "<group>"; };
+		18C4C2D72476B3300054EE00 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
+		18CCB13F24682CAF0044E095 /* ErrorsCoreML.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorsCoreML.swift; sourceTree = "<group>"; };
+		18CCB141246C1FB60044E095 /* CategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoriesView.swift; sourceTree = "<group>"; };
 		18D4EEE4236DAE6A007C16D6 /* UserCoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCoreData.swift; sourceTree = "<group>"; };
 		18E1554B23B40C5D0051D833 /* ProfileProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileProtocol.swift; sourceTree = "<group>"; };
 		18E1554D23B40CA00051D833 /* UserState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserState.swift; sourceTree = "<group>"; };
@@ -128,6 +149,7 @@
 		18FCDFF723B213AE007AA3F4 /* UserCoreDataProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCoreDataProtocol.swift; sourceTree = "<group>"; };
 		632194B70D0AC636CB2B847F /* PhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCell.swift; sourceTree = "<group>"; };
 		63219C5F3C3B40275C1AC524 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		63219D7C7886ADF7FFF33FD0 /* CoreMLManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreMLManager.swift; sourceTree = "<group>"; };
 		9C268BAC885081135A8D57AD /* Pods-IdealVisual.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisual.debug.xcconfig"; path = "Target Support Files/Pods-IdealVisual/Pods-IdealVisual.debug.xcconfig"; sourceTree = "<group>"; };
 		C0223884480607F6E632A79A /* libPods-IdealVisual.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-IdealVisual.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF38FB8C9FF56CB9EF1E3D4E /* Pods-IdealVisual.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisual.release.xcconfig"; path = "Target Support Files/Pods-IdealVisual/Pods-IdealVisual.release.xcconfig"; sourceTree = "<group>"; };
@@ -192,7 +214,6 @@
 				188B5FB32361E68200EA3701 /* Models */,
 				632195CA3321E1A5988D39D1 /* View */,
 				18999E1E2398F83C003C0F44 /* View-Model */,
-				18F8EA9323B296E20085A9BD /* view-modelErrors.swift */,
 				18F8EA8B23B232D20085A9BD /* Easier */,
 				188F4E3723BE8BF100043E70 /* fonts */,
 			);
@@ -324,11 +345,21 @@
 			path = CoreData;
 			sourceTree = "<group>";
 		};
+		18618AB82470034B00A6F10E /* CoreML */ = {
+			isa = PBXGroup;
+			children = (
+				18618AB92470038A00A6F10E /* CoreMLViewModelProtocol.swift */,
+				18618ABB2470039E00A6F10E /* CoreMLViewModel.swift */,
+			);
+			path = CoreML;
+			sourceTree = "<group>";
+		};
 		188B5FB32361E68200EA3701 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				1853FC4223B7B00F0015A31A /* CoreData */,
 				18AC168823A8D5BB00F83290 /* Network */,
+				632192FBD0016AD82DE0DBF8 /* CoreML */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -345,8 +376,10 @@
 		18999E1E2398F83C003C0F44 /* View-Model */ = {
 			isa = PBXGroup;
 			children = (
+				18F8EA9323B296E20085A9BD /* view-modelErrors.swift */,
 				1853FC3623B7ACDF0015A31A /* User */,
 				1853FC3723B7ACF40015A31A /* Post */,
+				18618AB82470034B00A6F10E /* CoreML */,
 			);
 			path = "View-Model";
 			sourceTree = "<group>";
@@ -374,6 +407,17 @@
 			path = Network;
 			sourceTree = "<group>";
 		};
+		18CCB143246C23D30044E095 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				18CCB141246C1FB60044E095 /* CategoriesView.swift */,
+				18618AC12470492700A6F10E /* CategoryViewSectionHeader.swift */,
+				18618ABF247023A700A6F10E /* ClassificationStruct.swift */,
+				18C4C2D72476B3300054EE00 /* File.swift */,
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
 		18F8EA8B23B232D20085A9BD /* Easier */ = {
 			isa = PBXGroup;
 			children = (
@@ -393,11 +437,24 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		632192FBD0016AD82DE0DBF8 /* CoreML */ = {
+			isa = PBXGroup;
+			children = (
+				18C2D90E247E31770001ABED /* IdealVisualClassifier 2.mlmodel */,
+				18618AB6247001F100A6F10E /* CoreMLManagerProtocol.swift */,
+				63219D7C7886ADF7FFF33FD0 /* CoreMLManager.swift */,
+				18618ABD247019AA00A6F10E /* CategoriesType.swift */,
+				18CCB13F24682CAF0044E095 /* ErrorsCoreML.swift */,
+			);
+			path = CoreML;
+			sourceTree = "<group>";
+		};
 		632195CA3321E1A5988D39D1 /* View */ = {
 			isa = PBXGroup;
 			children = (
 				1853FC3C23B7AEC00015A31A /* Auth */,
 				1853FC3D23B7AECE0015A31A /* Main */,
+				18CCB143246C23D30044E095 /* Categories */,
 				1853FC3E23B7AEE70015A31A /* Profile */,
 				1853FC3F23B7AF000015A31A /* Post */,
 			);
@@ -410,7 +467,6 @@
 				9C268BAC885081135A8D57AD /* Pods-IdealVisual.debug.xcconfig */,
 				FF38FB8C9FF56CB9EF1E3D4E /* Pods-IdealVisual.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -598,6 +654,8 @@
 				18E1555223B4EF580051D833 /* PhotoNetworkManager.swift in Sources */,
 				1853FC4423BC836C0015A31A /* PostNetworkManagerProtocol.swift in Sources */,
 				180C5C6423B63DC7003538DF /* PostCoreDataProtocol.swift in Sources */,
+				18CCB142246C1FB60044E095 /* CategoriesView.swift in Sources */,
+				18618AC22470492700A6F10E /* CategoryViewSectionHeader.swift in Sources */,
 				184EB37723971D3F00256255 /* FileManager.swift in Sources */,
 				1893229E23466104004026FC /* ProfileView.swift in Sources */,
 				18F8EA9023B280820085A9BD /* UserNetworkManager.swift in Sources */,
@@ -605,16 +663,24 @@
 				18999E202398F8E6003C0F44 /* checkValid.swift in Sources */,
 				18E1554C23B40C5D0051D833 /* ProfileProtocol.swift in Sources */,
 				181B1ABF231DA6930081B01C /* IdealVisual.xcdatamodeld in Sources */,
+				18C2D90F247E31780001ABED /* IdealVisualClassifier 2.mlmodel in Sources */,
 				18E1555423B4EF9B0051D833 /* PhotoNetworkManagerProtocol.swift in Sources */,
+				18CCB14024682CAF0044E095 /* ErrorsCoreML.swift in Sources */,
+				18618ABE247019AA00A6F10E /* CategoriesType.swift in Sources */,
 				1853FC4623BC8A9E0015A31A /* PostNetworkManager.swift in Sources */,
 				18F8EA9423B296E20085A9BD /* view-modelErrors.swift in Sources */,
+				18618AB7247001F100A6F10E /* CoreMLManagerProtocol.swift in Sources */,
 				18F8EA8723B228780085A9BD /* UserViewModelProtocol.swift in Sources */,
+				18618AC0247023A700A6F10E /* ClassificationStruct.swift in Sources */,
 				180C5C6823B6844E003538DF /* PostViewModelProtocol.swift in Sources */,
 				18FCDFF823B213AF007AA3F4 /* UserCoreDataProtocol.swift in Sources */,
+				18618ABA2470038A00A6F10E /* CoreMLViewModelProtocol.swift in Sources */,
+				18C4C2D82476B3300054EE00 /* File.swift in Sources */,
 				18ACE2A42391AB78008B05B8 /* PostCoreData.swift in Sources */,
 				181B1AB7231DA6930081B01C /* AppDelegate.swift in Sources */,
 				18FCDFF623B0BFF3007AA3F4 /* HttpEntity.swift in Sources */,
 				63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */,
+				18618ABC2470039E00A6F10E /* CoreMLViewModel.swift in Sources */,
 				63219A4A265F4D025E33856C /* MainView.swift in Sources */,
 				18E8C53A237B7EE60064B4F0 /* SignUp.swift in Sources */,
 				1838C7B823718358000A32A9 /* SignIn.swift in Sources */,
@@ -631,6 +697,7 @@
 				18E1555023B40ED20051D833 /* BlockProtocol.swift in Sources */,
 				180E3CDD23A3B84A000B96D8 /* JsonModels.swift in Sources */,
 				18D4EEE5236DAE6A007C16D6 /* UserCoreData.swift in Sources */,
+				632192245184F7C7C13373A5 /* CoreMLManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -799,15 +866,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = IdealVisual/IdealVisual.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = D9U48T4MSD;
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = CT884K7983;
 				INFOPLIST_FILE = IdealVisual/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = a.kurganova.IdealVisual;
+				PRODUCT_BUNDLE_IDENTIFIER = kurganova.IdealVisual;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = kurganova.IdealVisual;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -819,15 +887,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = IdealVisual/IdealVisual.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = D9U48T4MSD;
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = CT884K7983;
 				INFOPLIST_FILE = IdealVisual/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = a.kurganova.IdealVisual;
+				PRODUCT_BUNDLE_IDENTIFIER = kurganova.IdealVisual;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = kurganova.IdealVisual;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};

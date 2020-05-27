@@ -22,10 +22,10 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
             .responseData { response in
                 if let error = response.error {
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(nil, NetworkError.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(nil, NetworkError(name: error.localizedDescription))
+                        completion?(nil, NetworkError.unknown)
                     }
                     return
                 }
@@ -36,26 +36,27 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                         break
                     case HTTPCodes.unprocessableEntity:
                         guard let data = response.value else {
-                            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                            completion?(nil, NetworkError.noData)
                             return
                         }
                         do {
                             let errors = try JSONDecoder().decode(JsonError.self, from: data)
-                            completion?(nil, NetworkError(name: ErrorsNetwork.wrongFields, description: errors.errors))
+                            completion?(nil, NetworkError.wrongFields(
+                                WrongFieldsNetworkEror(name: "wrongFields", description: errors.errors)))
                         } catch let error {
                             Logger.log("unknown network error: \(error.localizedDescription)")
-                            completion?(nil, NetworkError(name: error.localizedDescription))
+                            completion?(nil, NetworkError.unknown)
                         }
                         return
                     default:
                         Logger.log("unknown status code: \(status))")
-                        completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                        completion?(nil, NetworkError.unknown)
                         return
                     }
                 }
 
                 guard let data = response.value else {
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    completion?(nil, NetworkError.noData)
                     return
                 }
 
@@ -64,7 +65,7 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                     completion?(user, nil)
                 } catch let error {
                     Logger.log("unknown network error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    completion?(nil, NetworkError.unknown)
                 }
         }.resume()
     }
@@ -83,26 +84,26 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.forbidden:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.forbidden))
+                            completion?(nil, NetworkError.forbidden)
                         default:
                             Logger.log("unknown staus code: \(status))")
-                            completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                            completion?(nil, NetworkError.unknown)
                         }
                         return
                     }
 
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(nil, NetworkError.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(nil, NetworkError(name: error.localizedDescription))
+                        completion?(nil, NetworkError.unknown)
                     }
                     return
                 }
 
                 guard let user = response.value else {
-                    Logger.log("data error: \(ErrorsNetwork.noData)")
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("error data")
+                    completion?(nil, NetworkError.noData)
                     return
                 }
                 completion?(user, nil)
@@ -123,23 +124,23 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.unauthorized:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                            completion?(nil, NetworkError.unauthorized)
                             return
                         case HTTPCodes.notFound:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                            completion?(nil, NetworkError.notFound)
                             return
                         default:
                             Logger.log("unknown staus code: \(status))")
-                            completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                            completion?(nil, NetworkError.unknown)
                             return
                         }
                     }
 
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(nil, NetworkError.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(nil, NetworkError(name: error.localizedDescription))
+                        completion?(nil, NetworkError.unknown)
                     }
                     return
                 }
@@ -150,29 +151,29 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                         break
                     case HTTPCodes.unprocessableEntity:
                         guard let data = response.value else {
-                            Logger.log("data error: \(ErrorsNetwork.noData)")
-                            completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                            Logger.log("error data")
+                            completion?(nil, NetworkError.noData)
                             return
                         }
                         do {
                             let errors = try JSONDecoder().decode(JsonError.self, from: data)
-                            completion?(nil, NetworkError(name: ErrorsNetwork.wrongFields,
-                                                          description: errors.errors))
+                            completion?(nil, NetworkError.wrongFields(
+                                WrongFieldsNetworkEror(name: "wrongFields", description: errors.errors)))
                         } catch let error {
                             Logger.log("unknown network error: \(error.localizedDescription)")
-                            completion?(nil, NetworkError(name: error.localizedDescription))
+                            completion?(nil, NetworkError.unknown)
                         }
                         return
                     default:
                         Logger.log("unknown staus code: \(status))")
-                        completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                        completion?(nil, NetworkError.unknown)
                         return
                     }
                 }
 
                 guard let data = response.value else {
-                    Logger.log("data error: \(ErrorsNetwork.noData)")
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("error data")
+                    completion?(nil, NetworkError.noData)
                     return
                 }
 
@@ -181,7 +182,7 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                     completion?(user, nil)
                 } catch let error {
                     Logger.log("unknown network error: \(error.localizedDescription)")
-                    completion?(nil, NetworkError(name: error.localizedDescription))
+                    completion?(nil, NetworkError.unknown)
                 }
         }.resume()
     }
@@ -196,10 +197,10 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
             .response { response in
                 if let error = response.error {
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(NetworkError.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(NetworkError(name: error.localizedDescription))
+                        completion?(NetworkError.unknown)
                     }
                     return
                 }
@@ -210,7 +211,7 @@ final class UserNetworkManager: UserNetworkManagerProtocol {
                         completion?(nil)
                     default:
                         Logger.log("unknown status code: \(status)")
-                        completion?(NetworkError(name: "unknown status code: \(status)"))
+                        completion?(NetworkError.unknown)
                     }
                 }
         }.resume()

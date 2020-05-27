@@ -28,28 +28,28 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.unauthorized:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                            completion?(nil, NetworkError.unauthorized)
                         case HTTPCodes.notFound:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                            completion?(nil, NetworkError.notFound)
                         default:
                             Logger.log("unknown status: \(status)")
-                            completion?(nil, NetworkError(name: "unknown status: \(status)"))
+                            completion?(nil, NetworkError.unknown)
                         }
                         return
                     }
 
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(nil, NetworkError.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(nil, NetworkError(name: error.localizedDescription))
+                        completion?(nil, NetworkError.unknown)
                     }
                     return
                 }
 
                 guard let post = response.value else {
-                    Logger.log("error data: \(ErrorsNetwork.noData)")
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("error data: \(NetworkError.noData)")
+                    completion?(nil, NetworkError.noData)
                     return
                 }
                 completion?(post, nil)
@@ -71,26 +71,26 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.unauthorized:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                            completion?(nil, NetworkError.unauthorized)
                         default:
                             Logger.log("unknown status code: \(status)")
-                            completion?(nil, NetworkError(name: "unknown status code: \(status)"))
+                            completion?(nil, NetworkError.unknown)
                         }
                         return
                     }
 
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(nil, NetworkError.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(nil, NetworkError(name: error.localizedDescription))
+                        completion?(nil, NetworkError.unknown)
                     }
                     return
                 }
 
                 guard let posts = response.value else {
-                    Logger.log("error data: \(ErrorsNetwork.noData)")
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("error data: \(NetworkError.noData)")
+                    completion?(nil, NetworkError.noData)
                     return
                 }
                 completion?(posts, nil)
@@ -115,28 +115,28 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.unauthorized:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.unauthorized))
+                            completion?(nil, NetworkError.unauthorized)
                         case HTTPCodes.notFound:
-                            completion?(nil, NetworkError(name: ErrorsNetwork.notFound))
+                            completion?(nil, NetworkError.notFound)
                         default:
                             Logger.log("unknown status: \(status)")
-                            completion?(nil, NetworkError(name: "unknown status: \(status)"))
+                            completion?(nil, NetworkError.unknown)
                         }
                         return
                     }
 
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(nil, NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(nil, NetworkError.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(nil, NetworkError(name: error.localizedDescription))
+                        completion?(nil, NetworkError.unknown)
                     }
                     return
                 }
 
                 guard let post = response.value else {
-                    Logger.log("error data: \(ErrorsNetwork.noData)")
-                    completion?(nil, NetworkError(name: ErrorsNetwork.noData))
+                    Logger.log("error data: \(NetworkError.noData)")
+                    completion?(nil, NetworkError.noData)
                     return
                 }
                 completion?(post, nil)
@@ -157,19 +157,19 @@ final class PostNetworkManager: PostNetworkManagerProtocol {
                     if let status = response.response?.statusCode {
                         switch status {
                         case HTTPCodes.unauthorized:
-                            completion?(NetworkError(name: ErrorsNetwork.unauthorized))
+                            completion?(NetworkError.unauthorized)
                         default:
                             Logger.log("unknown status: \(status)")
-                            completion?(NetworkError(name: "unknown status: \(status)"))
+                            completion?(NetworkError.unknown)
                         }
                         return
                     }
 
                     if let err = error.underlyingError as? URLError, err.code == URLError.Code.notConnectedToInternet {
-                        completion?(NetworkError(name: ErrorsNetwork.noConnection))
+                        completion?(NetworkError.noConnection)
                     } else {
                         Logger.log("unknown error: \(error.localizedDescription)")
-                        completion?(NetworkError(name: error.localizedDescription))
+                        completion?(NetworkError.unknown)
                     }
                     return
                 }

@@ -32,16 +32,16 @@ final class SignUp: UIViewController {
         setScroll()
         self.userViewModel = UserViewModel()
 
-        self.username = InputFields(labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
+        self.username = InputFields(tag: 0, labelImage: UIImage(named: "login"), text: nil, placeholder: "Логин",
                                     textContentType: .username, validator: checkValidUsername,
                                     inputDelegate: self)
-        self.email = InputFields(labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
+        self.email = InputFields(tag: 1, labelImage: UIImage(named: "email"), text: nil, placeholder: "Почта",
                                  textContentType: .emailAddress, keyboardType: .emailAddress,
                                  validator: checkValidEmail, inputDelegate: self)
-        self.password = InputFields(labelImage: UIImage(named: "password"), text: nil,
+        self.password = InputFields(tag: 2, labelImage: UIImage(named: "password"), text: nil,
                                     placeholder: "Пароль", textContentType: .newPassword,
                                     validator: checkValidPassword, inputDelegate: self)
-        self.repeatPassword = InputFields(labelImage: UIImage(named: "password"), text: nil,
+        self.repeatPassword = InputFields(tag: 3, labelImage: UIImage(named: "password"), text: nil,
                                           placeholder: "Повторите пароль",
                                           textContentType: .newPassword, validator: checkValidPassword,
                                           inputDelegate: self)
@@ -85,8 +85,14 @@ final class SignUp: UIViewController {
 
         guard let activeField = activeField else { return }
 
-        let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y-kbSize.height)
-        scroll.setContentOffset(scrollPoint, animated: true)
+        let visible_screen_without_keyboard = scroll.bounds.height - kbSize.height
+
+        let tr = scroll.convert(activeField.frame, to: nil)
+
+        if tr.origin.y + tr.height > visible_screen_without_keyboard {
+            let scrollPoint = CGPoint(x: 0, y: activeField.frame.origin.y - kbSize.height)
+            scroll.setContentOffset(scrollPoint, animated: true)
+        }
     }
 
     @objc
@@ -107,7 +113,7 @@ final class SignUp: UIViewController {
         titleV.adjustsFontSizeToFitWidth = true
 
         let logo = UIImageView()
-        view.addSubview(logo)
+        titleView?.addSubview(logo)
         logo.translatesAutoresizingMaskIntoConstraints = false
         logo.image = UIImage(named: "app")?.withRenderingMode(.alwaysOriginal)
         logo.widthAnchor.constraint(equalToConstant: 35).isActive = true
@@ -140,7 +146,7 @@ final class SignUp: UIViewController {
             $0.widthAnchor.constraint(equalToConstant: 300).isActive = true
             $0.setEditFields(state: true)
         }
-        username.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: -200).isActive = true
+        username.centerYAnchor.constraint(equalTo: scroll.topAnchor, constant: 200).isActive = true
         email.topAnchor.constraint(equalTo: username.bottomAnchor, constant: 40).isActive = true
         password.topAnchor.constraint(equalTo: email.bottomAnchor, constant: 40).isActive = true
         repeatPassword.topAnchor.constraint(equalTo: password.bottomAnchor, constant: 40).isActive = true
@@ -159,16 +165,11 @@ final class SignUp: UIViewController {
             $0.layer.cornerRadius = 10
         }
 
-        guard
-            let repeatPassword = repeatPassword
-        else {
-            return
-        }
+        guard let repeatPassword = repeatPassword else { return }
 
         createAccountButton.topAnchor.constraint(equalTo: repeatPassword.bottomAnchor,
                                                  constant: 50).isActive = true
         createAccountButton.widthAnchor.constraint(equalToConstant: 210).isActive = true
-        createAccountButton.setTitleColor(.white, for: .normal)
         createAccountButton.backgroundColor = Colors.blue
         createAccountButton.addTarget(self, action: #selector(createAccount), for: .touchUpInside)
 
@@ -198,12 +199,11 @@ final class SignUp: UIViewController {
     @objc
     private func createAccount() {
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 45,
-                                                                     y: 495,
+                                                                     y: 515,
                                                                      width: 50, height: 50))
         loadingIndicator.color = Colors.blue
         loadingIndicator.hidesWhenStopped = true
         scroll.addSubview(loadingIndicator)
-        loadingIndicator.startAnimating()
 
         if !checkValidInputs() {
             return
@@ -215,22 +215,23 @@ final class SignUp: UIViewController {
             let password = password?.textField.text
         else { return }
 
+        loadingIndicator.startAnimating()
         userViewModel?.create(username: username, email: email, password: password,
                               completion: { [weak self] (error) in
             DispatchQueue.main.async {
                 if let error = error {
                     switch error {
-                    case ErrorsUserViewModel.noConnection:
+                    case .noConnection:
                         self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
-                    case ErrorsUserViewModel.usernameAlreadyExists:
+                    case .usernameAlreadyExists:
                         self?.username?.setError(text: "Такое имя пользователя уже занято")
-                    case ErrorsUserViewModel.usernameLengthIsWrong:
+                    case .usernameLengthIsWrong:
                         self?.username?.setError(text: "Неверная длина имени пользователя, минимум: 4")
-                    case ErrorsUserViewModel.emailFormatIsWrong:
+                    case .emailFormatIsWrong:
                         self?.email?.setError(text: "Неверный формат почты")
-                    case ErrorsUserViewModel.emailAlreadyExists:
+                    case .emailAlreadyExists:
                         self?.email?.setError(text: "Такая почта уже занята")
-                    case ErrorsUserViewModel.passwordLengthIsWrong:
+                    case .passwordLengthIsWrong:
                         self?.password?.setError(text: "Неверная длина пароля")
                     default:
                         Logger.log("unknown error: \(error)")

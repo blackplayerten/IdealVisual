@@ -26,29 +26,29 @@ final class UserViewModel: UserViewModelProtocol {
 
     // MARK: - create
     func create(username: String, email: String, password: String,
-                completion: ((ErrorViewModel?) -> Void)?) {
+                completion: ((UserViewModelErrors?) -> Void)?) {
         userNetworkManager.create(newUser: JsonUserModel(username: username, email: email,
                                                          password: password), completion: { (user, error) in
                 if let error = error {
-                    switch error.name {
-                    case ErrorsNetwork.wrongFields:
+                    switch error {
+                    case .wrongFields:
                         self.processWrongFields(error: error, completion: completion)
-                    case ErrorsNetwork.noConnection:
-                        completion?(ErrorsUserViewModel.noConnection)
+                    case .noConnection:
+                        completion?(UserViewModelErrors.noConnection)
                     default:
                         Logger.log("unknown error: \(error)")
-                        completion?(ErrorsUserViewModel.unknownError)
+                        completion?(UserViewModelErrors.unknown)
                     }
                     return
                 }
 
                 guard let user = user else {
-                    completion?(ErrorsUserViewModel.noData)
+                    completion?(UserViewModelErrors.noData)
                     return
                 }
                 guard let token = user.token else {
                     Logger.log("got nil token from server, unauthorized")
-                    completion?(ErrorsUserViewModel.unauthorized)
+                    completion?(UserViewModelErrors.unauthorized)
                     return
                 }
 
@@ -59,31 +59,31 @@ final class UserViewModel: UserViewModelProtocol {
     }
 
     // MARK: - login
-    func login(email: String, password: String, completion: ((ErrorViewModel?) -> Void)?) {
+    func login(email: String, password: String, completion: ((UserViewModelErrors?) -> Void)?) {
         userNetworkManager.login(user: JsonUserModel(email: email, password: password),
                                      completion: { (user, error) in
-            if let error = error {
-                switch error.name {
-                case ErrorsNetwork.forbidden:
-                    completion?(ErrorsUserViewModel.wrongCredentials)
-                case ErrorsNetwork.noConnection:
-                    completion?(ErrorsUserViewModel.noConnection)
+            if let err = error {
+                switch err {
+                case .forbidden:
+                    completion?(UserViewModelErrors.wrongCredentials)
+                case .noConnection:
+                    completion?(UserViewModelErrors.noConnection)
                 default:
                     Logger.log("unknown error: \(error)")
-                    completion?(ErrorsUserViewModel.unknownError)
+                    completion?(UserViewModelErrors.unknown)
                 }
                 return
             }
 
             guard var user = user else {
-                Logger.log("data error: \(ErrorsUserViewModel.noData)")
-                completion?(ErrorsUserViewModel.noData)
+                Logger.log("data error: \(UserViewModelErrors.noData)")
+                completion?(UserViewModelErrors.noData)
                 return
             }
 
             guard let token = user.token else {
                 Logger.log("got nil token from server, unauthorized")
-                completion?(ErrorsUserViewModel.unauthorized)
+                completion?(UserViewModelErrors.unauthorized)
                 return
             }
 
@@ -91,14 +91,14 @@ final class UserViewModel: UserViewModelProtocol {
                 if ava != "" {
                     self.photoNetworkManager.get(path: ava, completion: { (data, error) in
                         DispatchQueue.main.async {
-                            if let error = error {
-                                switch error.name {
-                                case ErrorsNetwork.notFound:
+                            if let err = error {
+                                switch err {
+                                case .notFound:
                                     // assume user nas no ava, so we will log in with data without it
                                     user.avatar = ""
                                 default:
                                     Logger.log("cannot get avatar: \(error)")
-                                    completion?(ErrorsUserViewModel.unknownError)
+                                    completion?(UserViewModelErrors.unknown)
                                 }
                                 return
                             }
@@ -106,13 +106,13 @@ final class UserViewModel: UserViewModelProtocol {
                             if let data = data {
                                 let avaPath = self.avaFolder + ava
                                 guard MyFileManager.saveFile(data: data, filePath: avaPath) != nil else {
-                                    completion?(ErrorsUserViewModel.filesystemSave)
+                                    completion?(UserViewModelErrors.filesystemSave)
                                     return
                                 }
                                 user.avatar = avaPath
                             } else {
-                                Logger.log("data error: \(ErrorsUserViewModel.noData)")
-                                completion?(ErrorsUserViewModel.noData)
+                                Logger.log("data error: \(UserViewModelErrors.noData)")
+                                completion?(UserViewModelErrors.noData)
                                 return
                             }
 
@@ -120,7 +120,7 @@ final class UserViewModel: UserViewModelProtocol {
                                                                       email: user.email, ava: user.avatar)
                             else {
                                 Logger.log("cannot create core data user")
-                                completion?(ErrorsUserViewModel.unknownError)
+                                completion?(UserViewModelErrors.unknown)
                                 return
                             }
                             self.user = user
@@ -132,7 +132,7 @@ final class UserViewModel: UserViewModelProtocol {
                 guard let user = self.userCoreData.create(token: token, username: user.username,
                                                           email: user.email, ava: user.avatar)
                 else {
-                    completion?(ErrorsUserViewModel.unknownError)
+                    completion?(UserViewModelErrors.unknown)
                     return
                 }
                 self.user = user
@@ -142,15 +142,15 @@ final class UserViewModel: UserViewModelProtocol {
     }
 
     // MARK: - get from core data
-    func get(completion: ((User?, ErrorViewModel?) -> Void)?) {
+    func get(completion: ((User?, UserViewModelErrors?) -> Void)?) {
         if user != nil {
             completion?(user, nil)
             return
         }
 
         guard let user = self.userCoreData.get() else {
-            Logger.log("data error: \(ErrorsUserViewModel.noData)")
-            completion?(nil, ErrorsUserViewModel.noData)
+            Logger.log("data error")
+            completion?(nil, UserViewModelErrors.noData)
             return
         }
 
@@ -159,7 +159,7 @@ final class UserViewModel: UserViewModelProtocol {
     }
 
     // MARK: - get avatar from core data
-    func getAvatar(completion: ((String?, ErrorViewModel?) -> Void)?) {
+    func getAvatar(completion: ((String?, UserViewModelErrors?) -> Void)?) {
         if var avaUsr = user!.ava {
             if avaUsr != "" {
                 avaUsr = MyFileManager.resolveAbsoluteFilePath(filePath: avaUsr).path
@@ -172,10 +172,10 @@ final class UserViewModel: UserViewModelProtocol {
 
     // MARK: - update
     func update(username: String?, email: String?, ava: Data?, avaName: String?, password: String?,
-                completion: ((ErrorViewModel?) -> Void)?) {
+                completion: ((UserViewModelErrors?) -> Void)?) {
         if username == nil && email == nil && ava == nil && password == nil {
-            Logger.log("data error: \(ErrorsUserViewModel.noData)")
-            completion?(ErrorsUserViewModel.noData)
+            Logger.log("data error: \(UserViewModelErrors.noData)")
+            completion?(UserViewModelErrors.noData)
             return
         }
 
@@ -191,7 +191,7 @@ final class UserViewModel: UserViewModelProtocol {
 
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
-            completion?(ErrorsUserViewModel.unauthorized)
+            completion?(UserViewModelErrors.unauthorized)
             return
         }
 
@@ -200,19 +200,19 @@ final class UserViewModel: UserViewModelProtocol {
                                             user: JsonUserModel(username: username ?? "", email: email ?? "",
                                                                 password: password ?? "", avatar: avaPath ?? ""),
                                             completion: { (user, error) in
-                if let error = error {
-                    switch error.name {
-                    case ErrorsNetwork.wrongFields:
-                        self.processWrongFields(error: error, completion: completion)
-                    case ErrorsNetwork.unauthorized:
-                        completion?(ErrorsUserViewModel.unauthorized)
-                    case ErrorsNetwork.notFound:
-                        completion?(ErrorsUserViewModel.notFound)
-                    case ErrorsNetwork.noConnection:
-                        completion?(ErrorsUserViewModel.noConnection)
+                if let err = error {
+                    switch err {
+                    case .wrongFields:
+                        self.processWrongFields(error: err, completion: completion)
+                    case .unauthorized:
+                        completion?(UserViewModelErrors.unauthorized)
+                    case .notFound:
+                        completion?(UserViewModelErrors.notFound)
+                    case .noConnection:
+                        completion?(UserViewModelErrors.noConnection)
                     default:
-                        Logger.log("\(ErrorsUserViewModel.unknownError)")
-                        completion?(ErrorsUserViewModel.unknownError)
+                        Logger.log("\(UserViewModelErrors.unknown)")
+                        completion?(UserViewModelErrors.unknown)
                     }
                     return
                 }
@@ -220,8 +220,8 @@ final class UserViewModel: UserViewModelProtocol {
                 if user != nil {
                     completion?(nil)
                 } else {
-                    Logger.log("no data: \(ErrorsUserViewModel.noData)")
-                    completion?(ErrorsUserViewModel.noData)
+                    Logger.log("no data: \(UserViewModelErrors.noData)")
+                    completion?(UserViewModelErrors.noData)
                 }
             })
         }
@@ -230,13 +230,13 @@ final class UserViewModel: UserViewModelProtocol {
             if let avaName = avaName {
                 photoNetworkManager.upload(token: token, data: ava, name: avaName,
                                            completion: { (uploadedPath, error) in
-                    if let error = error {
-                        switch error.name {
-                        case ErrorsNetwork.notFound:
-                            completion?(ErrorsUserViewModel.notFound)
+                    if let err = error {
+                        switch err {
+                        case .notFound:
+                            completion?(UserViewModelErrors.notFound)
                         default:
                             Logger.log("unknown error: \(error)")
-                            completion?(ErrorsUserViewModel.unknownError)
+                            completion?(UserViewModelErrors.unknown)
                         }
                         return
                     }
@@ -254,21 +254,21 @@ final class UserViewModel: UserViewModelProtocol {
     }
 
     // MARK: - delete
-    func logout(completion: ((ErrorViewModel?) -> Void)?) {
+    func logout(completion: ((UserViewModelErrors?) -> Void)?) {
         guard let token = user?.token else {
             Logger.log("token in coredata is nil")
-            completion?(ErrorsUserViewModel.unauthorized)
+            completion?(UserViewModelErrors.unauthorized)
             return
         }
 
         self.userNetworkManager.logout(token: token, completion: { (error) in
             if let error = error {
-                switch error.name {
-                case ErrorsNetwork.noConnection:
-                    completion?(ErrorsUserViewModel.noConnection)
+                switch error {
+                case .noConnection:
+                    completion?(UserViewModelErrors.noConnection)
                 default:
                     Logger.log("unknown error: \(error)")
-                    completion?(ErrorsUserViewModel.unknownError)
+                    completion?(UserViewModelErrors.unknown)
                 }
                 return
             }
@@ -279,51 +279,60 @@ final class UserViewModel: UserViewModelProtocol {
         })
     }
 
-    private func processWrongFields(error: NetworkError, completion: ((ErrorViewModel?) -> Void)?) {
-        guard let fieldErrors = error.description as? [JsonFieldError] else {
-            Logger.log("unknown fields")
-            completion?(ErrorsUserViewModel.unknownError)
+    private func processWrongFields(error: NetworkError, completion: ((UserViewModelErrors?) -> Void)?) {
+        let fieldErrors: [JsonFieldError]
+        switch error {
+        case .wrongFields(let st):
+            guard let flEr = st.description as? [JsonFieldError] else {
+                Logger.log("unknown error")
+                completion?(UserViewModelErrors.unknown)
+                return
+            }
+            fieldErrors = flEr
+        default:
+            Logger.log("unexpected network error")
             return
         }
+
         fieldErrors.forEach { (err) in
             switch err.field {
             case SignUpInFields.username:
                 err.reasons.forEach { (reason) in
                     switch reason {
                     case SignUpInReasons.alreadyExists:
-                        completion?(ErrorsUserViewModel.usernameAlreadyExists)
+                        completion?(UserViewModelErrors.usernameAlreadyExists)
                     case SignUpInReasons.wrongLength:
-                        completion?(ErrorsUserViewModel.usernameLengthIsWrong)
+                        completion?(UserViewModelErrors.usernameLengthIsWrong)
                     default:
                         Logger.log("unknown error: \(error)")
-                        completion?(ErrorsUserViewModel.unknownError)
+                        completion?(UserViewModelErrors.unknown)
                     }
                 }
             case SignUpInFields.email:
                 err.reasons.forEach { (reason) in
                     switch reason {
                     case SignUpInReasons.alreadyExists:
-                        completion?(ErrorsUserViewModel.emailAlreadyExists)
+                        completion?(UserViewModelErrors.emailAlreadyExists)
                     case SignUpInReasons.wrongEmail:
-                        completion?(ErrorsUserViewModel.emailFormatIsWrong)
+                        completion?(UserViewModelErrors.emailFormatIsWrong)
                     default:
                         Logger.log("unknown error: \(error)")
-                        completion?(ErrorsUserViewModel.unknownError)
+                        completion?(UserViewModelErrors.unknown)
                     }
                 }
             case SignUpInFields.password:
                 err.reasons.forEach { (reason) in
                     switch reason {
                     case SignUpInReasons.wrongLength:
-                        completion?(ErrorsUserViewModel.passwordLengthIsWrong)
+                        completion?(UserViewModelErrors.passwordLengthIsWrong)
                     default:
                         Logger.log("unknown error: \(error)")
-                        completion?(ErrorsUserViewModel.unknownError)
+                        completion?(UserViewModelErrors.unknown)
                     }
                 }
             default:
                 Logger.log("error field: \(err.field)")
-                completion?(ErrorsUserViewModel.unknownError)
+                completion?(UserViewModelErrors.unknown)
             }
         }
     }
