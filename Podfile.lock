@@ -1,16 +1,27 @@
 PODS:
   - Alamofire (5.0.0-rc.3)
+  - SQLite.swift (0.12.2):
+    - SQLite.swift/standard (= 0.12.2)
+  - SQLite.swift/standard (0.12.2)
+  - SQLiteMigrationManager.swift (0.7.0):
+    - SQLite.swift (~> 0.12.0)
 
 DEPENDENCIES:
   - Alamofire (~> 5.0.0-rc.3)
+  - SQLite.swift (~> 0.12.2)
+  - SQLiteMigrationManager.swift
 
 SPEC REPOS:
   trunk:
     - Alamofire
+    - SQLite.swift
+    - SQLiteMigrationManager.swift
 
 SPEC CHECKSUMS:
   Alamofire: ca8c0de6906873be89d6deec5c8de279e00bf872
+  SQLite.swift: d2b4642190917051ce6bd1d49aab565fe794eea3
+  SQLiteMigrationManager.swift: 2dd6f760d6e53f666176346436c689e55a608f7a
 
-PODFILE CHECKSUM: 424a4add3fab72b26f6ca663e615d42db102e86e
+PODFILE CHECKSUM: 279ce2cf1082c8101d1619f68aea1160fab0f0a7
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.10.0

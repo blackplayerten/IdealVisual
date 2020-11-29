@@ -151,12 +151,12 @@ final class PostView: UIViewController {
         let blockPostType = BlockPostType.self
 
         var dcp: DatePickerComponent?
-        if let date = publication?.date {
-            if date != Date() {
-                dcp = DatePickerComponent()
-                dcp?.date = date
-            }
-        }
+//        if let date = publication?.date {
+//            if date != Date() {
+//                dcp = DatePickerComponent()
+//                dcp?.date = date
+//            }
+//        }
         date = BlockPost(
             textValue: nil,
             iconImage: UIImage(named: "date")!, buttonIext: "Добавить дату", datePicker: dcp, view: scroll,
@@ -165,14 +165,14 @@ final class PostView: UIViewController {
         guard let date = date else { return }
 
         place = BlockPost(
-            textValue: publication?.place,
+//            textValue: publication?.place,
             iconImage: UIImage(named: "map")!, buttonIext: "Добавить место", datePicker: nil, view: scroll,
             blockPostType: blockPostType.textView, delegatePost: self
         )
         guard let place = place else { return }
 
         post = BlockPost(
-            textValue: publication?.text,
+//            textValue: publication?.text,
             iconImage: UIImage(named: "post")!, buttonIext: "Добавить пост", datePicker: nil, view: scroll,
             blockPostType: blockPostType.textView, delegatePost: self
         )

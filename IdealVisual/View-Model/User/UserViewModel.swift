@@ -10,16 +10,16 @@ import Foundation
 import UIKit
 
 final class UserViewModel: UserViewModelProtocol {
-    private var userCoreData: UserCoreDataProtocol
     private var userNetworkManager: UserNetworkManagerProtocol
     private var photoNetworkManager: PhotoNetworkManagerProtocol
-    var user: User?
+    private(set) var user: User
 
     private let avaFolder = "avatars/"
 
     init() {
-        self.userCoreData = UserCoreData()
-        self.user = userCoreData.get() // try to get user, if he is logged in
+        let user = User() // try to get user, if he is logged in
+        user.get()
+        self.user = user
         self.userNetworkManager = UserNetworkManager()
         self.photoNetworkManager = PhotoNetworkManager()
     }
@@ -27,6 +27,10 @@ final class UserViewModel: UserViewModelProtocol {
     // MARK: - create
     func create(username: String, email: String, password: String,
                 completion: ((UserViewModelErrors?) -> Void)?) {
+        guard user.id == nil else {
+            Logger.log("user exists (authorized)")
+            return
+        }
         userNetworkManager.create(newUser: JsonUserModel(username: username, email: email,
                                                          password: password), completion: { (user, error) in
                 if let error = error {
@@ -52,8 +56,10 @@ final class UserViewModel: UserViewModelProtocol {
                     return
                 }
 
-                _ = self.userCoreData.create(token: token, username: user.username,
-                                             email: user.email, ava: user.avatar)
+                self.user = User(id: Int64(user.id!), username: user.username, email: user.email,
+                                 token: token, ava: user.avatar)
+                self.user.create()
+
                 completion?(nil)
         })
     }
@@ -116,26 +122,19 @@ final class UserViewModel: UserViewModelProtocol {
                                 return
                             }
 
-                            guard let user = self.userCoreData.create(token: token, username: user.username,
-                                                                      email: user.email, ava: user.avatar)
-                            else {
-                                Logger.log("cannot create core data user")
-                                completion?(UserViewModelErrors.unknown)
-                                return
-                            }
-                            self.user = user
+                            self.user = User(id: self.user.id, username: user.username, email: user.email,
+                                             token: token, ava: user.avatar)
+                            self.user.create()
+
                             completion?(nil)
                         }
                     })
                 }
             } else {
-                guard let user = self.userCoreData.create(token: token, username: user.username,
-                                                          email: user.email, ava: user.avatar)
-                else {
-                    completion?(UserViewModelErrors.unknown)
-                    return
-                }
-                self.user = user
+                self.user = User(id: self.user.id, username: user.username, email: user.email,
+                                 token: token, ava: user.avatar)
+                self.user.create()
+
                 completion?(nil)
             }
         })
@@ -143,24 +142,19 @@ final class UserViewModel: UserViewModelProtocol {
 
     // MARK: - get from core data
     func get(completion: ((User?, UserViewModelErrors?) -> Void)?) {
-        if user != nil {
-            completion?(user, nil)
-            return
-        }
-
-        guard let user = self.userCoreData.get() else {
+        user.get()
+        if user.id == nil {
             Logger.log("data error")
             completion?(nil, UserViewModelErrors.noData)
             return
         }
-
-        self.user = user
+        
         completion?(user, nil)
     }
 
     // MARK: - get avatar from core data
     func getAvatar(completion: ((String?, UserViewModelErrors?) -> Void)?) {
-        if var avaUsr = user!.ava {
+        if var avaUsr = user.ava {
             if avaUsr != "" {
                 avaUsr = MyFileManager.resolveAbsoluteFilePath(filePath: avaUsr).path
                 completion?(avaUsr, nil)
@@ -186,14 +180,16 @@ final class UserViewModel: UserViewModelProtocol {
                 _ = MyFileManager.saveFile(data: ava, filePath: avaPath!)
             }
         }
-        // update in core data first, then upload to server, because we want offline first
-        userCoreData.update(username: username, email: email, avatar: avaPath)
-
-        guard let token = user?.token else {
-            Logger.log("token in coredata is nil")
+        
+        guard let token = user.token else {
+            Logger.log("token in db is nil")
             completion?(UserViewModelErrors.unauthorized)
             return
         }
+        
+        // update in db first, then upload to server, because we want offline first
+        self.user = User(id: user.id, username: username, email: email, token: user.token, ava: avaPath)
+        self.user.update()
 
         let updateServerInfo = {
             self.userNetworkManager.update(token: token,
@@ -255,8 +251,8 @@ final class UserViewModel: UserViewModelProtocol {
 
     // MARK: - delete
     func logout(completion: ((UserViewModelErrors?) -> Void)?) {
-        guard let token = user?.token else {
-            Logger.log("token in coredata is nil")
+        guard let token = user.token else {
+            Logger.log("token in db is nil")
             completion?(UserViewModelErrors.unauthorized)
             return
         }
@@ -273,7 +269,9 @@ final class UserViewModel: UserViewModelProtocol {
                 return
             }
 
-            self.userCoreData.delete()
+            self.user.delete()
+            self.user = User()
+
             MyFileManager.deleteDirectoriesFromAppDirectory()
             completion?(nil)
         })

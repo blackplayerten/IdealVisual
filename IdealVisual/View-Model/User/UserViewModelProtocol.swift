@@ -9,7 +9,7 @@
 import Foundation
 
 protocol UserViewModelProtocol {
-    var user: User? { get }
+    var user: User { get }
     func create(username: String, email: String, password: String, completion: ((UserViewModelErrors?) -> Void)?)
     func login(email: String, password: String, completion: ((UserViewModelErrors?) -> Void)?)
     func get(completion: ((User?, UserViewModelErrors?) -> Void)?)

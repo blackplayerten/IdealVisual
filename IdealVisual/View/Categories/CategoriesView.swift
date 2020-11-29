@@ -85,7 +85,7 @@ final class CategoriesView: UIViewController {
             }
         case .authorized:
             initModel()
-        case .denied, .restricted:
+        case .denied, .restricted, .limited:
             noPermissionsAlert()
         }
     }

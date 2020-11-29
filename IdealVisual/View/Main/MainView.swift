@@ -314,13 +314,13 @@ extension MainView: UICollectionViewDelegate {
             guard let postViewModel = postViewModel else { return }
             let post = postViewModel.posts[indexPath.item]
 
-            guard let path = post.photo else { return }
+//            guard let path = post.photo else { return }
 
             let detailPhoto = PostView()
 
-            DispatchQueue.main.async {
-                detailPhoto.photo.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
-            }
+//            DispatchQueue.main.async {
+//                detailPhoto.photo.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+//            }
 
             detailPhoto.publication = post
 
@@ -341,7 +341,7 @@ extension MainView: UICollectionViewDataSource {
         if let unwrapCell = cell as? PhotoCell {
             guard let postViewModel = postViewModel else { return cell }
 
-            guard let path = postViewModel.posts[indexPath.item].photo else { return cell }
+//            guard let path = postViewModel.posts[indexPath.item].photo else { return cell }
 
             unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
                                       height: view.bounds.width / 3 - 1)
@@ -358,7 +358,7 @@ extension MainView: UICollectionViewDataSource {
 
             DispatchQueue.main.async {
                 loadingIndicator.stopAnimating()
-                unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+//                unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
             }
         }
         return cell
