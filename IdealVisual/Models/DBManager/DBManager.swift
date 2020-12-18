@@ -45,7 +45,7 @@ final class UserMigration: Migration {
         try db.run(
             """
             CREATE TABLE user (
-                id INT PRIMARY KEY NOT NULL,
+                id INT PRIMARY KEY,
                 username CHAR(64) NOT NULL,
                 email CHAR(64) NOT NULL,
                 token CHAR(36) NOT NULL,
@@ -63,7 +63,7 @@ final class FeedMigration: Migration {
         try db.run(
             """
             CREATE TABLE feed (
-                id INT PRIMARY KEY NOT NULL,
+                id INT PRIMARY KEY,
                 user INT NOT NULL,
                 FOREIGN KEY (user) REFERENCES user(id)
             )
@@ -79,14 +79,15 @@ final class PostMigration: Migration {
         try db.run(
             """
             CREATE TABLE post (
-                id CHAR(36) PRIMARY KEY NOT NULL,
+                _id INTEGER PRIMARY KEY,
+                id CHAR(36),
                 feed INT NOT NULL,
                 photo CHAR(128) NOT NULL,
                 date CHAR(30) NOT NULL,
                 place CHAR(36) NOT NULL,
                 text CHAR(36) NOT NULL,
                 index_photo INT NOT NULL,
-                last_updated CHAR(30) NOT NULL DEFAULT now,
+                last_updated CHAR(30),
                 FOREIGN KEY (feed) REFERENCES feed(id)
             )
             """

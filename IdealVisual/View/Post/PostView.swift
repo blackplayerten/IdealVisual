@@ -165,14 +165,14 @@ final class PostView: UIViewController {
         guard let date = date else { return }
 
         place = BlockPost(
-//            textValue: publication?.place,
+            textValue: publication?.place,
             iconImage: UIImage(named: "map")!, buttonIext: "Добавить место", datePicker: nil, view: scroll,
             blockPostType: blockPostType.textView, delegatePost: self
         )
         guard let place = place else { return }
 
         post = BlockPost(
-//            textValue: publication?.text,
+            textValue: publication?.text,
             iconImage: UIImage(named: "post")!, buttonIext: "Добавить пост", datePicker: nil, view: scroll,
             blockPostType: blockPostType.textView, delegatePost: self
         )

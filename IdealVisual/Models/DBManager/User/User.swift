@@ -32,7 +32,7 @@ final class User {
                 [self.id, username, email, token, ava]
             ))
         } catch let Result.error(message, code, statement) where code == SQLITE_CONSTRAINT {
-            Logger.log("constraint failed: \(message), in \(statement!)")
+            Logger.log("constraint failed: \(message), in \(statement)")
         } catch let error {
             Logger.log("insert failed: \(error)")
         }

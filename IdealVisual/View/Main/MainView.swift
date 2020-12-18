@@ -15,6 +15,7 @@ final class MainView: UIViewController {
     private var profileV: ProfileView?
     private var userViewModel: UserViewModelProtocol?
     private var postViewModel: PostViewModelProtocol?
+    private var feedViewModel: FeedViewModelProtocol?
     private var helpCategories: MainViewAddPostsDelegate?
 
     private let refreshOnSwipeView: UIScrollView = UIScrollView()
@@ -49,8 +50,10 @@ final class MainView: UIViewController {
         super.viewDidLoad()
         self.userViewModel = UserViewModel()
         let postVM = PostViewModel(delegat: self)
+        let feedVM = FeedViewModel()
         self.postViewModel = postVM
-        self.helpCategories = postVM
+        self.feedViewModel = feedVM
+        self.helpCategories = feedVM
         view.backgroundColor = .white
 
         self.tabBarController?.delegate = self
@@ -96,36 +99,7 @@ final class MainView: UIViewController {
         initContent()
         setupHelpAndRefreshView()
         checkPhotos()
-
-        self.postViewModel?.subscribe(completion: { [weak self] (_) in
-                DispatchQueue.main.async {
-                    self?.checkPhotos()
-                    self?.setNavItems()
-                }
-            })
-
-        postViewModel?.sync(completion: { [weak self] (error) in
-            DispatchQueue.main.async {
-                if let error = error {
-                    switch error {
-                    case .unauthorized:
-                        self?._error(text: "Вы не авторизованы", color: Colors.red)
-                        sleep(3)
-                        self?.logOut()
-                    case .notFound:
-                        // only manual sync triggers alert
-                        break
-                    case .noConnection:
-                        self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
-                    default:
-                        self?._error(text: "Ошибка синхронизации", color: Colors.red)
-                    }
-                    Logger.log("cannot sync: \(error)")
-                }
-            }
-        })
     }
-
 
     // MARK: ui error
     private func _error(text: String, color: UIColor? = Colors.red) {
@@ -158,7 +132,7 @@ final class MainView: UIViewController {
         profileB.layer.cornerRadius = 10
         profileB.addTarget(self, action: #selector(profile), for: .touchUpInside)
 
-        if postViewModel?.posts.count != 0 {
+        if feedViewModel?.posts.count != 0 {
             guard let markEdit = UIImage(named: "edit_gray") else { return }
             navigationItem.leftBarButtonItem = UIBarButtonItem(customView: SubstrateButton(image: markEdit, side: 35,
                                                                                            target: self,
@@ -199,35 +173,6 @@ final class MainView: UIViewController {
         content.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         content.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         content.layer.backgroundColor = UIColor.white.cgColor
-
-        let refreshControl = UIRefreshControl()
-        content.refreshControl = refreshControl
-        refreshControl.tintColor = Colors.lightBlue
-        refreshControl.addTarget(self, action: #selector(doSync(_:)), for: .valueChanged)
-    }
-
-    // MARK: - synchronization posts
-    @objc private func doSync(_ sender: UIRefreshControl) {
-        postViewModel?.sync(completion: { [weak self] (error) in
-            DispatchQueue.main.async {
-                if let error = error {
-                    switch error {
-                    case .unauthorized:
-                        self?._error(text: "Вы не авторизованы")
-                        sleep(3)
-                        self?.logOut()
-                    case .notFound:
-                        self?._error(text: "Посты не найдены", color: Colors.darkGray)
-                    case .noConnection:
-                        self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
-                    default:
-                        self?._error(text: "Ошибка синхронизации")
-                    }
-                    Logger.log("cannot sync: \(error)")
-                }
-                sender.endRefreshing()
-            }
-        })
     }
 }
 
@@ -242,7 +187,7 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
         if let url = info[UIImagePickerController.InfoKey.imageURL] as? URL {
             if let selected = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 let photoName = url.lastPathComponent
-                postViewModel?.create(photoName: photoName,
+                feedViewModel?.create(photoName: photoName,
                                   photoData: selected.jpegData(compressionQuality: 1.0),
                                   date: Date(timeIntervalSince1970: 0),
                                   place: "", text: "",
@@ -276,6 +221,7 @@ extension MainView: UIImagePickerControllerDelegate, UINavigationControllerDeleg
                         }
                         self?.setNavItems()
                         self?.checkPhotos()
+                        self?.content.reloadData()
                     }
             })
             self.setNavItems()
@@ -311,16 +257,15 @@ extension MainView: UICollectionViewDelegate {
                 content.deselectItem(at: $0, animated: true)
             }
 
-            guard let postViewModel = postViewModel else { return }
-            let post = postViewModel.posts[indexPath.item]
-
-//            guard let path = post.photo else { return }
+            guard let feedViewModel = feedViewModel, let postViewModel = postViewModel else { return }
+            let post = feedViewModel.posts[indexPath.item]
+            let path = post.photo
 
             let detailPhoto = PostView()
 
-//            DispatchQueue.main.async {
-//                detailPhoto.photo.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
-//            }
+            DispatchQueue.main.async {
+                detailPhoto.photo.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+            }
 
             detailPhoto.publication = post
 
@@ -332,16 +277,18 @@ extension MainView: UICollectionViewDelegate {
 // MARK: - data source
 extension MainView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return postViewModel?.posts.count ?? 0
+        return feedViewModel?.posts.count ?? 0
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) ->
         UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
         if let unwrapCell = cell as? PhotoCell {
-            guard let postViewModel = postViewModel else { return cell }
+            guard let feedViewModel = feedViewModel, let postViewModel = postViewModel else {
+                return cell
+            }
 
-//            guard let path = postViewModel.posts[indexPath.item].photo else { return cell }
+            let path = feedViewModel.posts[indexPath.item].photo
 
             unwrapCell.picture.frame = CGRect(x: 0, y: 0, width: view.bounds.width / 3 - 1,
                                       height: view.bounds.width / 3 - 1)
@@ -358,7 +305,7 @@ extension MainView: UICollectionViewDataSource {
 
             DispatchQueue.main.async {
                 loadingIndicator.stopAnimating()
-//                unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+                unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
             }
         }
         return cell
@@ -366,11 +313,6 @@ extension MainView: UICollectionViewDataSource {
 
     // MARK: - set refresh and help
     private func setupHelpAndRefreshView() {
-        let refreshControl = UIRefreshControl()
-        refreshOnSwipeView.refreshControl = refreshControl
-        refreshControl.tintColor = Colors.lightBlue
-        refreshControl.addTarget(self, action: #selector(doSync(_:)), for: .valueChanged)
-
         helpText.font = UIFont(name: "PingFang-SC-Regular", size: 18)
         helpText.numberOfLines = 0
         helpText.textAlignment = .center
@@ -408,7 +350,7 @@ extension MainView: UICollectionViewDataSource {
 
     // MARK: - check photos
     private func checkPhotos() {
-        if postViewModel?.posts.count != 0 {
+        if feedViewModel?.posts.count != 0 {
             content.isHidden = false
             refreshOnSwipeView.removeFromSuperview()
         } else {
@@ -451,27 +393,6 @@ extension MainView: UICollectionViewDropDelegate {
                 let destinationIndexPath = coordinator.destinationIndexPath,
                 let viewModel = postViewModel
             else { return }
-
-            viewModel.swap(source: sourceIndexPath.item, dest: destinationIndexPath.item,
-                                completion: { [weak self] (error) in
-                DispatchQueue.main.async {
-                    if let error = error {
-                        switch error {
-                        case .noConnection:
-                            Logger.log(error)
-                            self?._error(text: "Нет соединения с интернетом", color: Colors.darkGray)
-                        case .unauthorized:
-                            self?._error(text: "Вы не авторизованы")
-                            sleep(3)
-                            self?.logOut()
-                        case .notFound:
-                            self?._error(text: "Ошибка синхронизации", color: Colors.darkGray)
-                        default:
-                            self?._error(text: "Упс, что-то пошло не так.")
-                        }
-                    }
-                }
-            })
         }
     }
 
@@ -505,6 +426,8 @@ extension MainView {
         content.dragInteractionEnabled = true
 
         editMode = false
+
+        content.reloadData()
     }
 
     @objc
@@ -516,6 +439,7 @@ extension MainView {
                 if selectedCells.count == 0 {
                     self.setNavItems()
                     self.checkPhotos()
+                    self.content.reloadData()
                     return
                 }
 
@@ -524,7 +448,7 @@ extension MainView {
                     content.deselectItem(at: $0, animated: true)
                 }
 
-                postViewModel?.delete(atIndices: [Int](items),
+                feedViewModel?.delete(atIndices: [Int](items),
                                       completion: { [weak self] (error) in
                     DispatchQueue.main.async {
                         if let error = error {
@@ -550,6 +474,7 @@ extension MainView {
                         }
                         self?.setNavItems()
                         self?.checkPhotos()
+                        self?.content.reloadData()
                     }
                 })
             }

@@ -16,6 +16,7 @@
 		181B1AC4231DA6930081B01C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 181B1AC2231DA6930081B01C /* LaunchScreen.storyboard */; };
 		181B1ACF231DA6940081B01C /* IdealVisualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1ACE231DA6940081B01C /* IdealVisualTests.swift */; };
 		181B1ADA231DA6940081B01C /* IdealVisualUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */; };
+		181BE517258D319B00F1124D /* Posts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181BE516258D319B00F1124D /* Posts.swift */; };
 		1838C7B823718358000A32A9 /* SignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1838C7B723718358000A32A9 /* SignIn.swift */; };
 		18457F2E23636E3300568D81 /* BlocksPub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18457F2D23636E3300568D81 /* BlocksPub.swift */; };
 		184EB37723971D3F00256255 /* FileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184EB37623971D3F00256255 /* FileManager.swift */; };
@@ -101,6 +102,7 @@
 		181B1AD5231DA6940081B01C /* IdealVisualUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IdealVisualUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		181B1AD9231DA6940081B01C /* IdealVisualUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdealVisualUITests.swift; sourceTree = "<group>"; };
 		181B1ADB231DA6940081B01C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		181BE516258D319B00F1124D /* Posts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Posts.swift; sourceTree = "<group>"; };
 		1838C7B723718358000A32A9 /* SignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignIn.swift; sourceTree = "<group>"; };
 		18457F2D23636E3300568D81 /* BlocksPub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlocksPub.swift; sourceTree = "<group>"; };
 		184EB37623971D3F00256255 /* FileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManager.swift; sourceTree = "<group>"; };
@@ -287,6 +289,7 @@
 			isa = PBXGroup;
 			children = (
 				18ACE2A32391AB78008B05B8 /* Post.swift */,
+				181BE516258D319B00F1124D /* Posts.swift */,
 			);
 			path = Post;
 			sourceTree = "<group>";
@@ -686,6 +689,7 @@
 				18FCDFF623B0BFF3007AA3F4 /* HttpEntity.swift in Sources */,
 				63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */,
 				18618ABC2470039E00A6F10E /* CoreMLViewModel.swift in Sources */,
+				181BE517258D319B00F1124D /* Posts.swift in Sources */,
 				63219A4A265F4D025E33856C /* MainView.swift in Sources */,
 				18E8C53A237B7EE60064B4F0 /* SignUp.swift in Sources */,
 				1838C7B823718358000A32A9 /* SignIn.swift in Sources */,

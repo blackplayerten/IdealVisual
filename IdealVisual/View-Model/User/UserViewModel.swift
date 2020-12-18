@@ -17,9 +17,8 @@ final class UserViewModel: UserViewModelProtocol {
     private let avaFolder = "avatars/"
 
     init() {
-        let user = User() // try to get user, if he is logged in
-        user.get()
-        self.user = user
+        self.user = User() // try to get user, if he is logged in
+        self.user.get()
         self.userNetworkManager = UserNetworkManager()
         self.photoNetworkManager = PhotoNetworkManager()
     }
@@ -122,7 +121,7 @@ final class UserViewModel: UserViewModelProtocol {
                                 return
                             }
 
-                            self.user = User(id: self.user.id, username: user.username, email: user.email,
+                            self.user = User(id: Int64(user.id!), username: user.username, email: user.email,
                                              token: token, ava: user.avatar)
                             self.user.create()
 
@@ -131,7 +130,7 @@ final class UserViewModel: UserViewModelProtocol {
                     })
                 }
             } else {
-                self.user = User(id: self.user.id, username: user.username, email: user.email,
+                self.user = User(id: Int64(user.id!), username: user.username, email: user.email,
                                  token: token, ava: user.avatar)
                 self.user.create()
 
@@ -140,7 +139,7 @@ final class UserViewModel: UserViewModelProtocol {
         })
     }
 
-    // MARK: - get from core data
+    // MARK: - get
     func get(completion: ((User?, UserViewModelErrors?) -> Void)?) {
         user.get()
         if user.id == nil {
