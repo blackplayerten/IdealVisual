@@ -32,3 +32,46 @@ class IdealVisualTests: XCTestCase {
     }
 
 }
+
+class ValidationTests: XCTestCase {
+    let wrongEmailLabelText = "Неверный формат почты"
+    
+    func testOKEmail() {
+        let field = InputFields(tag: 0)
+        field.textField.text = "kurganova06.1998@gmail.com"
+        let label = CheckMistakeLabel()
+        let ok = checkValidEmail(field: field, mistake: label)
+        XCTAssertTrue(ok)
+
+        XCTAssertEqual(field.layer.borderColor, Colors.lightBlue.cgColor) // OK.
+
+        XCTAssertTrue(label.isHidden)
+        XCTAssertTrue(label.text?.isEmpty ?? true)
+    }
+    
+    func testWrongDomain() {
+        let field = InputFields(tag: 0)
+        field.textField.text = "kurganova06.1998@gmail.c"
+        let label = CheckMistakeLabel()
+        let ok = checkValidEmail(field: field, mistake: label)
+        XCTAssertFalse(ok)
+
+        XCTAssertEqual(field.layer.borderColor, UIColor.red.cgColor) // Failed.
+
+        XCTAssertFalse(label.isHidden)
+        XCTAssertEqual(label.text, wrongEmailLabelText)
+    }
+    
+    func testNotEmail() {
+        let field = InputFields(tag: 0)
+        field.textField.text = "kurganova06.1998"
+        let label = CheckMistakeLabel()
+        let ok = checkValidEmail(field: field, mistake: label)
+        XCTAssertFalse(ok)
+
+        XCTAssertEqual(field.layer.borderColor, UIColor.red.cgColor) // Failed.
+
+        XCTAssertFalse(label.isHidden)
+        XCTAssertEqual(label.text, wrongEmailLabelText)
+    }
+}

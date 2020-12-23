@@ -64,6 +64,7 @@
 		18F8EA9423B296E20085A9BD /* view-modelErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18F8EA9323B296E20085A9BD /* view-modelErrors.swift */; };
 		18FCDFF623B0BFF3007AA3F4 /* HttpEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCDFF523B0BFF3007AA3F4 /* HttpEntity.swift */; };
 		416AD9868AD428CF5A4CC80F /* libPods-IdealVisual.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0223884480607F6E632A79A /* libPods-IdealVisual.a */; };
+		577174D7311F84475E6691D1 /* libPods-IdealVisualTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 225A3FCBF6E1DA7095AB8BED /* libPods-IdealVisualTests.a */; };
 		632192245184F7C7C13373A5 /* CoreMLManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219D7C7886ADF7FFF33FD0 /* CoreMLManager.swift */; };
 		63219A3C5FE90566DBAF74BD /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632194B70D0AC636CB2B847F /* PhotoCell.swift */; };
 		63219A4A265F4D025E33856C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63219C5F3C3B40275C1AC524 /* MainView.swift */; };
@@ -149,9 +150,12 @@
 		18F8EA9123B294830085A9BD /* networkErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = networkErrors.swift; sourceTree = "<group>"; };
 		18F8EA9323B296E20085A9BD /* view-modelErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "view-modelErrors.swift"; sourceTree = "<group>"; };
 		18FCDFF523B0BFF3007AA3F4 /* HttpEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HttpEntity.swift; sourceTree = "<group>"; };
+		225A3FCBF6E1DA7095AB8BED /* libPods-IdealVisualTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-IdealVisualTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		518FBCEDD78B307C3D34D11B /* Pods-IdealVisualTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisualTests.release.xcconfig"; path = "Target Support Files/Pods-IdealVisualTests/Pods-IdealVisualTests.release.xcconfig"; sourceTree = "<group>"; };
 		632194B70D0AC636CB2B847F /* PhotoCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhotoCell.swift; sourceTree = "<group>"; };
 		63219C5F3C3B40275C1AC524 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		63219D7C7886ADF7FFF33FD0 /* CoreMLManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreMLManager.swift; sourceTree = "<group>"; };
+		76D4B15E3098B413AAC84F3F /* Pods-IdealVisualTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisualTests.debug.xcconfig"; path = "Target Support Files/Pods-IdealVisualTests/Pods-IdealVisualTests.debug.xcconfig"; sourceTree = "<group>"; };
 		9C268BAC885081135A8D57AD /* Pods-IdealVisual.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisual.debug.xcconfig"; path = "Target Support Files/Pods-IdealVisual/Pods-IdealVisual.debug.xcconfig"; sourceTree = "<group>"; };
 		C0223884480607F6E632A79A /* libPods-IdealVisual.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-IdealVisual.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF38FB8C9FF56CB9EF1E3D4E /* Pods-IdealVisual.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-IdealVisual.release.xcconfig"; path = "Target Support Files/Pods-IdealVisual/Pods-IdealVisual.release.xcconfig"; sourceTree = "<group>"; };
@@ -170,6 +174,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				577174D7311F84475E6691D1 /* libPods-IdealVisualTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -444,6 +449,7 @@
 			isa = PBXGroup;
 			children = (
 				C0223884480607F6E632A79A /* libPods-IdealVisual.a */,
+				225A3FCBF6E1DA7095AB8BED /* libPods-IdealVisualTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -477,6 +483,8 @@
 			children = (
 				9C268BAC885081135A8D57AD /* Pods-IdealVisual.debug.xcconfig */,
 				FF38FB8C9FF56CB9EF1E3D4E /* Pods-IdealVisual.release.xcconfig */,
+				76D4B15E3098B413AAC84F3F /* Pods-IdealVisualTests.debug.xcconfig */,
+				518FBCEDD78B307C3D34D11B /* Pods-IdealVisualTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -507,6 +515,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 181B1AE1231DA6940081B01C /* Build configuration list for PBXNativeTarget "IdealVisualTests" */;
 			buildPhases = (
+				29D3FE4481A48122AB7C92CB /* [CP] Check Pods Manifest.lock */,
 				181B1AC6231DA6940081B01C /* Sources */,
 				181B1AC7231DA6940081B01C /* Frameworks */,
 				181B1AC8231DA6940081B01C /* Resources */,
@@ -628,6 +637,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+		29D3FE4481A48122AB7C92CB /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-IdealVisualTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
 		};
 		CCBBD1ABA851456258FCD64D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -916,6 +947,7 @@
 		};
 		181B1AE2231DA6940081B01C /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 76D4B15E3098B413AAC84F3F /* Pods-IdealVisualTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -937,6 +969,7 @@
 		};
 		181B1AE3231DA6940081B01C /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 518FBCEDD78B307C3D34D11B /* Pods-IdealVisualTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
