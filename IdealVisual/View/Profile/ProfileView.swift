@@ -37,6 +37,7 @@ final class ProfileView: UIView, InputFieldDelegate {
     private let ava: UIImageView = UIImageView()
     private var avaContent: Data? // for saving
     private var avaName: String?
+    private var editor: iPhotoEditor
 
     // MARK: - init
     init(profileDelegate: ProfileDelegate) {
@@ -47,6 +48,7 @@ final class ProfileView: UIView, InputFieldDelegate {
         self.email = InputFields(tag: 1)
         self.password = InputFields(tag: 2)
         self.repeatPassword = InputFields(tag: 3)
+        self.editor = PhotoRoundedDecorator(ava)
         super.init(frame: CGRect())
 
         // MARK: nav bar
@@ -169,14 +171,14 @@ final class ProfileView: UIView, InputFieldDelegate {
         dataState.email = email.textField.text ?? ""
         dataState.oldAva = ava.image
 
-//        NotificationCenter.default.addObserver(self,
-//                selector: #selector(keyboardWillShow(_:)),
-//                name: UIResponder.keyboardWillShowNotification,
-//                object: nil)
-//        NotificationCenter.default.addObserver(self,
-//                selector: #selector(keyboardWillHide(_:)),
-//                name: UIResponder.keyboardWillHideNotification,
-//                object: nil)
+        NotificationCenter.default.addObserver(self,
+                selector: #selector(keyboardWillShow(_:)),
+                name: UIResponder.keyboardWillShowNotification,
+                object: nil)
+        NotificationCenter.default.addObserver(self,
+                selector: #selector(keyboardWillHide(_:)),
+                name: UIResponder.keyboardWillHideNotification,
+                object: nil)
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -463,11 +465,7 @@ extension ProfileView {
         ava.topAnchor.constraint(equalTo: scroll.topAnchor, constant: 10).isActive = true
         ava.widthAnchor.constraint(equalToConstant: 170).isActive = true
         ava.heightAnchor.constraint(equalToConstant: 170).isActive = true
-        ava.contentMode = .scaleAspectFill
-        ava.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner,
-                                   .layerMinXMaxYCorner, .layerMinXMinYCorner]
-        ava.layer.cornerRadius = 10
-        ava.layer.masksToBounds = true
+        _ = editor.apply()
 
         let loadingIndicator = UIActivityIndicatorView(frame: CGRect(x: 60,
                                                                      y: 60,

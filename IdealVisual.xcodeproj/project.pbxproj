@@ -40,6 +40,7 @@
 		189322B5234687CE004026FC /* CustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* CustomElements.swift */; };
 		18999E202398F8E6003C0F44 /* checkValid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18999E1F2398F8E6003C0F44 /* checkValid.swift */; };
 		189B64DC260484E500801749 /* PhotoCacheDecorator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189B64DB260484E500801749 /* PhotoCacheDecorator.swift */; };
+		189B64EF2604CEF500801749 /* PhotoRoundedDecorator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189B64EE2604CEF500801749 /* PhotoRoundedDecorator.swift */; };
 		189F984B25729441009016CA /* DBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189F984A25729441009016CA /* DBManager.swift */; };
 		18A9A98C23C3C4F4005D6657 /* Printer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A9A98B23C3C4F4005D6657 /* Printer.swift */; };
 		18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 18AA6582237714F0004B9588 /* .swiftlint.yml */; };
@@ -128,6 +129,7 @@
 		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
 		18999E1F2398F8E6003C0F44 /* checkValid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = checkValid.swift; sourceTree = "<group>"; };
 		189B64DB260484E500801749 /* PhotoCacheDecorator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCacheDecorator.swift; sourceTree = "<group>"; };
+		189B64EE2604CEF500801749 /* PhotoRoundedDecorator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoRoundedDecorator.swift; sourceTree = "<group>"; };
 		189F984A25729441009016CA /* DBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBManager.swift; sourceTree = "<group>"; };
 		18A9A98B23C3C4F4005D6657 /* Printer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Printer.swift; sourceTree = "<group>"; };
 		18AA6582237714F0004B9588 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
@@ -328,6 +330,7 @@
 			children = (
 				18E1554B23B40C5D0051D833 /* ProfileProtocol.swift */,
 				1893229D23466104004026FC /* ProfileView.swift */,
+				189B64EE2604CEF500801749 /* PhotoRoundedDecorator.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -726,6 +729,7 @@
 				18618ABC2470039E00A6F10E /* CoreMLViewModel.swift in Sources */,
 				181BE517258D319B00F1124D /* Posts.swift in Sources */,
 				63219A4A265F4D025E33856C /* MainView.swift in Sources */,
+				189B64EF2604CEF500801749 /* PhotoRoundedDecorator.swift in Sources */,
 				18E8C53A237B7EE60064B4F0 /* SignUp.swift in Sources */,
 				1838C7B823718358000A32A9 /* SignIn.swift in Sources */,
 				180C5C6623B6840E003538DF /* PostViewModel.swift in Sources */,
