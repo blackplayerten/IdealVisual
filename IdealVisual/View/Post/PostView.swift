@@ -151,12 +151,12 @@ final class PostView: UIViewController {
         let blockPostType = BlockPostType.self
 
         var dcp: DatePickerComponent?
-//        if let date = publication?.date {
-//            if date != Date() {
-//                dcp = DatePickerComponent()
-//                dcp?.date = date
-//            }
-//        }
+        if let date = publication?.date {
+            if date != Date() {
+                dcp = DatePickerComponent()
+                dcp?.date = date
+            }
+        }
         date = BlockPost(
             textValue: nil,
             iconImage: UIImage(named: "date")!, buttonIext: "Добавить дату", datePicker: dcp, view: scroll,

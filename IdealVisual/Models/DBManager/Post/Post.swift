@@ -57,7 +57,7 @@ final class Post: iARDataPost {
                 }
             }
         } catch let Result.error(message, code, statement) where code == SQLITE_CONSTRAINT {
-            Logger.log("constraint failed: \(message), in \(statement)")
+            Logger.log("constraint failed: \(message), in \(String(describing: statement ?? nil))")
         } catch let error {
             Logger.log("insert failed: \(error)")
         }
@@ -73,7 +73,7 @@ final class Post: iARDataPost {
                 Logger.log("post not found: id = \(id)")
             }
         } catch let Result.error(message, code, statement) where code == SQLITE_CONSTRAINT {
-            Logger.log("constraint failed: \(message), in \(statement)")
+            Logger.log("constraint failed: \(message), in \(String(describing: statement ?? nil))")
         } catch let error {
             Logger.log("update failed: \(error)")
         }

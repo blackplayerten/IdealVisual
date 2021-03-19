@@ -39,6 +39,7 @@
 		1893229E23466104004026FC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1893229D23466104004026FC /* ProfileView.swift */; };
 		189322B5234687CE004026FC /* CustomElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189322B4234687CE004026FC /* CustomElements.swift */; };
 		18999E202398F8E6003C0F44 /* checkValid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18999E1F2398F8E6003C0F44 /* checkValid.swift */; };
+		189B64DC260484E500801749 /* PhotoCacheDecorator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189B64DB260484E500801749 /* PhotoCacheDecorator.swift */; };
 		189F984B25729441009016CA /* DBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189F984A25729441009016CA /* DBManager.swift */; };
 		18A9A98C23C3C4F4005D6657 /* Printer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A9A98B23C3C4F4005D6657 /* Printer.swift */; };
 		18AA6583237714F0004B9588 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 18AA6582237714F0004B9588 /* .swiftlint.yml */; };
@@ -126,6 +127,7 @@
 		1893229D23466104004026FC /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		189322B4234687CE004026FC /* CustomElements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomElements.swift; sourceTree = "<group>"; };
 		18999E1F2398F8E6003C0F44 /* checkValid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = checkValid.swift; sourceTree = "<group>"; };
+		189B64DB260484E500801749 /* PhotoCacheDecorator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCacheDecorator.swift; sourceTree = "<group>"; };
 		189F984A25729441009016CA /* DBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBManager.swift; sourceTree = "<group>"; };
 		18A9A98B23C3C4F4005D6657 /* Printer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Printer.swift; sourceTree = "<group>"; };
 		18AA6582237714F0004B9588 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
@@ -405,6 +407,7 @@
 			children = (
 				18E1555323B4EF9B0051D833 /* PhotoNetworkManagerProtocol.swift */,
 				18E1555123B4EF580051D833 /* PhotoNetworkManager.swift */,
+				189B64DB260484E500801749 /* PhotoCacheDecorator.swift */,
 			);
 			path = Photo;
 			sourceTree = "<group>";
@@ -693,6 +696,7 @@
 				189322B5234687CE004026FC /* CustomElements.swift in Sources */,
 				18BD9DB323C3502B000E5FD3 /* InputFieldsDelegate.swift in Sources */,
 				18F8EA8523B2246D0085A9BD /* UserViewModel.swift in Sources */,
+				189B64DC260484E500801749 /* PhotoCacheDecorator.swift in Sources */,
 				18E1555223B4EF580051D833 /* PhotoNetworkManager.swift in Sources */,
 				1853FC4423BC836C0015A31A /* PostNetworkManagerProtocol.swift in Sources */,
 				18CCB142246C1FB60044E095 /* CategoriesView.swift in Sources */,

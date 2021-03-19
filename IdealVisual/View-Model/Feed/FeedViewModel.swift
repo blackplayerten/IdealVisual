@@ -67,7 +67,7 @@ final class FeedViewModel: iFeedWork, MainViewAddPostsDelegate {
                 case .notFound:
                     completion?(PostViewModelErrors.notFound)
                 default:
-                    Logger.log(error)
+                    Logger.log(error ?? "")
                     completion?(PostViewModelErrors.unknown)
                 }
                 return

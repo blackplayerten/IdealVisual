@@ -39,7 +39,7 @@ final class User: iARDataUser {
                 [self.id, username, email, token, ava]
             ))
         } catch let Result.error(message, code, statement) where code == SQLITE_CONSTRAINT {
-            Logger.log("constraint failed: \(message), in \(statement)")
+            Logger.log("constraint failed: \(message), in \(String(describing: statement ?? nil))")
         } catch let error {
             Logger.log("insert failed: \(error)")
         }
@@ -52,7 +52,7 @@ final class User: iARDataUser {
                 [username, email, token, ava, id]
             ))
             if count == 0 {
-                Logger.log("user not found: id = \(id)")
+                Logger.log("user not found: id = \(id ?? 0)")
             }
         } catch let Result.error(message, code, statement) where code == SQLITE_CONSTRAINT {
             Logger.log("constraint failed: \(message), in \(statement!)")
@@ -83,7 +83,7 @@ final class User: iARDataUser {
         do {
             let count = try DataBase.shared.connection.run(Delete("DELETE FROM user WHERE id = ?", [id]))
             if count == 0 {
-                Logger.log("user not found: id = \(id)")
+                Logger.log("user not found: id = \(id ?? 0)")
             }
         } catch let Result.error(message, code, statement) where code == SQLITE_CONSTRAINT {
             Logger.log("constraint failed: \(message), in \(statement!)")

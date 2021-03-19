@@ -9,7 +9,6 @@
 import Foundation
 
 protocol iPostWork {
-    func getPhoto(path: String) -> String
     func update(post: Post, date: Date?, place: String?, text: String?,
                 completion: ((PostViewModelErrors?) -> Void)?)
 }

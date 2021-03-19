@@ -27,6 +27,7 @@ final class MainView: UIViewController {
     private let profileB: UIButton = UIButton()
     private var avaUser: UIImage = UIImage()
     fileprivate var choose = UIImagePickerController()
+    private var postVM: PostViewModel?
 
     lazy fileprivate var content: UICollectionView = {
         let cellSide = view.bounds.width / 3 - 1
@@ -49,7 +50,7 @@ final class MainView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.userViewModel = UserViewModel()
-        let postVM = PostViewModel(delegat: self)
+        postVM = PostViewModel(delegat: self)
         let feedVM = FeedViewModel()
         self.postViewModel = postVM
         self.feedViewModel = feedVM
@@ -257,14 +258,14 @@ extension MainView: UICollectionViewDelegate {
                 content.deselectItem(at: $0, animated: true)
             }
 
-            guard let feedViewModel = feedViewModel, let postViewModel = postViewModel else { return }
+            guard let feedViewModel = feedViewModel, let _ = postViewModel else { return }
             let post = feedViewModel.posts[indexPath.item]
             let path = post.photo
 
             let detailPhoto = PostView()
 
             DispatchQueue.main.async {
-                detailPhoto.photo.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+                detailPhoto.photo.image = UIImage(contentsOfFile: self.postVM!.getPhoto(path: path))
             }
 
             detailPhoto.publication = post
@@ -284,7 +285,7 @@ extension MainView: UICollectionViewDataSource {
         UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
         if let unwrapCell = cell as? PhotoCell {
-            guard let feedViewModel = feedViewModel, let postViewModel = postViewModel else {
+            guard let feedViewModel = feedViewModel, let _ = postViewModel else {
                 return cell
             }
 
@@ -305,7 +306,7 @@ extension MainView: UICollectionViewDataSource {
 
             DispatchQueue.main.async {
                 loadingIndicator.stopAnimating()
-                unwrapCell.picture.image = UIImage(contentsOfFile: postViewModel.getPhoto(path: path))
+                unwrapCell.picture.image = UIImage(contentsOfFile: self.postVM!.getPhoto(path: path))
             }
         }
         return cell

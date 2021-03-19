@@ -4,7 +4,6 @@ import CoreData
 final class PostViewModel: iPostWork {
     private var user: User
     private var postNetworkManager: PostNetworkManagerProtocol
-    private var photoNetworkManager: PhotoNetworkManagerProtocol
 
     private weak var delegatePosts: PostChangedDelegate?
 
@@ -13,7 +12,6 @@ final class PostViewModel: iPostWork {
         self.user.get()
         self.delegatePosts = delegat
         self.postNetworkManager = PostNetworkManager()
-        self.photoNetworkManager = PhotoNetworkManager()
     }
 
     private func convertDBModelToJSON(post: Post) -> JsonPostModel {

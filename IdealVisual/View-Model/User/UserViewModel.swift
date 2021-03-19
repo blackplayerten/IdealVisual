@@ -20,7 +20,7 @@ final class UserViewModel: iUserWork {
         self.user = User() // try to get user, if he is logged in
         self.user.get()
         self.userNetworkManager = UserNetworkManager()
-        self.photoNetworkManager = PhotoNetworkManager()
+        self.photoNetworkManager = PhotoCacheDecorator(PhotoNetworkManager())
     }
 
     // MARK: - create
@@ -74,7 +74,7 @@ final class UserViewModel: iUserWork {
                 case .noConnection:
                     completion?(UserViewModelErrors.noConnection)
                 default:
-                    Logger.log("unknown error: \(error)")
+                    Logger.log("unknown error: \(String(describing: error))")
                     completion?(UserViewModelErrors.unknown)
                 }
                 return
@@ -102,7 +102,7 @@ final class UserViewModel: iUserWork {
                                     // assume user nas no ava, so we will log in with data without it
                                     user.avatar = ""
                                 default:
-                                    Logger.log("cannot get avatar: \(error)")
+                                    Logger.log("cannot get avatar: \(String(describing: error))")
                                     completion?(UserViewModelErrors.unknown)
                                 }
                                 return
@@ -230,7 +230,7 @@ final class UserViewModel: iUserWork {
                         case .notFound:
                             completion?(UserViewModelErrors.notFound)
                         default:
-                            Logger.log("unknown error: \(error)")
+                            Logger.log("unknown error: \(String(describing: error))")
                             completion?(UserViewModelErrors.unknown)
                         }
                         return
