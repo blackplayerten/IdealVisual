@@ -10,7 +10,16 @@ import Foundation
 import UIKit
 import SQLite
 
-final class Post {
+protocol iARDataPost {
+    func create()
+    func update()
+    func get()
+    func delete()
+    func changeIndex()
+    func changeID()
+}
+
+final class Post: iARDataPost {
     private var row_id: Int64 // local
     var id: UUID
     let feed: Int64 = 1

@@ -13,7 +13,7 @@ final class SignIn: UIViewController {
     private var scroll = UIScrollView()
     private var titleView: UIView?
 
-    private var userViewModel: UserViewModelProtocol?
+    private var userViewModel: iUserWork?
     private var email: InputFields?
     private var password: InputFields?
     private var activeField: InputFields?

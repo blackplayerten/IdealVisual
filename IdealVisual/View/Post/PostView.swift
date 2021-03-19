@@ -15,7 +15,7 @@ enum BlockPostType {
 }
 
 final class PostView: UIViewController {
-    private var viewModel: PostViewModelProtocol?
+    private var viewModel: iPostWork?
     var publication: Post?
     let photo = UIImageView()
     private var scroll = UIScrollView()

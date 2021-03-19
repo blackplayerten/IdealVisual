@@ -8,7 +8,7 @@
 
 import Foundation
 
-final class FeedViewModel: FeedViewModelProtocol, MainViewAddPostsDelegate {
+final class FeedViewModel: iFeedWork, MainViewAddPostsDelegate {
     private var user: User
     private var postNetworkManager: PostNetworkManagerProtocol
     private var photoNetworkManager: PhotoNetworkManagerProtocol

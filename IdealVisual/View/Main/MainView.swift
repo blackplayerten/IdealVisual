@@ -13,9 +13,9 @@ import CoreData
 
 final class MainView: UIViewController {
     private var profileV: ProfileView?
-    private var userViewModel: UserViewModelProtocol?
-    private var postViewModel: PostViewModelProtocol?
-    private var feedViewModel: FeedViewModelProtocol?
+    private var userViewModel: iUserWork?
+    private var postViewModel: iPostWork?
+    private var feedViewModel: iFeedWork?
     private var helpCategories: MainViewAddPostsDelegate?
 
     private let refreshOnSwipeView: UIScrollView = UIScrollView()
@@ -389,9 +389,9 @@ extension MainView: UICollectionViewDropDelegate {
                         performDropWith coordinator: UICollectionViewDropCoordinator) {
         let items = coordinator.items
         for item in items {
-            guard let sourceIndexPath = item.sourceIndexPath,
-                let destinationIndexPath = coordinator.destinationIndexPath,
-                let viewModel = postViewModel
+            guard let _ = item.sourceIndexPath,
+                let _ = coordinator.destinationIndexPath,
+                let _ = postViewModel
             else { return }
         }
     }

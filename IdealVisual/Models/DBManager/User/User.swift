@@ -10,7 +10,14 @@ import Foundation
 import UIKit
 import SQLite
 
-final class User {
+protocol iARDataUser {
+    func create()
+    func update()
+    func get()
+    func delete()
+}
+
+final class User: iARDataUser {
     var id: Int64?
     var username: String?
     var email: String?

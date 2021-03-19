@@ -1,7 +1,7 @@
 import Foundation
 import CoreData
 
-final class PostViewModel: PostViewModelProtocol {
+final class PostViewModel: iPostWork {
     private var user: User
     private var postNetworkManager: PostNetworkManagerProtocol
     private var photoNetworkManager: PhotoNetworkManagerProtocol

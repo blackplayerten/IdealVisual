@@ -14,7 +14,7 @@ final class SignUp: UIViewController {
     private var scroll = UIScrollView()
     private var titleView: UIView?
 
-    private var userViewModel: UserViewModelProtocol?
+    private var userViewModel: UserViewModel?
     private var username: InputFields?
     private var email: InputFields?
     private var password: InputFields?

@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol UserViewModelProtocol {
+protocol iUserWork {
     var user: User { get }
     func create(username: String, email: String, password: String, completion: ((UserViewModelErrors?) -> Void)?)
     func login(email: String, password: String, completion: ((UserViewModelErrors?) -> Void)?)

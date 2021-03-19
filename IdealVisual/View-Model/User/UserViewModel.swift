@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-final class UserViewModel: UserViewModelProtocol {
+final class UserViewModel: iUserWork {
     private var userNetworkManager: UserNetworkManagerProtocol
     private var photoNetworkManager: PhotoNetworkManagerProtocol
     private(set) var user: User

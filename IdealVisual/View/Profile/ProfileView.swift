@@ -15,7 +15,7 @@ final class ProfileView: UIView, InputFieldDelegate {
     private var dataState = State()
 
     private weak var delegateProfile: ProfileDelegate?
-    private var userViewModel: UserViewModelProtocol?
+    private var userViewModel: iUserWork?
 
     private let scroll: UIScrollView = UIScrollView()
     private var navBar: UIView? = UIView()

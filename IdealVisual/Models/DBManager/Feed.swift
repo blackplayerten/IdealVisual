@@ -9,7 +9,12 @@
 import Foundation
 import SQLite
 
-final class Feed {
+protocol iARDataFeed {
+    func create()
+    func delete()
+}
+
+final class Feed: iARDataFeed {
     let id: Int = 1
     var user: Int
     

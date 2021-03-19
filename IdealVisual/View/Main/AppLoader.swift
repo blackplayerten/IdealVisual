@@ -24,7 +24,7 @@ class AppLoader: UIViewController {
 
         present(alert, animated: true, completion: { [weak self] in
             DispatchQueue.main.async {
-                let userViewModel: UserViewModelProtocol? = UserViewModel()
+                let userViewModel: iUserWork? = UserViewModel()
                 userViewModel?.get(completion: { (_, error) in
                     if let error = error {
                         switch error {
